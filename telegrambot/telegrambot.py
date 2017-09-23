@@ -4,10 +4,6 @@
 from telegram.ext import Updater, MessageHandler, Filters
 import requests as r
 
-#
-# pip install python-telegram-bot --upgrade
-# Is most likely necessary for telegram.ext
-#
 
 backend_url = "http://localhost:4567/"
 
