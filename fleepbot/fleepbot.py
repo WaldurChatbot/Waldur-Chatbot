@@ -1,6 +1,5 @@
 # Derived from https://github.com/fleephub/fleep-api/blob/master/python-client/chatbot.py
 
-#import urlparse
 import uuid
 import base64
 import time
@@ -13,8 +12,8 @@ backend_url = "http://localhost:4567/"
 
 SERVER = 'https://fleep.io'
 # how to identify chat
-CHAT_URL = None #"https://fleep.io/chat?cid=exdMtzePSNCb2zQwfOwVFA"             # https://fleep.io/chat?cid=P6lD79k_TMSYwg8AAbX6Tg
-CHAT_TOPIC = "Api send test"           # 'bot-test'
+CHAT_CID = 'G0xzIA-BQq2iiADMqjZuZA'
+CHAT_TOPIC = "Api send test"
 
 
 def load_config():
@@ -45,6 +44,7 @@ def process_msg(fc, chat, msg):
         if txt[:1] == "!":
             chat.message_send(str(query(txt[1:])))
 
+
 def query(input):
     print("Request:    " + input)
     response = r.request("GET", backend_url + input)
@@ -52,30 +52,35 @@ def query(input):
     return response.text
 
 
+def get_chat_id(fc):
+    chat_id = None
+    if CHAT_TOPIC is not None:
+        chat_id = find_chat_by_topic(fc, CHAT_TOPIC)
+
+    if chat_id is None and CHAT_CID is not None:
+        chat_id = uuid_decode(CHAT_CID)
+
+    if chat_id is None:
+        raise Exception('need chat info')
+    return chat_id
+
+
 def main():
-    USERNAME, PASSWORD = load_config()
+    username, password = load_config()
 
     print('Login')
-    fc = FleepCache(SERVER, USERNAME, PASSWORD)
+    fc = FleepCache(SERVER, username, password)
     print('Loading contacts')
-    #fc.contacts.sync_all()
     print('convs: %d' % len(fc.conversations))
 
-    if CHAT_TOPIC:
-        chat_id = find_chat_by_topic(fc, CHAT_TOPIC)
-    #elif CHAT_URL:
-    #    p = urlparse.urlparse(CHAT_URL)
-    #    q = urlparse.parse_qs(p.query)
-    #    chat_id = uuid_decode(q['cid'][0])
-    else:
-        raise Exception('need chat info')
-
+    chat_id = get_chat_id(fc)
     chat = fc.conversations[chat_id]
     print('chat_id: %s' % chat_id)
 
     chat_msg_nr = chat.read_message_nr
-    while 1:
-        while 1:
+
+    while True:
+        while True:
             msg = chat.get_next_message(chat_msg_nr)
             if not msg:
                 break
