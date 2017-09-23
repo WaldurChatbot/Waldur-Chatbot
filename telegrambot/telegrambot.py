@@ -13,8 +13,11 @@ backend_url = "http://localhost:4567/"
 
 
 def query(bot, update):
-    response = r.request("GET", backend_url + update.message.text)
-    update.message.reply_text(response.text)
+    if update.message.text[:1] == '!':
+        print("Request:    " + update.message.text[1:])
+        response = r.request("GET", backend_url + update.message.text[1:])
+        print("Response:   " + response.text)
+        update.message.reply_text(response.text)
 
 
 def main():
@@ -22,8 +25,8 @@ def main():
 
     dp = updater.dispatcher
 
-    # responds to any message that starts with '/'
-    dp.add_handler(MessageHandler(Filters.command, query))
+    # responds to any message that starts with '!'
+    dp.add_handler(MessageHandler(Filters.text, query))
 
     updater.start_polling()
 
