@@ -9,7 +9,7 @@ chatbot = ChatBot(
     database='./chatterbotdb.sqlite3'
 )
 
-chatbot.train("chatterbot.corpus.english.greetings")
+chatbot.train("chatterbot.corpus.english")
 
 
 app = Flask("Waldur")
