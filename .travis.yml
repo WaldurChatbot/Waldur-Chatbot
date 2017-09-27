@@ -6,7 +6,7 @@ env:
         - TEST_DIR=fleepbot
         - TEST_DIR=telegrambot 
 install:
-        - pip install -r requirements.txt
+        - pip install -r $TEST_DIR/requirements.txt
 
 script:
         cd $TEST_DIR && pytest
