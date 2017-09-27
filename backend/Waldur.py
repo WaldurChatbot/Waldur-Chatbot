@@ -1,6 +1,6 @@
+from chatterbot import ChatBot
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
-from chatterbot import ChatBot
 
 chatbot = ChatBot(
     'asd',
@@ -9,7 +9,7 @@ chatbot = ChatBot(
     database='./chatterbotdb.sqlite3'
 )
 
-chatbot.train("chatterbot.corpus.english")
+chatbot.train("chatterbot.corpus.english.greetings")
 
 
 app = Flask("Waldur")

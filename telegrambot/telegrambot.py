@@ -3,17 +3,29 @@
 
 from telegram.ext import Updater, MessageHandler, Filters
 import requests as r
+import json
 
-
-backend_url = "http://localhost:4567/"
-
+backend_url = "http://localhost:4567"
 
 def query(bot, update):
     if update.message.text[:1] == '!':
-        print("Request:    " + update.message.text[1:])
-        response = r.request("GET", backend_url + update.message.text[1:])
-        print("Response:   " + response.text)
-        update.message.reply_text(response.text)
+        query = update.message.text[1:]
+        print("Request:    " + query)
+        response = r.request(
+                "POST",
+                backend_url,
+                data={'query': query}
+        ).text
+        print("Response: " + response.strip())
+        response = json.loads(response)
+
+        if 'message' in response:
+            response = response['message']
+        else:
+            response = "Something went wrong, sorry!"
+
+        print("Response: " + response)
+        update.message.reply_text(response)
 
 
 def main():

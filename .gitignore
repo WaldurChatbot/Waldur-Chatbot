@@ -14,3 +14,7 @@ target/
 
 # python build stuff
 __pycache__/
+
+# chatterbot db
+chatterbotdb.sqlite3.db
+
