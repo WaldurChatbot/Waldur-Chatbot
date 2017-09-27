@@ -1,2 +1,12 @@
-language: java
-before_script: cd backend
+language: python
+python:
+        - "3.5"
+env:
+        - TEST_DIR=backend
+        - TEST_DIR=fleepbot
+        - TEST_DIR=telegrambot 
+install:
+        - pip install -r requirements.txt
+
+script:
+        cd $TEST_DIR && pytest
