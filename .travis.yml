@@ -9,4 +9,4 @@ install:
         - pip install -r $TEST_DIR/requirements.txt
 
 script:
-        cd $TEST_DIR && pytest
+        cd $TEST_DIR && pytest $TEST_DIR/tests.py
