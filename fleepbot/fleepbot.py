@@ -4,6 +4,7 @@ import uuid
 import base64
 import time
 import requests as r
+import json
 
 from fleepclient.cache import FleepCache
 from fleepclient.utils import convert_xml_to_text
@@ -47,9 +48,22 @@ def process_msg(fc, chat, msg):
 
 def query(input):
     print("Request:    " + input)
-    response = r.request("GET", backend_url + input)
-    print("Response:   " + response.text)
-    return response.text
+    response = r.request(
+            "POST",
+            backend_url,
+            data={'query': input}
+    ).text
+    print("Response: " + response.strip())
+    response = json.loads(response)
+
+    if 'message' in response:
+        response = response['message']
+    else:
+        response = "Something went wrong, sorry!"
+
+    print("Response: " + response)
+    return response
+
 
 
 def get_chat_id(fc):
