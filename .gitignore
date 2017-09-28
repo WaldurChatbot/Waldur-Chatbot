@@ -11,9 +11,11 @@ target/
 # sensitive info
 .token
 .config
+configuration.ini
 
 # python build stuff
 __pycache__/
+*.pyc
 
 # chatterbot db
 chatterbotdb.sqlite3.db

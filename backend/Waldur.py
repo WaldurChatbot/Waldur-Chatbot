@@ -1,9 +1,10 @@
 from chatterbot import ChatBot
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
+from configparser import ConfigParser
 
 chatbot = ChatBot(
-    'asd',
+    'Waldur',
     storage_adapter='chatterbot.storage.SQLStorageAdapter',
     trainer='chatterbot.trainers.ChatterBotCorpusTrainer',
     database='./chatterbotdb.sqlite3'
@@ -35,8 +36,11 @@ class Hello(Resource):
         return {'message': 'Hello World!'}
 
 
-
 api.add_resource(Hello, '/hello')
 api.add_resource(Query, '/')
 
-app.run(port='4567')
+config = ConfigParser()
+config.read('../configuration.ini')
+port = config['backend']['port']
+
+app.run(port=port)

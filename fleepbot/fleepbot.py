@@ -3,31 +3,13 @@
 import uuid
 import base64
 import time
-import requests as r
-import json
+from configparser import ConfigParser
 
 from fleepclient.cache import FleepCache
 from fleepclient.utils import convert_xml_to_text
-
-backend_url = "http://localhost:4567/"
-
-SERVER = 'https://fleep.io'
-# how to identify chat
-CHAT_CID = 'G0xzIA-BQq2iiADMqjZuZA'
-CHAT_TOPIC = "Api send test"
-
-
-def load_config():
-    with open(".config") as config:
-        return config.readline().strip(), config.readline().strip()
-
-
-def find_chat_by_topic(fc, topic):
-    for conv_id in fc.conversations:
-        conv = fc.conversations[conv_id]
-        if conv.topic == topic:
-            return conv_id
-    raise Exception('chat not found')
+import sys
+sys.path.insert(0, '../')
+import common.requests as r
 
 
 def uuid_decode(b64uuid):
@@ -36,7 +18,7 @@ def uuid_decode(b64uuid):
     return str(uobj)
 
 
-def process_msg(fc, chat, msg):
+def process_msg(chat, msg):
     if msg.mk_message_type == 'text':
         txt = convert_xml_to_text(msg.message).strip()
         print("got msg: %r" % msg.__dict__)
@@ -48,46 +30,26 @@ def process_msg(fc, chat, msg):
 
 def query(input):
     print("Request:    " + input)
-    response = r.request(
-            "POST",
-            backend_url,
-            data={'query': input}
-    ).text
-    print("Response: " + response.strip())
-    response = json.loads(response)
-
-    if 'message' in response:
-        response = response['message']
-    else:
-        response = "Something went wrong, sorry!"
-
+    response = r.query(input)
     print("Response: " + response)
     return response
 
 
-
-def get_chat_id(fc):
-    chat_id = None
-    if CHAT_TOPIC is not None:
-        chat_id = find_chat_by_topic(fc, CHAT_TOPIC)
-
-    if chat_id is None and CHAT_CID is not None:
-        chat_id = uuid_decode(CHAT_CID)
-
-    if chat_id is None:
-        raise Exception('need chat info')
-    return chat_id
-
-
 def main():
-    username, password = load_config()
+    config = ConfigParser()
+    config.read('../configuration.ini')
+    config = config['fleep']
+    username = config['user']
+    password = config['pass']
+    server   = config['server']
+    chatid   = config['chatid']
 
     print('Login')
-    fc = FleepCache(SERVER, username, password)
+    fc = FleepCache(server, username, password)
     print('Loading contacts')
     print('convs: %d' % len(fc.conversations))
 
-    chat_id = get_chat_id(fc)
+    chat_id = uuid_decode(chatid)
     chat = fc.conversations[chat_id]
     print('chat_id: %s' % chat_id)
 
@@ -98,7 +60,7 @@ def main():
             msg = chat.get_next_message(chat_msg_nr)
             if not msg:
                 break
-            process_msg(fc, chat, msg)
+            process_msg(chat, msg)
             chat_msg_nr = msg.message_nr
 
         if not fc.poll():
