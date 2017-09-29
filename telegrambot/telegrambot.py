@@ -10,7 +10,7 @@ from configparser import ConfigParser
 
 logging.config.fileConfig('../logging_config.ini', disable_existing_loggers = False)
 
-root = logging.getLogger(__name__)
+log = logging.getLogger("Telegram")
 
 def query(bot, update):
     if update.message.text[:1] == '!':

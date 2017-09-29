@@ -23,7 +23,7 @@ def query(q):
 
     prepped = request.prepare()
     prepped.headers['Content-Type'] = 'application/json'
-    logger.info("Sending request: " + str(request))
+    logger.info("Sending request: " + str(request.data))
     response = session.send(prepped)
 
     response_json = response.json()

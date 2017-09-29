@@ -10,7 +10,7 @@ from traceback import print_exc
 
 logging.config.fileConfig('../logging_config.ini', disable_existing_loggers = False)
 
-root = logging.getLogger(__name__)
+log = logging.getLogger("Waldur")
 
 class Query(Resource):
     __name__ = ''
@@ -34,7 +34,7 @@ class Query(Resource):
 
 
 def main():
-    root.info("Initializing Backend")
+    log.info("Initializing Backend")
     chatbot = ChatBot(
         'Waldur',
         storage_adapter='chatterbot.storage.SQLStorageAdapter',
@@ -48,12 +48,12 @@ def main():
     api = Api(app)
     api.add_resource(Query, '/', resource_class_kwargs={'chatbot': chatbot})
 
-    root.info("Loading config")
+    log.info("Loading config")
     config = ConfigParser()
     config.read('../configuration.ini')
     port = config['backend']['port']
 
-    root.info("Launching Backend")
+    log.info("Launching Backend")
     app.run(port=port)
 
 
