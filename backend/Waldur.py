@@ -1,4 +1,5 @@
 import sys
+import logging, logging.config, logging.handlers
 sys.path.insert(0, '../')
 from common import respond
 from chatterbot import ChatBot
@@ -7,6 +8,9 @@ from flask_restful import Api, Resource, reqparse
 from configparser import ConfigParser
 from traceback import print_exc
 
+logging.config.fileConfig('../logging_config.ini', disable_existing_loggers = False)
+
+root = logging.getLogger(__name__)
 
 class Query(Resource):
     __name__ = ''
@@ -30,6 +34,7 @@ class Query(Resource):
 
 
 def main():
+    root.info("Initializing Backend")
     chatbot = ChatBot(
         'Waldur',
         storage_adapter='chatterbot.storage.SQLStorageAdapter',
@@ -43,10 +48,12 @@ def main():
     api = Api(app)
     api.add_resource(Query, '/', resource_class_kwargs={'chatbot': chatbot})
 
+    root.info("Loading config")
     config = ConfigParser()
     config.read('../configuration.ini')
     port = config['backend']['port']
 
+    root.info("Launching Backend")
     app.run(port=port)
 
 

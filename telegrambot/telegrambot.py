@@ -3,17 +3,21 @@
 
 from telegram.ext import Updater, MessageHandler, Filters
 import sys
+import logging, logging.config, logging.handlers
 sys.path.insert(0, '../')
 from common import request
 from configparser import ConfigParser
 
+logging.config.fileConfig('../logging_config.ini', disable_existing_loggers = False)
+
+root = logging.getLogger(__name__)
 
 def query(bot, update):
     if update.message.text[:1] == '!':
         query = update.message.text[1:]
-        print("Query:    " + query)
+        #print("Query:    " + query)
         response = request.query(query)
-        print("Response: " + str(response))
+        #print("Response: " + str(response))
         update.message.reply_text(response['message'])
 
 
