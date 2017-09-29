@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from telegram.ext import Updater, MessageHandler, Filters
 import sys
-sys.path.insert(0, '../')
+sys.path.insert(0, '../')  # important for common import
+
+from telegram.ext import Updater, MessageHandler, Filters
+import logging, logging.config, logging.handlers
 from common import request
 from configparser import ConfigParser
 

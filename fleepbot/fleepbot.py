@@ -1,5 +1,8 @@
 # Derived from https://github.com/fleephub/fleep-api/blob/master/python-client/chatbot.py
 
+import sys
+sys.path.insert(0, '../')  # important for common import
+
 import uuid
 import base64
 import time
@@ -7,8 +10,6 @@ from configparser import ConfigParser
 
 from fleepclient.cache import FleepCache
 from fleepclient.utils import convert_xml_to_text
-import sys
-sys.path.insert(0, '../')
 from common import request
 
 
