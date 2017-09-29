@@ -1,10 +1,12 @@
 language: python
 python:
         - "3.5"
+        - "3.6"
 env:
         - TEST_DIR=backend
         - TEST_DIR=fleepbot
         - TEST_DIR=telegrambot 
+        - TEST_DIR=common
 install:
         - pip install -r $TEST_DIR/requirements.txt
 
