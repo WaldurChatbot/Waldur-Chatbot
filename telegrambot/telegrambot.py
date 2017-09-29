@@ -4,16 +4,17 @@
 from telegram.ext import Updater, MessageHandler, Filters
 import sys
 sys.path.insert(0, '../')
-import common.requests as r
+from common import request
 from configparser import ConfigParser
+
 
 def query(bot, update):
     if update.message.text[:1] == '!':
         query = update.message.text[1:]
-        print("Request:    " + query)
-        response = r.query(query)
-        print("Response: " + response)
-        update.message.reply_text(response)
+        print("Query:    " + query)
+        response = request.query(query)
+        print("Response: " + str(response))
+        update.message.reply_text(response['message'])
 
 
 def main():

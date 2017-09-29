@@ -9,7 +9,7 @@ from fleepclient.cache import FleepCache
 from fleepclient.utils import convert_xml_to_text
 import sys
 sys.path.insert(0, '../')
-import common.requests as r
+from common import request
 
 
 def uuid_decode(b64uuid):
@@ -29,10 +29,10 @@ def process_msg(chat, msg):
 
 
 def query(input):
-    print("Request:    " + input)
-    response = r.query(input)
+    print("Query:    " + input)
+    response = request.query(input)
     print("Response: " + response)
-    return response
+    return response['message']
 
 
 def main():
