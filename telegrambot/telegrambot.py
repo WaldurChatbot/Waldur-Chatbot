@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
+import sys
+sys.path.insert(0, '../')  # important for common import
 
 from telegram.ext import Updater, MessageHandler, Filters
-import sys
 import logging, logging.config, logging.handlers
-sys.path.insert(0, '../')
 from common import request
 from configparser import ConfigParser
 
@@ -12,16 +12,19 @@ logging.config.fileConfig('../logging_config.ini', disable_existing_loggers = Fa
 
 log = logging.getLogger("Telegram")
 
+
 def query(bot, update):
+    log.debug("IN: " + update.message.text)
     if update.message.text[:1] == '!':
         query = update.message.text[1:]
-        #print("Query:    " + query)
+        log.info("IN:  " + query)
         response = request.query(query)
-        #print("Response: " + str(response))
+        log.info("OUT: " + response['message'])
         update.message.reply_text(response['message'])
 
 
 def main():
+    log.info("Initializing bot")
     config = ConfigParser()
     config.read('../configuration.ini')
     token = config['telegram']['token']
@@ -29,12 +32,14 @@ def main():
     updater = Updater(token)
 
     dp = updater.dispatcher
-
+    log.info("Adding handlers")
     # responds to any message that starts with '!'
     dp.add_handler(MessageHandler(Filters.text, query))
 
+    log.info("Starting polling")
     updater.start_polling()
 
+    log.info("Bot initialized")
     updater.idle()
 
 
