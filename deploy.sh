@@ -1,5 +1,8 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
+
+echo "ok"
+exit 0
 # if supplied argument is 'dev', use develop branch
 script = "./local_deploy.sh"
 if [ ! -z $1 ]; then
