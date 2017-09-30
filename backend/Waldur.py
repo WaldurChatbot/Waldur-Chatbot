@@ -1,11 +1,11 @@
 import sys
 import os
 sys.path.insert(0, '../')  # important for common import
+from common import respond
 
 import logging, logging.config, logging.handlers
-from common import respond
 from chatterbot import ChatBot
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from flask_restful import Api, Resource, reqparse
 from configparser import ConfigParser
 
@@ -28,16 +28,22 @@ class Query(Resource):
 
     def post(self):
         try:
-            log.info("IN:  " + request.json)
+            log.info("IN:  " + str(request.json))
             query = self.parser.parse_args()['query']
             if query is not None:
                 response = self.chatbot.get_response(query)
-                return jsonify(respond.ok(str(response))), 200
+                response = respond.ok(str(response))
+                code = 200
             else:
-                return jsonify(respond.error("This url supports only POST with the argument 'query'")), 405
+                response = respond.error("This url supports only POST with the argument 'query'")
+                code = 405
         except Exception as e:
             log.error(e)
-            return jsonify(respond.error('System error.')), 500
+            response = respond.error('System error.')
+            code = 500
+
+        log.info("OUT: " + str(response) + " code: " + str(code))
+        return make_response(jsonify(response), code)
 
 
 def main():
