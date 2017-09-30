@@ -12,8 +12,9 @@ install:
 
 script:
         - pytest $TEST_DIR/tests.py
-        - pwd
-        - ls -lat
+
+before_deploy:
+        - chmod +x deploy.sh
 
 deploy:
         provider: script
