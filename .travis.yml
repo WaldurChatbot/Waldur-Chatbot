@@ -11,8 +11,7 @@ install:
         - pip install -r $TEST_DIR/requirements.txt
 
 script:
-        - cd $TEST_DIR && pytest tests.py
-        - cd /home/travis/build/m2rtk/Waldur-Chatbot/
+        - pytest $TEST_DIR/tests.py
         - pwd
         - ls -lat
 
