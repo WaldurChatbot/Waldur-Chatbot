@@ -16,6 +16,7 @@ configuration.ini
 # python build stuff
 __pycache__/
 *.pyc
+.cache/
 
 # chatterbot db
 chatterbotdb.sqlite3.db
