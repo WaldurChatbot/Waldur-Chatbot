@@ -1,12 +1,11 @@
 #!/bin/bash
 
-
 echo "Deploying"
 # if supplied argument is 'dev', use develop branch
-script = "./local_deploy.sh"
+script="./local_deploy.sh"
 if [ ! -z $1 ]; then
-    if [ $1 == "dev" ]; then
-        script = "./local_deploy.sh dev"
+    if [ $1 = "dev" ]; then
+        script="./local_deploy.sh dev"
     fi
 fi
 

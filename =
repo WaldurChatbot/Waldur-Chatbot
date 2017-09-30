@@ -1,0 +1,269 @@
+Script started on Sat 30 Sep 2017 04:36:52 PM EEST
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ exitssh debian@193.40.11.175exit[K[Kexitssh debian@193.40.11.175exit[K[K
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ 
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ 
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ sh deploy.sh 
+Deploying
+./local_deploy.sh
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ sh deploy.sh 
+Deploying
+./local_deploy.sh
+./local_deploy.sh
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ sh deploy.sh dev
+Deploying
+deploy.sh: 7: [: dev: unexpected operator
+./local_deploy.sh
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ sh deploy.sh dev[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ 
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ 
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ 
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ 
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ 
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ 
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ sh deploy.sh dev
+Deploying
+deploy.sh: 7: [: dev: unexpected operator
+./local_deploy.sh
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ sh deploy.sh dev
+Deploying
+dev
+deploy.sh: 8: [: dev: unexpected operator
+./local_deploy.sh
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ sh deploy.sh dev
+Deploying
+dev
+dev
+deploy.sh: 9: [: dev: unexpected operator
+./local_deploy.sh
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ sh deploy.sh dev
+Deploying
+dev
+dev
+./local_deploy.sh dev
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ sh deploy.sh dev[K[K[K
+Deploying
+
+./local_deploy.sh
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ sh deploy.sh dev[Kexit[Kssh debian@193.40.11.175exit[Kvim deploy.sh [K[1P./deploy.sh vim deploy.sh[1P./deploy.sh [7@chmod +x [C[C[C[C[C[C[C[C[C[C[6Pvim deploy.shchmod +x deploy.sh [7P./[C[C[C[C[C[C[C[C[C[Cvim deploy.sh[1P./deploy.sh vim deploy.sh exit[Kssh debian@193.40.11.175exit[Ksh deploy.sh dev[K[Kgisto[K[K[K[K[Kgis[K[K[Khistory | tail
+ 1994  vim deploy.sh
+ 1995  vim deploy.sh 
+ 1996  exit
+ 1997  ssh debian@193.40.11.175
+ 1998  exit
+ 1999  exit
+ 2000  sh deploy.sh 
+ 2001  sh deploy.sh dev
+ 2002  sh deploy.sh 
+ 2003  history | tail
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ history | tail[K[K[K[Kgrep git push
+grep: push: No such file or directory
+mrt@konsap:~/UT/tp/Waldur-Chatbot$ history | grep git push[K[K[K[K
+ 1006  [01;31m[Kgit[m[K status
+ 1009  [01;31m[Kgit[m[K status
+ 1011  [01;31m[Kgit[m[K add .
+ 1012  [01;31m[Kgit[m[K status
+ 1013  [01;31m[Kgit[m[K reset head
+ 1014  [01;31m[Kgit[m[K reset HEAD
+ 1015  [01;31m[Kgit[m[K status
+ 1016  vim .[01;31m[Kgit[m[Kignore 
+ 1017  [01;31m[Kgit[m[K status
+ 1018  vim .[01;31m[Kgit[m[Kignore 
+ 1019  [01;31m[Kgit[m[K status
+ 1020  [01;31m[Kgit[m[K add .
+ 1021  [01;31m[Kgit[m[K status
+ 1022  [01;31m[Kgit[m[K commit
+ 1023  [01;31m[Kgit[m[K push
+ 1032  [01;31m[Kgit[m[K status
+ 1033  vim .[01;31m[Kgit[m[Kignore 
+ 1034  [01;31m[Kgit[m[K add .
+ 1035  [01;31m[Kgit[m[K status
+ 1036  [01;31m[Kgit[m[K commit
+ 1037  [01;31m[Kgit[m[K push
+ 1039  [01;31m[Kgit[m[K status
+ 1040  [01;31m[Kgit[m[K add .
+ 1041  [01;31m[Kgit[m[K commit
+ 1042  [01;31m[Kgit[m[K push
+ 1045  [01;31m[Kgit[m[K status
+ 1048  vim .[01;31m[Kgit[m[Kignore
+ 1049  [01;31m[Kgit[m[K status
+ 1050  vim .[01;31m[Kgit[m[Kignore
+ 1051  [01;31m[Kgit[m[K status
+ 1052  [01;31m[Kgit[m[K add .
+ 1053  [01;31m[Kgit[m[K status
+ 1054  [01;31m[Kgit[m[K commit
+ 1055  [01;31m[Kgit[m[K push
+ 1059  [01;31m[Kgit[m[K status
+ 1060  [01;31m[Kgit[m[K add .
+ 1061  [01;31m[Kgit[m[K commit
+ 1062  [01;31m[Kgit[m[K push
+ 1063  man [01;31m[Kgit[m[K
+ 1100  [01;31m[Kgit[m[K status
+ 1101  [01;31m[Kgit[m[K reset HEAD
+ 1102  [01;31m[Kgit[m[K reset head
+ 1104  vim .[01;31m[Kgit[m[Kignore
+ 1105  [01;31m[Kgit[m[K status
+ 1106  vim .[01;31m[Kgit[m[Kignore
+ 1107  [01;31m[Kgit[m[K status
+ 1108  [01;31m[Kgit[m[K rm --cached .idea/vcs.xml
+ 1109  [01;31m[Kgit[m[K status
+ 1110  [01;31m[Kgit[m[K add ..
+ 1111  [01;31m[Kgit[m[K add .
+ 1112  [01;31m[Kgit[m[K commit
+ 1113  [01;31m[Kgit[m[K push
+ 1114  [01;31m[Kgit[m[K remote add [01;31m[Kgit[m[K@[01;31m[Kgit[m[Khub.com:m2rtk/Test.[01;31m[Kgit[m[K
+ 1115  [01;31m[Kgit[m[K remote add [01;31m[Kgit[m[K@[01;31m[Kgit[m[Khub.com:m2rtk/Test.[01;31m[Kgit[m[K origin
+ 1116  [01;31m[Kgit[m[K remote add origin [01;31m[Kgit[m[K@[01;31m[Kgit[m[Khub.com:m2rtk/Test.[01;31m[Kgit[m[K
+ 1117  [01;31m[Kgit[m[K push
+ 1118  [01;31m[Kgit[m[K push --set-upstream origin master
+ 1119  [01;31m[Kgit[m[K remote add origin https://[01;31m[Kgit[m[Khub.com/m2rtk/Test.[01;31m[Kgit[m[K
+ 1120  [01;31m[Kgit[m[K push -u origin master
+ 1121  [01;31m[Kgit[m[K remote remove origin
+ 1122  [01;31m[Kgit[m[K remote add origin https://[01;31m[Kgit[m[Khub.com/m2rtk/Test.[01;31m[Kgit[m[K
+ 1123  [01;31m[Kgit[m[K push -u origin master
+ 1125  [01;31m[Kgit[m[K add .
+ 1126  [01;31m[Kgit[m[K status
+ 1127  [01;31m[Kgit[m[K push
+ 1128  [01;31m[Kgit[m[K commit
+ 1129  [01;31m[Kgit[m[K push
+ 1130  [01;31m[Kgit[m[K add .
+ 1131  [01;31m[Kgit[m[K commit
+ 1132  [01;31m[Kgit[m[K push
+ 1135  [01;31m[Kgit[m[K status
+ 1136  [01;31m[Kgit[m[K add .travis.yml
+ 1138  [01;31m[Kgit[m[K status
+ 1139  [01;31m[Kgit[m[K commit
+ 1140  [01;31m[Kgit[m[K push
+ 1142  [01;31m[Kgit[m[K status
+ 1143  [01;31m[Kgit[m[K add .travis.yml 
+ 1144  [01;31m[Kgit[m[K commit
+ 1145  [01;31m[Kgit[m[K push
+ 1146  [01;31m[Kgit[m[K diff
+ 1147  [01;31m[Kgit[m[K add .
+ 1148  [01;31m[Kgit[m[K commit 
+ 1149  [01;31m[Kgit[m[K push
+ 1150  [01;31m[Kgit[m[K pull
+ 1151  [01;31m[Kgit[m[K diff
+ 1152  [01;31m[Kgit[m[K push
+ 1175  [01;31m[Kgit[m[K status
+ 1176  [01;31m[Kgit[m[K diff
+ 1177  [01;31m[Kgit[m[K add .
+ 1178  [01;31m[Kgit[m[K commit
+ 1179  [01;31m[Kgit[m[K push
+ 1180  [01;31m[Kgit[m[K remote set-url origin [01;31m[Kgit[m[K@[01;31m[Kgit[m[Khub.com:m2rt_k/waldur_chatbot.[01;31m[Kgit[m[K
+ 1181  [01;31m[Kgit[m[K push
+ 1182  [01;31m[Kgit[m[K remote set-url origin [01;31m[Kgit[m[K@[01;31m[Kgit[m[Khub.com:m2rt_k/waldur-chatbot.[01;31m[Kgit[m[K
+ 1183  [01;31m[Kgit[m[K push
+ 1189  ssh -T [01;31m[Kgit[m[K@[01;31m[Kgit[m[Khub.com
+ 1190  sudo ssh -T [01;31m[Kgit[m[K@[01;31m[Kgit[m[Khub.com
+ 1194  [01;31m[Kgit[m[K push
+ 1195  [01;31m[Kgit[m[K rm origin
+ 1196  [01;31m[Kgit[m[K status
+ 1197  [01;31m[Kgit[m[K add origin
+ 1198  [01;31m[Kgit[m[K remote rm origin
+ 1199  [01;31m[Kgit[m[K remote add origin https://[01;31m[Kgit[m[Khub.com/m2rtk/Waldur-Chatbot
+ 1200  [01;31m[Kgit[m[K push
+ 1201  [01;31m[Kgit[m[K push --set-upstream origin master
+ 1202  [01;31m[Kgit[m[K push
+ 1203  [01;31m[Kgit[m[K remote rm origin
+ 1204  [01;31m[Kgit[m[K remote add origin [01;31m[Kgit[m[K@[01;31m[Kgit[m[Khub.com:m2rt_k/Waldur-Chatbot.[01;31m[Kgit[m[K
+ 1205  [01;31m[Kgit[m[K push
+ 1206  [01;31m[Kgit[m[K push --set-upstream origin master
+ 1207  [01;31m[Kgit[m[K push
+ 1208  [01;31m[Kgit[m[K remote add origin [01;31m[Kgit[m[K@[01;31m[Kgit[m[Khub.com:m2rtk/Waldur-Chatbot.[01;31m[Kgit[m[K
+ 1209  [01;31m[Kgit[m[K remote rm origin
+ 1210  [01;31m[Kgit[m[K remote add origin [01;31m[Kgit[m[K@[01;31m[Kgit[m[Khub.com:m2rtk/Waldur-Chatbot.[01;31m[Kgit[m[K
+ 1211  [01;31m[Kgit[m[K push --set-upstream origin master
+ 1212  [01;31m[Kgit[m[K push
+ 1214  [01;31m[Kgit[m[K pull
+ 1215  [01;31m[Kgit[m[K ls -lt
+ 1220  cat .[01;31m[Kgit[m[Kignore 
+ 1232  [01;31m[Kgit[m[K status
+ 1233  [01;31m[Kgit[m[K diff
+ 1234  man [01;31m[Kgit[m[K diff
+ 1235  [01;31m[Kgit[m[K add .
+ 1236  [01;31m[Kgit[m[K status
+ 1237  [01;31m[Kgit[m[K diff
+ 1238  [01;31m[Kgit[m[K reset HEAD
+ 1239  [01;31m[Kgit[m[K status
+ 1240  [01;31m[Kgit[m[K diff
+ 1241  [01;31m[Kgit[m[K add */requirements.txt
+ 1242  [01;31m[Kgit[m[K status
+ 1243  [01;31m[Kgit[m[K add telegrambot/telegrambot.py 
+ 1244  [01;31m[Kgit[m[K status
+ 1245  [01;31m[Kgit[m[K commit
+ 1246  [01;31m[Kgit[m[K push
+ 1248  [01;31m[Kgit[m[K status
+ 1257  vim .[01;31m[Kgit[m[Kignore 
+ 1258  [01;31m[Kgit[m[K status
+ 1259  [01;31m[Kgit[m[K add .
+ 1260  [01;31m[Kgit[m[K status
+ 1261  [01;31m[Kgit[m[K commit
+ 1262  [01;31m[Kgit[m[K push
+ 1263  pip install https://[01;31m[Kgit[m[Khub.com/fleephub/fleep-api/tree/master/python-client/fleepclient
+ 1264  pip install https://[01;31m[Kgit[m[Khub.com/fleephub/fleep-api
+ 1265  pip install [01;31m[Kgit[m[K+https://[01;31m[Kgit[m[Khub.com/fleephub/fleep-api
+ 1266  pip install [01;31m[Kgit[m[K+https://[01;31m[Kgit[m[Khub.com/fleephub/fleep-api/tree/master/python-client/fleepclient
+ 1267  [01;31m[Kgit[m[K clone https://[01;31m[Kgit[m[Khub.com/fleephub/fleep-api/tree/master/python-client/fleepclient
+ 1272  [01;31m[Kgit[m[K clone [01;31m[Kgit[m[K@[01;31m[Kgit[m[Khub.com:m2rtk/fleep-api.[01;31m[Kgit[m[K
+ 1293  [01;31m[Kgit[m[K status
+ 1294  [01;31m[Kgit[m[K add .
+ 1295  [01;31m[Kgit[m[K status
+ 1296  [01;31m[Kgit[m[K commit
+ 1297  [01;31m[Kgit[m[K push
+ 1299  pip install [01;31m[Kgit[m[K+https://[01;31m[Kgit[m[Khub.com/m2rtk/fleep-api
+ 1316  [01;31m[Kgit[m[K status
+ 1317  [01;31m[Kgit[m[K add setup.py 
+ 1318  [01;31m[Kgit[m[K status
+ 1319  [01;31m[Kgit[m[K commit
+ 1320  [01;31m[Kgit[m[K push
+ 1321  pip install [01;31m[Kgit[m[K+https://[01;31m[Kgit[m[Khub.com/m2rtk/fleep-api
+ 1328  [01;31m[Kgit[m[K status
+ 1329  [01;31m[Kgit[m[K add .
+ 1330  [01;31m[Kgit[m[K status
+ 1333  [01;31m[Kgit[m[K commit
+ 1334  [01;31m[Kgit[m[K push
+ 1335  [01;31m[Kgit[m[K pull
+ 1336  [01;31m[Kgit[m[K push
+ 1337  pip install [01;31m[Kgit[m[K+https://[01;31m[Kgit[m[Khub.com/m2rtk/fleep-api --upgrade
+ 1338  sudo pip install [01;31m[Kgit[m[K+https://[01;31m[Kgit[m[Khub.com/m2rtk/fleep-api --upgrade
+ 1350  [01;31m[Kgit[m[K status
+ 1351  [01;31m[Kgit[m[K pull
+ 1354  [01;31m[Kgit[m[K status
+ 1355  [01;31m[Kgit[m[K pull
+ 1356  [01;31m[Kgit[m[K status
+ 1384  [01;31m[Kgit[m[K status
+ 1385  [01;31m[Kgit[m[K diff
+ 1389  [01;31m[Kgit[m[K diff
+ 1391  [01;31m[Kgit[m[K add .
+ 1392  [01;31m[Kgit[m[K status
+ 1393  [01;31m[Kgit[m[K push
+ 1394  [01;31m[Kgit[m[K pull
+ 1395  [01;31m[Kgit[m[K push
+ 1396  [01;31m[Kgit[m[K status
+ 1397  [01;31m[Kgit[m[K add .
+ 1398  [01;31m[Kgit[m[K commit
+ 1399  [01;31m[Kgit[m[K push
+ 1432  [01;31m[Kgit[m[K clone https://[01;31m[Kgit[m[Khub.com/linthesia/linthesia
+ 1458  [01;31m[Kgit[m[K clone https://[01;31m[Kgit[m[Khub.com/linthesia/linthesia
+ 1514  [01;31m[Kgit[m[K status
+ 1515  [01;31m[Kgit[m[K add .
+ 1516  [01;31m[Kgit[m[K status
+ 1517  [01;31m[Kgit[m[K commit
+ 1518  [01;31m[Kgit[m[K push
+ 1520  [01;31m[Kgit[m[K add .
+ 1521  [01;31m[Kgit[m[K commit
+ 1522  [01;31m[Kgit[m[K push
+ 1541  [01;31m[Kgit[m[K status
+ 1542  [01;31m[Kgit[m[K add .
+ 1543  [01;31m[Kgit[m[K rm asd.sh 
+ 1544  [01;31m[Kgit[m[K rm asd.sh  --cached
+ 1545  [01;31m[Kgit[m[K status
+ 1546  [01;31m[Kgit[m[K commit
+ 1547  [01;31m[Kgit[m[K push
+ 1549  [01;31m[Kgit[m[K commit
+ 1550  [01;31m[Kgit[m[K add .
+ 1551  [01;31m[Kgit[m[K commit
+ 1552  [01;31m[Kgit[m[K push
+ 1559  [01;31m[Kgit[m[K add .
+ 1560  [01;31m[Kgit[m[K commit
+ 1561  [01;31m[Kgit[m[
