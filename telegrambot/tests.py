@@ -1,4 +1,6 @@
 import pytest
+import sys
+sys.path.insert(0, '../')
 
-def testtest():
-    assert 1 + 2 == 3
+def test_import():
+    import telegrambot

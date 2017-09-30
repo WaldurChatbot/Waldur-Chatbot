@@ -2,10 +2,10 @@
 # coding: utf-8
 import sys
 sys.path.insert(0, '../')  # important for common import
+from common import request
 
 from telegram.ext import Updater, MessageHandler, Filters
 import logging, logging.config, logging.handlers
-from common import request
 from configparser import ConfigParser
 
 logging.config.fileConfig('../logging_config.ini', disable_existing_loggers = False)

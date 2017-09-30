@@ -2,6 +2,7 @@
 
 import sys
 sys.path.insert(0, '../')  # important for common import
+from common import request
 
 import uuid
 import base64
@@ -10,7 +11,6 @@ import logging, logging.config, logging.handlers
 from configparser import ConfigParser
 from fleepclient.cache import FleepCache
 from fleepclient.utils import convert_xml_to_text
-from common import request
 
 logging.config.fileConfig('../logging_config.ini', disable_existing_loggers = False)
 log = logging.getLogger("Fleep")
