@@ -11,10 +11,9 @@ install:
         - pip install -r $TEST_DIR/requirements.txt
 
 script:
-        - cd $TEST_DIR && pytest tests.py
+        cd $TEST_DIR && pytest tests.py
 
-deploy:
-        - provider: script
-          script: deply.sh dev
-          on:
-              branch: cd
+after_success:
+        - openssl aes-256-cbc -K $encrypted_5899b1a8b456_key -iv $encrypted_5899b1a8b456_iv -in .travis/travis_deploy_key.enc -out travis_deploy_key -d
+        - scp deploy.sh $DEVUSER@$DEVREMOTE:~/
+        - ssh $DEVUSE@$DEVREMOTE './local_deploy.sh dev'
