@@ -13,13 +13,9 @@ install:
 script:
         - pytest $TEST_DIR/tests.py
 
-before_deploy:
-        - chmod 777 deploy.sh
-        - ls -lat
-
 deploy:
         provider: script
-        script: "./deploy.sh"
+        script: sh deploy.sh
         on:
           branch: cd
 
