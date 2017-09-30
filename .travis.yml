@@ -13,6 +13,8 @@ install:
 script:
         - cd $TEST_DIR && pytest tests.py
         - cd /home/travis/build/m2rtk/Waldur-Chatbot/
+        - pwd
+        - ls -lat
 
 deploy:
         provider: script
