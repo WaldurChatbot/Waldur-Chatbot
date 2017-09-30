@@ -10,6 +10,6 @@ Current iteration: 1st iteration
 2. Clone or download the project.  
         `git clone https://github.com/m2rtk/Waldur-Chatbot.git`  
         `https://github.com/m2rtk/Waldur-Chatbot/archive/master.zip`
-3. Use pip to install necessary requirements.
+3. Use pip to install necessary requirements.  
         `pip install -r telegrambot/requirements -r fleepbot/requirements.txt -r common/requirements.txt -r backend/requirements.txt`
 4. Setup configuration.ini according to .configuration.ini
