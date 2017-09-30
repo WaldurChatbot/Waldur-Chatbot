@@ -15,9 +15,11 @@ script:
 
 deploy:
         provider: script
-        script: sh deploy.sh
+        script: sh deploy.sh dev
         on:
           branch: cd
+          python: '3.5'
+          condition: $TEST_DIR = backend
 
 #after_success:
 #        - cd /home/travis/build/m2rtk/Waldur-Chatbot/
