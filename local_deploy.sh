@@ -10,6 +10,8 @@ if [ ! -z $1 ]; then
     else
         git checkout master
     fi
+else
+    git checkout master
 fi
 
 git pull
