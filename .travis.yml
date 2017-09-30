@@ -14,7 +14,8 @@ script:
         - pytest $TEST_DIR/tests.py
 
 before_deploy:
-        - chmod +x deploy.sh
+        - chmod 777 deploy.sh
+        - ls -lat
 
 deploy:
         provider: script
