@@ -20,4 +20,4 @@ deploy:
                   scp deploy.sh $DEVUSER@$DEVREMOTE:~/
                   ssh $DEVUSE@$DEVREMOTE './deploy.sh dev'
           on:
-                  branch: develop
+                  branch: cd
