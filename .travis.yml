@@ -4,19 +4,10 @@ python:
         - "3.6"
 env:
         - TEST_DIR=backend
-        - TEST_DIR=fleepbot
-        - TEST_DIR=telegrambot 
         - TEST_DIR=common
 install:
-        - pip install -r $TEST_DIR/requirements.txt
+        - pip install -r requirements.txt
 
 script:
-        - pytest $TEST_DIR/tests.py
+        - pytest $TEST_DIR/test/tests.py
 
-deploy:
-        provider: script
-        script: sh .travis/deploy.sh dev
-        on:
-          branch: cd
-          python: '3.5'
-          condition: $TEST_DIR = backend

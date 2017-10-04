@@ -1,2 +1,0 @@
-lxml
-git+https://github.com/m2rtk/fleep-api
