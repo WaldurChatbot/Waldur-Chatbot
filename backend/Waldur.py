@@ -1,7 +1,9 @@
 import sys
 import os
-sys.path.insert(0, '../')  # important for common import
-from common import respond
+#sys.path.insert(0, '../')  # important for common import
+#from common import respond
+from __init__ import common
+
 
 import logging, logging.config, logging.handlers
 from chatterbot import ChatBot
