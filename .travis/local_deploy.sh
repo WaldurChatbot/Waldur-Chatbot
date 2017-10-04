@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # the target should already have cloned this repo
+# check if repo is cloned, if is not, clone
 cd Waldur-Chatbot
 
 # if supplied argument is 'dev', use develop branch
@@ -17,9 +18,7 @@ fi
 git pull
 
 # install requirements
-sudo pip install -r telegrambot/requirements.txt
-sudo pip install -r fleepbot/requirements.txt
-sudo pip install -r backend/requirements.txt
+sudo pip install -r requirements.txt
 
 # kill all python processes
 pkill python3.5
@@ -28,11 +27,5 @@ pkill python3.5
 cd backend
 nohup python3.5 Waldur.py > /dev/null 2>&1 &
 echo "Started backend"
-cd ../telegrambot
-nohup python3.5 telegrambot.py > /dev/null 2>&1 &
-echo "Started telegram bot"
-cd ../fleepbot
-nohup python3.5 fleepbot.py > /dev/null 2>&1 &
-echo "Started fleep bot"
 
 exit 0

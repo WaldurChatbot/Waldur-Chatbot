@@ -2,12 +2,17 @@ language: python
 python:
         - "3.5"
         - "3.6"
-env:
-        - TEST_DIR=backend
-        - TEST_DIR=common
+
 install:
         - pip install -r requirements.txt
 
 script:
-        - pytest $TEST_DIR/test/tests.py
+        - pytest backend/test/tests.py
+        - pytest common/test/tests.py
 
+deploy:
+        provider: script
+        script: sh .travis/deploy.sh
+        on:
+                branch: master
+                python: '3.5'
