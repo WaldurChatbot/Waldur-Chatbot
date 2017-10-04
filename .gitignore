@@ -23,3 +23,6 @@ chatterbotdb.sqlite3.db
 
 # log files
 *.log
+
+# decrypted key
+travis_deploy_key
