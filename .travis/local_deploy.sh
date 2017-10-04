@@ -20,12 +20,12 @@ git pull
 # install requirements
 sudo pip install -r requirements.txt
 
-# kill all python processes
-pkill python3.5
+# kill backend if running
+[ -f pid ] && kill `cat pid`
 
 # start processes
 cd backend
-nohup python3.5 Waldur.py > /dev/null 2>&1 &
+nohup python3.5 Waldur.py > /dev/null 2>&1 & echo $! > ../pid
 echo "Started backend"
 
 exit 0
