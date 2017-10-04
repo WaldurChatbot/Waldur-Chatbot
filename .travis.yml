@@ -11,4 +11,12 @@ install:
         - pip install -r $TEST_DIR/requirements.txt
 
 script:
-        cd $TEST_DIR && pytest tests.py
+        - pytest $TEST_DIR/tests.py
+
+deploy:
+        provider: script
+        script: sh .travis/deploy.sh dev
+        on:
+          branch: cd
+          python: '3.5'
+          condition: $TEST_DIR = backend
