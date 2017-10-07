@@ -11,7 +11,7 @@ from configparser import ConfigParser
 
 logging.config.fileConfig('../logging_config.ini', disable_existing_loggers = False)
 
-log = logging.getLogger("Waldur")
+log = logging.getLogger(__name__)
 
 # disable print, due to chatterbot
 sys.stdout = open(os.devnull, 'w')
@@ -35,8 +35,8 @@ class Query(Resource):
                 response = respond.ok(str(response))
                 code = 200
             else:
-                response = respond.error("This url supports only POST with the argument 'query'")
-                code = 405
+                response = respond.error("Parameter 'query' missing from request")
+                code = 400
         except Exception as e:
             log.error(e)
             response = respond.error('System error.')
