@@ -30,9 +30,9 @@ echo "Started backend"
 
 sleep 5
 
-if ps -p `cat pid` > /dev/null
+if ps -p `cat ../pid` > /dev/null
 then
-   echo "`cat pid` is running"
+   echo "`cat ../pid` is running"
    exit 0
 else
    echo "Backend is not running"
