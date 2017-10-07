@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # the target should already have cloned this repo
-# check if repo is cloned, if is not, clone
+# todo check if repo is cloned, if is not, clone
 cd Waldur-Chatbot
 
 # if supplied argument is 'dev', use develop branch
@@ -18,7 +18,7 @@ fi
 git pull
 
 # install requirements
-sudo pip install -r requirements.txt
+sudo pip install -r requirements.txt --upgrade
 
 # kill backend if running
 [ -f pid ] && kill `cat pid`
@@ -28,4 +28,13 @@ cd backend
 nohup python3.5 Waldur.py > /dev/null 2>&1 & echo $! > ../pid
 echo "Started backend"
 
-exit 0
+sleep 5
+
+if ps -p `cat pid` > /dev/null
+then
+   echo "`cat pid` is running"
+   exit 0
+else
+   echo "Backend is not running"
+   exit 100
+fi
