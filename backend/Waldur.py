@@ -1,7 +1,6 @@
 import sys
 import os
-from __init__ import respond
-
+from common.respond import marshall
 
 import logging, logging.config, logging.handlers
 from chatterbot import ChatBot
@@ -32,14 +31,14 @@ class Query(Resource):
             query = self.parser.parse_args()['query']
             if query is not None:
                 response = self.chatbot.get_response(query)
-                response = respond.ok(str(response))
+                response = marshall(str(response))
                 code = 200
             else:
-                response = respond.error("Parameter 'query' missing from request")
+                response = marshall("Parameter 'query' missing from request")
                 code = 400
         except Exception as e:
             log.error(e)
-            response = respond.error('System error.')
+            response = marshall('Internal system error.')
             code = 500
 
         log.info("OUT: " + str(response) + " code: " + str(code))

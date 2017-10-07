@@ -28,7 +28,7 @@ def query(q):
 
     response_json = response.json()
 
-    if response_json['status'] == 'ok':
+    if response.status_code == 200:
         logger.info("Received response: " + response_json['message'])
         return response_json
     else:
