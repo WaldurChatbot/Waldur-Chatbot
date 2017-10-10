@@ -1,32 +1,23 @@
 #!/bin/bash
 
-# the target should already have cloned this repo
-# todo check if repo is cloned, if is not, clone
+DIRECT="backend"
+SCRIPT="Waldur.py"
+
+# we are working on the assumption that the remote server already has cloned this repo
 cd Waldur-Chatbot
-
-# if supplied argument is 'dev', use develop branch
-if [ ! -z $1 ]; then
-    if [ $1 == "dev" ]; then
-        git checkout develop
-    else
-        git checkout master
-    fi
-else
-    git checkout master
-fi
-
+git checkout master
 git pull
 
 # install requirements
 sudo pip install -r requirements.txt --upgrade
 
-# kill backend if running
+# kill process if running
 [ -f pid ] && kill `cat pid`
 
-# start processes
-cd backend
-nohup python3.5 Waldur.py > /dev/null 2>&1 & echo $! > ../pid
-echo "Started backend"
+# start process
+cd ${DIRECT}
+nohup python3.5 ${SCRIPT} > /dev/null 2>&1 & echo $! > ../pid
+echo "Started" ${DIRECT}/${SCRIPT}
 
 sleep 5
 
@@ -35,6 +26,6 @@ then
    echo "`cat ../pid` is running"
    exit 0
 else
-   echo "Backend is not running"
+   echo ${DIRECT}/${SCRIPT} "is not running"
    exit 100
 fi
