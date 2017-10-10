@@ -1,10 +1,11 @@
 #!/bin/bash
 
+NAME="Waldur-Chatbot"
 DIRECT="backend"
 SCRIPT="Waldur.py"
 
 # we are working on the assumption that the remote server already has cloned this repo
-cd Waldur-Chatbot
+cd ${NAME}
 git checkout master
 git pull
 
@@ -17,15 +18,17 @@ sudo pip install -r requirements.txt --upgrade
 # start process
 cd ${DIRECT}
 nohup python3.5 ${SCRIPT} > /dev/null 2>&1 & echo $! > ../pid
-echo "Started" ${DIRECT}/${SCRIPT}
+echo "Started ${DIRECT}/${SCRIPT}"
 
 sleep 5
 
-if ps -p `cat ../pid` > /dev/null
+PID=`cat ../pid`
+
+if ps -p ${PID} > /dev/null
 then
-   echo "`cat ../pid` is running"
+   echo "${NAME} is running with pid ${PID}"
    exit 0
 else
-   echo ${DIRECT}/${SCRIPT} "is not running"
+   echo "${NAME} is not running"
    exit 100
 fi

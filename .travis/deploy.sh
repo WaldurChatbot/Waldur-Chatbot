@@ -21,10 +21,10 @@ openssl aes-256-cbc \
                     -out ${DECRYPTED_KEY} \
                     -d
 
-chmod 600 .travis/deploy_rsa
+chmod 600 ${DECRYPTED_KEY}
 
-echo "Moving local_deploy to remote"
+echo "Moving ${SCRIPT} to remote"
 scp -o "StrictHostKeyChecking no" -i ${DECRYPTED_KEY} .travis/${SCRIPT} ${USER}@${REMOTE}:~/
 
-echo "Executing local_deploy in remote"
+echo "Executing ${SCRIPT} in remote"
 ssh -o "StrictHostKeyChecking no" -i ${DECRYPTED_KEY} ${USER}@${REMOTE} ./${SCRIPT}
