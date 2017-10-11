@@ -31,3 +31,37 @@ class Connection(object):
         else:
             logger.error("Received error response: " + response_json['message'])
             raise Exception(response_json['message'])
+
+
+class WaldurConnection(object):
+
+    def __init__(self, api_url, token):
+
+        if api_url[-1] != '/':
+            api_url += '/'
+
+        self.api_url = api_url
+        self.token = token
+        self.session = Session()
+
+    def query(self, method, data, endpoint):
+        if endpoint[-1] != '/':
+            endpoint += '/'
+
+        request = Request(
+            method=method,
+            url=self.api_url + endpoint,
+            data=json.dumps(data)
+        )
+
+        prepped = request.prepare()
+        prepped.headers['Content-Type'] = 'application/json'
+        prepped.headers['Authorization'] = 'token ' + self.token
+        response = self.session.send(prepped)
+
+        response_json = response.json()
+
+        if response.status_code == 200:
+            return response_json
+        else:
+            raise Exception(response_json['detail'])

@@ -1,9 +1,5 @@
 import sys
 import os
-
-from chatterbot.conversation import Statement
-
-from backend.logic.getorglogicadapter import GetOrganisationLogicAdapter
 from common.respond import marshall
 
 import logging, logging.config, logging.handlers
@@ -13,19 +9,6 @@ from flask_restful import Api, Resource, reqparse
 from configparser import ConfigParser
 
 
-asd = GetOrganisationLogicAdapter()
-
-s1 = Statement("Hello world")
-print(s1)
-if asd.can_process(s1):
-    asd.process(s1)
-
-s2 = Statement("Hello my world projects")
-print(s2)
-if asd.can_process(s2): asd.process(s2)
-
-
-exit()
 logging.config.fileConfig('../logging_config.ini', disable_existing_loggers = False)
 
 log = logging.getLogger(__name__)
@@ -71,7 +54,8 @@ def main():
         trainer='chatterbot.trainers.ChatterBotCorpusTrainer',
         database='./chatterbotdb.sqlite3',
         logic_adapters=[
-            'logic.adapter.Adapter1'
+            'logic.requestlogicadapters.GetProjectsLogicAdapter',
+            'chatterbot.logic.BestMatch',
         ]
     )
     log.info("Training chatterbot")
