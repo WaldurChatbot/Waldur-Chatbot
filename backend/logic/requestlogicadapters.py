@@ -1,6 +1,9 @@
 from chatterbot.logic import LogicAdapter
-from common.request import WaldurConnection
+from common.request import WaldurConnection, MissingTokenException
 from chatterbot.conversation.statement import Statement
+from backend.__init__ import logging
+
+log = logging.getLogger(__name__)
 
 
 class RequestLogicAdapter(LogicAdapter):
@@ -36,6 +39,7 @@ class RequestLogicAdapter(LogicAdapter):
         self.method = method
         self.parameters = parameters
         self.optional_parameters = optional_parameters
+        self.token = None
 
     def can_process(self, statement):
         raise NotImplementedError("subclass must override can_process()")
@@ -44,13 +48,15 @@ class RequestLogicAdapter(LogicAdapter):
         raise NotImplementedError("subclass must override process()")
 
     def request(self):
-        # todo figure out how to get these programmatically
+        # todo figure out how to get this programmatically
         api_url = "https://api.etais.ee/api/"
-        token = "f5adefd4a5cd5757c552eac7992813c1ace7ec0b"
+
+        if self.token is None:
+            raise MissingTokenException
 
         waldur = WaldurConnection(
             api_url=api_url,
-            token=token
+            token=self.token
         )
 
         response = waldur.query(
@@ -73,7 +79,11 @@ class GetProjectsLogicAdapter(RequestLogicAdapter):
         words = ['my', 'projects']
         return all(x in statement.text.split() for x in words)
 
+    def set_token(self, token):
+        self.token = token
+
     def process(self, statement):
+        log.debug(str(statement))
         response = self.request()
         projects = response[0]['projects']
 

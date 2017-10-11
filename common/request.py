@@ -5,17 +5,28 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Connection(object):
+class MissingTokenException(Exception):
+    pass
 
-    def __init__(self, url):
-        self.url = url
+
+class BackendConnection(object):
+
+    def __init__(self, backend_url):
+        self.url = backend_url
         self.session = Session()
+        self.token = None
+
+    def set_token(self, token):
+        self.token = token
 
     def query(self, q):
         request = Request(
             'POST',
             self.url,
-            data=json.dumps({'query': q})
+            data=json.dumps({
+                'query': q,
+                'token': self.token
+            })
         )
 
         prepped = request.prepare()
@@ -25,7 +36,7 @@ class Connection(object):
 
         response_json = response.json()
 
-        if response.status_code == 200:
+        if 200 <= response.status_code < 300:  # all responses in the range [200,300) are successes
             logger.info("Received response: " + response_json['message'])
             return response_json
         else:
