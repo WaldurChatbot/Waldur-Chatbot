@@ -51,7 +51,10 @@ def main():
         'Waldur',
         storage_adapter='chatterbot.storage.SQLStorageAdapter',
         trainer='chatterbot.trainers.ChatterBotCorpusTrainer',
-        database='./chatterbotdb.sqlite3'
+        database='./chatterbotdb.sqlite3',
+        logic_adapters=[
+            'logic.adapter.Adapter1'
+        ]
     )
     log.info("Training chatterbot")
     chatbot.train("chatterbot.corpus.english.greetings")
