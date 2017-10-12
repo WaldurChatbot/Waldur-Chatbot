@@ -14,18 +14,14 @@ class BackendConnection(object):
     def __init__(self, backend_url):
         self.url = backend_url
         self.session = Session()
-        self.token = None
 
-    def set_token(self, token):
-        self.token = token
-
-    def query(self, q):
+    def query(self, q, token=None):
         request = Request(
             'POST',
             self.url,
             data=json.dumps({
                 'query': q,
-                'token': self.token
+                'token': token
             })
         )
 
