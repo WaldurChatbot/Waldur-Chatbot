@@ -1,9 +1,9 @@
 from chatterbot.logic import LogicAdapter
 from common.request import WaldurConnection, MissingTokenException
 from chatterbot.conversation.statement import Statement
-from backend.__init__ import logging
+from backend.__init__ import getLogger
 
-log = logging.getLogger(__name__)
+log = getLogger(__name__)
 
 
 class RequestLogicAdapter(LogicAdapter):

@@ -1,8 +1,8 @@
+import __init__ as init
 from requests import Session, Request
 import json
-import logging
 
-logger = logging.getLogger(__name__)
+log = init.getLogger(__name__)
 
 
 class MissingTokenException(Exception):
@@ -31,16 +31,18 @@ class BackendConnection(object):
 
         prepped = request.prepare()
         prepped.headers['Content-Type'] = 'application/json'
-        logger.info("Sending request: " + str(request.data))
+        log.info("Sending request: " + str(request.data))
         response = self.session.send(prepped)
 
         response_json = response.json()
 
-        if 200 <= response.status_code < 300:  # all responses in the range [200,300) are successes
-            logger.info("Received response: " + response_json['message'])
+        if response.status_code == 200:  # all responses in the range [200,300) are successes
+            log.info("Received response: " + response_json['message'])
             return response_json
+        elif response.status_code == 401:
+            raise MissingTokenException
         else:
-            logger.error("Received error response: " + response_json['message'])
+            log.error("Received error response: " + response_json['message'])
             raise Exception(response_json['message'])
 
 

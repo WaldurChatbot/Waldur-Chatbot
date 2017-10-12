@@ -1,17 +1,20 @@
-import sys
 import os
-from common.respond import marshall
-from common.request import MissingTokenException
-from backend.__init__ import logging
+import sys
+import traceback
+from configparser import ConfigParser
+
 from chatterbot import ChatBot
 from flask import Flask, jsonify, request, make_response
 from flask_restful import Api, Resource, reqparse
-from configparser import ConfigParser
-import traceback
 
-log = logging.getLogger(__name__)
+import __init__ as init
+from common.respond import marshall
+from common.request import MissingTokenException, asd
+
+log = init.getLogger(__name__)
+
 # disable print, due to chatterbot
-sys.stdout = open(os.devnull, 'w')
+#sys.stdout = open(os.devnull, 'w')
 
 
 class Query(Resource):
@@ -27,8 +30,9 @@ class Query(Resource):
     def post(self):
         try:
             log.info("IN:  " + str(request.json))
-            query = self.parser.parse_args()['query']
-            token = self.parser.parse_args()['token']
+            args = self.parser.parse_args()
+            query = args['query']
+            token = args['token']
             add_token(self.chatbot, token)
             if query is not None:
                 log.debug("Getting response from chatterbot")
@@ -38,10 +42,10 @@ class Query(Resource):
             else:
                 response = marshall("Parameter 'query' missing from request")
                 code = 400
-        except MissingTokenException:  # why don't you work my dear except block
+        except MissingTokenException:
             log.info("Request sent with no token")
             response = marshall('Couldn\'t query Waldur because of missing token, please send token')
-            code = 210  # this is a custom code, to which the client should react
+            code = 401  # this is a custom code, to which the client should react
         except Exception:
             for line in traceback.format_exc().split("\n"): log.error(line)
             response = marshall('Internal system error.')
@@ -56,6 +60,7 @@ def add_token(chatbot, token):
     for adapter in chatbot.logic.get_adapters():
         if hasattr(adapter, 'set_token'):
             adapter.set_token(token)
+
 
 def main():
     log.info("Initializing Backend")
@@ -88,4 +93,15 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        asd()
+        exit()
+        main()
+    except KeyboardInterrupt:
+        log.info("Keyboard interrupt")
+    except Exception as e:
+        log.critical("Unresumable exception occurred")
+        for line in traceback.format_exc().split("\n"): log.critical(line)
+    finally:
+        log.info("Shutting down")
+

@@ -1,9 +1,10 @@
+from os import path
 import sys  # for easily importing common
 sys.path.insert(0, '../')
 
-import logging, logging.config, logging.handlers
-logging.config.fileConfig('../logging_config.ini', disable_existing_loggers = False)
+from logging import getLogger
+from logging.config import fileConfig
+log_file_path = path.join(path.dirname(path.abspath(__file__)), '..', 'logging_config.ini')
+fileConfig(log_file_path, disable_existing_loggers = False)
 
-
-__version__ = '0.1.2'
-
+__version__ = '0.1.4'
