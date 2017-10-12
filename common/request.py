@@ -66,14 +66,13 @@ class BackendConnection(object):
         response = self.session.send(prepped)
 
         response_json = response.json()
+        log.info("Received response: " + response_json)
 
         if response.status_code == 200:
-            log.info("Received response: " + response_json['message'])
             return response_json
         elif response.status_code == 401:
             raise InvalidTokenException
         else:
-            log.error("Received error response: " + response_json['message'])
             raise Exception(response_json['message'])
 
 
