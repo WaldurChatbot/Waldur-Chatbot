@@ -14,6 +14,13 @@ class BackendConnection(object):
     def __init__(self, backend_url):
         self.url = backend_url
         self.session = Session()
+        self.tokens = {}  # tokens = { 'user_id': 'token', ... }
+
+    def add_token(self, user_id, token):
+        self.tokens[user_id] = token
+
+    def get_token(self, user_id):
+        return None if user_id not in self.tokens else self.tokens.get(user_id)
 
     def query(self, q, token=None):
         request = Request(
@@ -32,7 +39,7 @@ class BackendConnection(object):
 
         response_json = response.json()
 
-        if response.status_code == 200:  # all responses in the range [200,300) are successes
+        if response.status_code == 200:
             log.info("Received response: " + response_json['message'])
             return response_json
         elif response.status_code == 401:

@@ -87,7 +87,7 @@ def main():
     config = ConfigParser()
     config.read('../configuration.ini')
     port = config['backend']['port']
-    
+
     log.info("Launching Backend")
     app.run(port=port)
 
