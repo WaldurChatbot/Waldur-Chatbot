@@ -94,7 +94,6 @@ def main():
 
 if __name__ == '__main__':
     try:
-        exit()
         main()
     except KeyboardInterrupt:
         log.info("Keyboard interrupt")
