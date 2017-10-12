@@ -1,5 +1,5 @@
 from chatterbot.logic import LogicAdapter
-from common.request import WaldurConnection, MissingTokenException
+from common.request import WaldurConnection, InvalidTokenException
 from chatterbot.conversation.statement import Statement
 from backend.__init__ import getLogger
 
@@ -52,7 +52,7 @@ class RequestLogicAdapter(LogicAdapter):
         api_url = "https://api.etais.ee/api/"
 
         if self.token is None:
-            raise MissingTokenException
+            raise InvalidTokenException
 
         waldur = WaldurConnection(
             api_url=api_url,
