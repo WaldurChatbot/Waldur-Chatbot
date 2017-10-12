@@ -5,7 +5,7 @@ import json
 log = init.getLogger(__name__)
 
 
-class MissingTokenException(Exception):
+class InvalidTokenException(Exception):
     pass
 
 
@@ -36,7 +36,7 @@ class BackendConnection(object):
             log.info("Received response: " + response_json['message'])
             return response_json
         elif response.status_code == 401:
-            raise MissingTokenException
+            raise InvalidTokenException
         else:
             log.error("Received error response: " + response_json['message'])
             raise Exception(response_json['message'])
@@ -72,5 +72,7 @@ class WaldurConnection(object):
 
         if response.status_code == 200:
             return response_json
+        elif response.status_code == 401:
+            raise InvalidTokenException
         else:
             raise Exception(response_json['detail'])

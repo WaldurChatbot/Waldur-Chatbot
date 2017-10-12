@@ -9,7 +9,7 @@ from flask_restful import Api, Resource, reqparse
 
 import __init__ as init
 from common.respond import marshall
-from common.request import MissingTokenException
+from common.request import MissingTokenException, InvalidTokenException
 
 log = init.getLogger(__name__)
 
@@ -42,10 +42,10 @@ class Query(Resource):
             else:
                 response = marshall("Parameter 'query' missing from request")
                 code = 400
-        except MissingTokenException:
-            log.info("Request sent with no token")
-            response = marshall('Couldn\'t query Waldur because of missing token, please send token')
-            code = 401  # this is a custom code, to which the client should react
+        except InvalidTokenException:
+            log.info("Request sent with invalid token")
+            response = marshall('Couldn\'t query Waldur because of invalid token, please send valid token')
+            code = 401
         except Exception:
             for line in traceback.format_exc().split("\n"): log.error(line)
             response = marshall('Internal system error.')
