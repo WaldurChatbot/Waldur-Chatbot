@@ -14,7 +14,6 @@ from common.request import InvalidTokenException
 log = init.getLogger(__name__)
 
 
-
 class Query(Resource):
     __name__ = ''
 

@@ -66,7 +66,7 @@ class BackendConnection(object):
         response = self.session.send(prepped)
 
         response_json = response.json()
-        log.info("Received response: " + response_json)
+        log.info("Received response: " + str(response_json))
 
         if response.status_code == 200:
             return response_json
