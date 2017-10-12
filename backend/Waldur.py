@@ -9,7 +9,7 @@ from flask_restful import Api, Resource, reqparse
 
 import __init__ as init
 from common.respond import marshall
-from common.request import MissingTokenException, asd
+from common.request import MissingTokenException
 
 log = init.getLogger(__name__)
 
@@ -94,7 +94,6 @@ def main():
 
 if __name__ == '__main__':
     try:
-        asd()
         exit()
         main()
     except KeyboardInterrupt:
