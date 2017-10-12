@@ -13,8 +13,6 @@ from common.request import InvalidTokenException
 
 log = init.getLogger(__name__)
 
-# disable print, due to chatterbot
-sys.stdout = open(os.devnull, 'w')
 
 
 class Query(Resource):
@@ -64,6 +62,7 @@ def add_token(chatbot, token):
 
 def main():
     log.info("Initializing Backend")
+
     chatbot = ChatBot(
         'Waldur',
         storage_adapter='chatterbot.storage.SQLStorageAdapter',
