@@ -9,12 +9,12 @@ from flask_restful import Api, Resource, reqparse
 
 import __init__ as init
 from common.respond import marshall
-from common.request import MissingTokenException, InvalidTokenException
+from common.request import InvalidTokenException
 
 log = init.getLogger(__name__)
 
 # disable print, due to chatterbot
-#sys.stdout = open(os.devnull, 'w')
+sys.stdout = open(os.devnull, 'w')
 
 
 class Query(Resource):
@@ -87,7 +87,7 @@ def main():
     config = ConfigParser()
     config.read('../configuration.ini')
     port = config['backend']['port']
-
+    
     log.info("Launching Backend")
     app.run(port=port)
 

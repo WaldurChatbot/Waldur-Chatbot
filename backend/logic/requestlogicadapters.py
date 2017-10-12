@@ -91,9 +91,6 @@ class GetProjectsLogicAdapter(RequestLogicAdapter):
         for project in projects:
             names.append(project['name'])
 
-        print("Yo, u have " + str(len(names)) + " projects")
-        print("They are " + str(names))
-
         response_statement  = "You have " + str(len(names)) + " projects. "
         response_statement += "They are " + str(names)
 
