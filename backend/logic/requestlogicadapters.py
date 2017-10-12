@@ -41,11 +41,16 @@ class RequestLogicAdapter(LogicAdapter):
         self.optional_parameters = optional_parameters
         self.token = None
 
+        self.confidence = None  # should be set by can_process() and sent out by process()
+
     def can_process(self, statement):
         raise NotImplementedError("subclass must override can_process()")
 
     def process(self, statement):
         raise NotImplementedError("subclass must override process()")
+
+    def set_token(self, token):
+        self.token = token
 
     def request(self):
         # todo figure out how to get this programmatically
@@ -77,10 +82,8 @@ class GetProjectsLogicAdapter(RequestLogicAdapter):
 
     def can_process(self, statement):
         words = ['my', 'projects']
+        self.confidence = 1
         return all(x in statement.text.split() for x in words)
-
-    def set_token(self, token):
-        self.token = token
 
     def process(self, statement):
         log.debug(str(statement))
@@ -95,7 +98,7 @@ class GetProjectsLogicAdapter(RequestLogicAdapter):
         response_statement += "They are " + str(names)
 
         response_statement = Statement(response_statement)
-        response_statement.confidence = 1
+        response_statement.confidence = self.confidence
 
         return response_statement
 
