@@ -22,12 +22,40 @@ class BackendConnection(object):
     def get_token(self, user_id):
         return None if user_id not in self.tokens else self.tokens.get(user_id)
 
-    def query(self, q, token=None):
+    def get_response(self, message, user_id):
+        log.info("IN: " + message)
+        token = self.get_token(user_id)
+        response = None
+
+        log.debug("user_id: " + str(user_id) + " token: " + str(token))
+        if message[:1] == '!':
+            message = message[1:]
+            try:
+                response = self.query(
+                    message=message,
+                    token=token
+                )
+                response = response['message']
+            except InvalidTokenException:
+                log.info("Needed token to query Waldur, asking user for token.")
+                response = "Needed token to query Waldur API. " \
+                           "Token was either invalid or missing. " \
+                           "Please send token like this '?<TOKEN>'"
+
+        elif message[:1] == '?':
+            log.info("Received token from user " + str(user_id) + " with a length of " + str(len(message[1:])))
+            self.add_token(user_id, message[1:])
+            response = "Thanks!"
+
+        log.info("OUT: " + str(response))
+        return response
+
+    def query(self, message, token=None):
         request = Request(
             'POST',
             self.url,
             data=json.dumps({
-                'query': q,
+                'query': message,
                 'token': token
             })
         )
