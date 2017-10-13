@@ -79,15 +79,13 @@ class GetProjectsLogicAdapter(RequestLogicAdapter):
             method='GET',
             endpoint='customers'
         )
+        
 
     def can_process(self, statement):
         words = ['my', 'projects']
-<<<<<<< Updated upstream
         self.confidence = 1
-        return all(x in statement.text.split() for x in words)
-=======
         return all(x in statement.text.translate(str.maketrans('','',punctuation)).split() for x in words)
->>>>>>> Stashed changes
+
 
     def process(self, statement):
         log.debug(str(statement))
