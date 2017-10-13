@@ -2,7 +2,7 @@ from chatterbot.logic import LogicAdapter
 from common.request import WaldurConnection, InvalidTokenException
 from chatterbot.conversation.statement import Statement
 from backend.__init__ import getLogger
-
+from string import punctuation
 log = getLogger(__name__)
 
 
@@ -82,8 +82,12 @@ class GetProjectsLogicAdapter(RequestLogicAdapter):
 
     def can_process(self, statement):
         words = ['my', 'projects']
+<<<<<<< Updated upstream
         self.confidence = 1
         return all(x in statement.text.split() for x in words)
+=======
+        return all(x in statement.text.translate(str.maketrans('','',punctuation)).split() for x in words)
+>>>>>>> Stashed changes
 
     def process(self, statement):
         log.debug(str(statement))
