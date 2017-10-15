@@ -1,7 +1,9 @@
 #!/bin/bash
 
+# Script that is executed by travis.
+# Moves remote deploy script to remote machine and executes it
+
 echo "Starting deployment"
-echo "Setting up variables"
 # variables in travis
 USER=${PRODUSER}
 REMOTE=${PRODREMOTE}
