@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Script that is started in remote machine
+#  - Pulls latest state from repository's master branch
+#  - Installs requirements by pip
+#  - Starts process in background
+#  - Checks if process is still alive 5 seconds after execution
+
+
 NAME="Waldur-Chatbot"
 DIRECT="backend"
 SCRIPT="Waldur.py"
