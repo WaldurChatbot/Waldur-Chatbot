@@ -1,8 +1,8 @@
-import __init__ as init
+from common.__init__ import getLogger
 from requests import Session, Request
 import json
 
-log = init.getLogger(__name__)
+log = getLogger(__name__)
 
 
 class InvalidTokenException(Exception):
