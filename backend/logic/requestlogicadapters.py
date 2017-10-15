@@ -98,9 +98,47 @@ class GetProjectsLogicAdapter(RequestLogicAdapter):
 
         response_statement  = "You have " + str(len(names)) + " projects. "
         response_statement += "They are " + str(names)
+        if str(len(names)) == 1:
+            response_statement  = "You have 1 project. "
+            response_statement += "The project is " + str(names)
 
         response_statement = Statement(response_statement)
         response_statement.confidence = self.confidence
 
         return response_statement
 
+class GetServicesLogicAdapter(RequestLogicAdapter):
+    def __init__(self, **kwargs):
+        super(GetServicesLogicAdapter, self).__init__(
+            method='GET',
+            endpoint='projects'
+        )
+
+
+    def can_process(self, statement):
+        words = ['my', 'services']
+        self.confidence = 1
+        return all(x in statement.text.translate(str.maketrans('','',punctuation)).split() for x in words)
+
+
+    def process(self, statement):
+        log.debug(str(statement))
+        response = self.request()
+
+        services = response[0]['services']
+
+        names = []
+        for service in services:
+            names.append(service['name'])
+
+        response_statement  = "Your organisation is using " + str(len(names)) + " services. "
+        response_statement += "They are " + str(names)
+        if str(len(names)) == 1:
+            response_statement  = "Your organisation is using 1 service. "
+            response_statement += "This service is " + str(names)
+
+
+        response_statement = Statement(response_statement)
+        response_statement.confidence = self.confidence
+
+        return response_statement

@@ -69,6 +69,7 @@ def main():
         database='./chatterbotdb.sqlite3',
         logic_adapters=[
             'logic.requestlogicadapters.GetProjectsLogicAdapter',
+            'logic.requestlogicadapters.GetServicesLogicAdapter',
             'chatterbot.logic.BestMatch',
         ]
     )
