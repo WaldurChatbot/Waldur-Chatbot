@@ -9,7 +9,7 @@
 
 NAME="Waldur-Chatbot"
 DIRECT="backend"
-SCRIPT="Waldur.py"
+SCRIPT="run.py"
 
 # we are working on the assumption that the remote server already has cloned this repo
 cd ${NAME}
