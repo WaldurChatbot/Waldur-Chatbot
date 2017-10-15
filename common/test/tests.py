@@ -1,10 +1,5 @@
-import pytest
 from unittest import TestCase, main, mock
 from ..request import BackendConnection, InvalidTokenException, WaldurConnection
-
-
-def test_import():
-    import common
 
 
 class MockResponse:

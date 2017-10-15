@@ -1,12 +1,7 @@
 from unittest import TestCase, main, mock
 from common.request import InvalidTokenException
 from flask import json
-
 from backend.waldur.waldur import api
-
-
-def test_import():
-    import backend
 
 
 def mocked_chatbot_get_response_ok(text):
