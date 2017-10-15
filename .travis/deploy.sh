@@ -1,7 +1,6 @@
 #!/bin/bash
 
 echo "Starting deployment"
-echo "Setting up variables"
 # variables in travis
 USER=${PRODUSER}
 REMOTE=${PRODREMOTE}
