@@ -1,4 +1,4 @@
-from common.__init__ import getLogger
+from logging import getLogger
 from requests import Session, Request
 import json
 
