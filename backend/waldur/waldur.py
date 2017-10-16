@@ -20,6 +20,7 @@ chatbot = ChatBot(
 
 log.info("Training chatterbot")
 chatbot.train("chatterbot.corpus.english.greetings")
+chatbot.train("corpus.waldur")
 
 log.info("Creating Flask app")
 app = Flask("Waldur")
