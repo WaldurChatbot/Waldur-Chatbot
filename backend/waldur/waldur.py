@@ -1,3 +1,4 @@
+from os import path
 from chatterbot import ChatBot
 from flask import Flask
 from flask_restful import Api
@@ -21,6 +22,10 @@ chatbot = ChatBot(
 log.info("Training chatterbot")
 chatbot.train("chatterbot.corpus.english.greetings")
 
+corpus_path = path.join(path.dirname(path.abspath(__file__)), 'corpus')
+chatbot.train(corpus_path)
+
+#exit()
 log.info("Creating Flask app")
 app = Flask("Waldur")
 
