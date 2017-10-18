@@ -1,0 +1,13 @@
+categories:
+- Waldur
+conversations:
+- - Please give me my projects
+  - REQUEST~GET~projects
+- - My projects pls
+  - REQUEST~GET~projects
+- - give projects
+  - REQUEST~GET~projects
+- - what projects do i have siri
+  - REQUEST~GET~projects
+- - My services pls
+  - REQUEST~GET~services
