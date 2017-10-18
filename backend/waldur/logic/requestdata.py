@@ -1,7 +1,6 @@
 from common.request import WaldurConnection, InvalidTokenException
 from logging import getLogger
 log = getLogger(__name__)
-
 # separator for string format
 sep = "~"
 
