@@ -5,7 +5,7 @@ from logging import getLogger
 from string import punctuation
 log = getLogger(__name__)
 
-
+#  deprecated
 class RequestLogicAdapter(LogicAdapter):
     """
     Abstract class for all logic adapters that query data from Waldur API

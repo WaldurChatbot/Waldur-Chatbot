@@ -107,6 +107,6 @@ class WaldurConnection(object):
         if response.status_code == 200:
             return response_json
         elif response.status_code == 401:
-            raise InvalidTokenException
+            raise InvalidTokenException("Token is invalid - " + str(self.token))
         else:
             raise Exception(response_json['detail'])

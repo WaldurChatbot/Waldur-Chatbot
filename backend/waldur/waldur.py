@@ -15,8 +15,6 @@ chatbot = ChatBot(
     trainer='chatterbot.trainers.ChatterBotCorpusTrainer',
     database='./chatterbotdb.sqlite3',
     logic_adapters=[
-        'backend.waldur.logic.requestlogicadapters.GetProjectsLogicAdapter',
-        'backend.waldur.logic.requestlogicadapters.GetServicesLogicAdapter',
         'chatterbot.logic.BestMatch',
     ]
 )

@@ -6,8 +6,13 @@ from flask_restful import Resource, reqparse
 
 from common.request import InvalidTokenException
 from common.respond import marshall
+from .logic.requestdata import lazy_hack_solution
 
 log = getLogger(__name__)
+
+INVALID_TOKEN_MESSAGE = "Couldn't query Waldur because of invalid token, please send valid token"
+MISSING_QUERY_MESSAGE = "Parameter 'query' missing from request"
+SYSTEM_ERROR_MESSAGE  = "Internal system error."
 
 
 class Query(Resource):
@@ -26,29 +31,34 @@ class Query(Resource):
             args = self.parser.parse_args()
             query = args['query']
             token = args['token']
-            self.add_token(token)
+            print(query)
+            print(token)
+
             if query is not None:
                 log.debug("Getting response from chatterbot")
-                response = self.chatbot.get_response(query)
+                response = self.get_response(query, token)
                 response = marshall(str(response))
                 code = 200
             else:
-                response = marshall("Parameter 'query' missing from request")
+                response = marshall(MISSING_QUERY_MESSAGE)
                 code = 400
-        except InvalidTokenException:
-            log.info("Request sent with invalid token")
-            response = marshall('Couldn\'t query Waldur because of invalid token, please send valid token')
+        except InvalidTokenException as e:
+            log.info("InvalidTokenException: " + str(e))
+            response = marshall(INVALID_TOKEN_MESSAGE)
             code = 401
         except Exception:
             for line in traceback.format_exc().split("\n"): log.error(line)
-            response = marshall('Internal system error.')
+            response = marshall(SYSTEM_ERROR_MESSAGE)
             code = 500
 
         log.info("OUT: " + str(response) + " code: " + str(code))
         return make_response(jsonify(response), code)
 
-    def add_token(self, token):
-        log.debug("Adding token to all logic adapters")
-        for adapter in self.chatbot.logic.get_adapters():
-            if hasattr(adapter, 'set_token'):
-                adapter.set_token(token)
+    def get_response(self, query, token):
+        bot_response = str(self.chatbot.get_response(query))
+
+        if bot_response.startswith("REQUEST"):
+            return lazy_hack_solution(bot_response).set_token(token).request()
+        else:
+            return bot_response
+
