@@ -65,11 +65,12 @@ class Query(Resource):
             response = req.process()
 
             if req.output == 'text':
+                print(str(marshall.text(response)))
                 return marshall.text(response)
             elif req.output == 'graph':
                 return marshall.graph(response)
         else:
-            return bot_response
+            return marshall.text(bot_response)
 
 
 class Teach(Resource):
