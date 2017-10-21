@@ -16,6 +16,9 @@ class BackendConnection(object):
         self.session = Session()
         self.tokens = {}  # tokens = { 'user_id': 'token', ... }
 
+        self.last_bot_response = None
+        self.last_query = None
+
     def add_token(self, user_id, token):
         self.tokens[user_id] = token
 
@@ -30,12 +33,19 @@ class BackendConnection(object):
         log.debug("user_id: " + str(user_id) + " token: " + str(token))
         if message[:1] == '!':
             message = message[1:]
+
+            if message.lower() == 'thanks' or message.lower() == 'ty':  # todo make better, this whole class needs a rework
+                self.teach(self.last_bot_response, self.last_query)
+
             try:
                 response = self.query(
                     message=message,
                     token=token
                 )
                 response = response['message']
+
+                self.last_query = message
+                self.last_bot_response = response
             except InvalidTokenException:
                 log.info("Needed token to query Waldur, asking user for token.")
                 response = "Needed token to query Waldur API. " \
@@ -50,14 +60,11 @@ class BackendConnection(object):
         log.info("OUT: " + str(response))
         return response
 
-    def query(self, message, token=None):
+    def request(self, method, url, data=None):
         request = Request(
-            'POST',
-            self.url,
-            data=json.dumps({
-                'query': message,
-                'token': token
-            })
+            method,
+            url,
+            data=json.dumps(data)
         )
 
         prepped = request.prepare()
@@ -68,12 +75,39 @@ class BackendConnection(object):
         response_json = response.json()
         log.info("Received response: " + str(response_json))
 
-        if response.status_code == 200:
-            return response_json
-        elif response.status_code == 401:
+        return response_json, response.status_code
+
+    def query(self, message, token=None):
+        response, status = self.request(
+            'POST',
+            self.url,
+            data={
+                'query': message,
+                'token': token
+            }
+        )
+
+        if status == 200:
+            return response
+        elif status == 401:
             raise InvalidTokenException
         else:
-            raise Exception(response_json['message'])
+            raise Exception(response['message'])
+
+    def teach(self, statement, in_response_to):
+        response, status = self.request(
+            'POST',
+            self.url + '/teach',
+            data={
+                'statement': statement,
+                'in_response_to': in_response_to
+            }
+        )
+
+        if status == 200:
+            return response
+        else:
+            raise Exception(response['message'])
 
 
 class WaldurConnection(object):

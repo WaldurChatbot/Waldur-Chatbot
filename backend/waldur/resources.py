@@ -1,6 +1,7 @@
 from logging import getLogger
 import traceback
 
+from chatterbot.conversation import Statement
 from flask import jsonify, request, make_response
 from flask_restful import Resource, reqparse
 
@@ -65,4 +66,34 @@ class Query(Resource):
                 .process()
         else:
             return bot_response
+
+
+class Teach(Resource):
+
+    def __init__(self, chatbot):
+        log.info("Initializing TeachBot class")
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('statement')
+        self.parser.add_argument('in_response_to')
+        self.chatbot = chatbot
+
+    def post(self):
+        try:
+            log.info("IN:  " + str(request.json))
+            args = self.parser.parse_args()
+            statement = Statement(args['statement'])
+            in_response_to = Statement(args['in_response_to'])
+
+            self.chatbot.learn_response(statement, in_response_to)
+
+            response = marshall("ok")
+            code = 200
+
+        except Exception:
+            for line in traceback.format_exc().split("\n"): log.error(line)
+            response = marshall(SYSTEM_ERROR_MESSAGE)
+            code = 500
+
+        log.info("OUT: " + str(response) + " code: " + str(code))
+        return make_response(jsonify(response), code)
 
