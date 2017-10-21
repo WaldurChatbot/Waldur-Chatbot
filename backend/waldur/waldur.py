@@ -1,11 +1,13 @@
+from logging import getLogger
 from os import path
+
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
 from flask import Flask
 from flask_restful import Api
-from logging import getLogger
-from .resources import Query, Teach
+
 from .corpus.list_training_data import data
+from .resources import Query, Teach
 
 log = getLogger(__name__)
 
@@ -34,6 +36,5 @@ app = Flask("Waldur")
 
 log.info("Creating Flask api")
 api = Api(app)
-api.add_resource(Query, '/', resource_class_kwargs={'chatbot': chatbot})
+api.add_resource(Query, '/',       resource_class_kwargs={'chatbot': chatbot})
 api.add_resource(Teach, '/teach/', resource_class_kwargs={'chatbot': chatbot})
-

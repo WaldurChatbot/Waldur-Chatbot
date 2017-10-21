@@ -19,6 +19,7 @@ class Request(object):
                  method=None,
                  endpoint=None,
                  parameters=None,
+                 output='text'
                  ):
 
         if endpoint is None:
@@ -38,6 +39,7 @@ class Request(object):
         self.endpoint = endpoint
         self.method = method
         self.parameters = parameters
+        self.output = output
         self.token = None
         self.sep = sep
 

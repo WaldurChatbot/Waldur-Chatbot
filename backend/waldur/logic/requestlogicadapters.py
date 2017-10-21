@@ -7,6 +7,7 @@ from common.request import WaldurConnection, InvalidTokenException
 
 log = getLogger(__name__)
 
+
 #  deprecated
 class RequestLogicAdapter(LogicAdapter):
     """
@@ -20,7 +21,6 @@ class RequestLogicAdapter(LogicAdapter):
                  endpoint=None,
                  method=None,
                  parameters=None,
-                 optional_parameters=None,
                  **kwargs
                  ):
         super(RequestLogicAdapter, self).__init__(**kwargs)
@@ -34,13 +34,9 @@ class RequestLogicAdapter(LogicAdapter):
         if parameters is None:
             parameters = {}
 
-        if optional_parameters is None:
-            optional_parameters = {}
-
         self.endpoint = endpoint
         self.method = method
         self.parameters = parameters
-        self.optional_parameters = optional_parameters
         self.token = None
 
         self.confidence = None  # should be set by can_process() and sent out by process()
@@ -69,7 +65,7 @@ class RequestLogicAdapter(LogicAdapter):
         response = waldur.query(
             method=self.method,
             endpoint=self.endpoint,
-            data={**self.parameters, **self.optional_parameters}
+            data=self.parameters
         )
 
         return response

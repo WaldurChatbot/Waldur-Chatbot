@@ -1,5 +1,5 @@
-from logging import getLogger
 import traceback
+from logging import getLogger
 
 from chatterbot.conversation import Statement
 from flask import jsonify, request, make_response
@@ -33,17 +33,14 @@ class Query(Resource):
             args = self.parser.parse_args()
             query = args['query']
             token = args['token']
-            print(query)
-            print(token)
 
             if query is not None:
-                log.debug("Getting response from chatterbot")
                 response = self.get_response(query, token)
-                response = marshall(str(response))
                 code = 200
             else:
                 response = marshall(MISSING_QUERY_MESSAGE)
                 code = 400
+
         except InvalidTokenException as e:
             log.info("InvalidTokenException: " + str(e))
             response = marshall(INVALID_TOKEN_MESSAGE)
@@ -60,11 +57,17 @@ class Query(Resource):
         bot_response = str(self.chatbot.get_response(query))
 
         if bot_response.startswith("REQUEST"):
-            return Request\
+            req = Request\
                 .from_string(bot_response)\
                 .set_token(token)\
-                .set_original(query)\
-                .process()
+                .set_original(query)
+
+            response = req.process()
+
+            if req.output == 'text':
+                return marshall(response)
+            elif req.output == 'graph':
+                pass  # todo implement
         else:
             return bot_response
 
@@ -100,4 +103,3 @@ class Teach(Resource):
 
         log.info("OUT: " + str(response) + " code: " + str(code))
         return make_response(jsonify(response), code)
-
