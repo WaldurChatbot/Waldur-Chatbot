@@ -34,7 +34,7 @@ class BackendConnection(object):
         if message[:1] == '!':
             message = message[1:]
 
-            if message.lower() == 'thanks' or message.lower() == 'ty':  # todo make better, this whole class needs a rework
+            if message.lower() == 'thanks' or message.lower() == 'ty':  # todo a better solution
                 self.teach(self.last_bot_response, self.last_query)
 
             try:

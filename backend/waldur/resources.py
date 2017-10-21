@@ -13,6 +13,7 @@ log = getLogger(__name__)
 
 INVALID_TOKEN_MESSAGE = "Couldn't query Waldur because of invalid or missing token, please send valid token"
 MISSING_QUERY_MESSAGE = "Parameter 'query' missing from request"
+MISSING_TEACH_MESSAGE = "Request needs parameters 'statement' and 'in_request_to'"
 SYSTEM_ERROR_MESSAGE  = "Internal system error."
 
 
@@ -81,13 +82,16 @@ class Teach(Resource):
         try:
             log.info("IN:  " + str(request.json))
             args = self.parser.parse_args()
-            statement = Statement(args['statement'])
-            in_response_to = Statement(args['in_response_to'])
+            statement = args['statement']
+            in_response_to = args['in_response_to']
 
-            self.chatbot.learn_response(statement, in_response_to)
-
-            response = marshall("ok")
-            code = 200
+            if statement is not None and in_response_to is not None:
+                self.chatbot.learn_response(Statement(statement), Statement(in_response_to))
+                response = marshall("ok")
+                code = 200
+            else:
+                response = marshall(MISSING_TEACH_MESSAGE)
+                code = 400
 
         except Exception:
             for line in traceback.format_exc().split("\n"): log.error(line)
