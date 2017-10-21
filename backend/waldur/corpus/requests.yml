@@ -2,12 +2,12 @@ categories:
 - Waldur
 conversations:
 - - Please give me my projects
-  - REQUEST~GET~projects
+  - REQUEST~get_projects
 - - My projects pls
-  - REQUEST~GET~projects
+  - REQUEST~get_projects
 - - give projects
-  - REQUEST~GET~projects
+  - REQUEST~get_projects
 - - what projects do i have siri
-  - REQUEST~GET~projects
+  - REQUEST~get_projects
 - - My services pls
-  - REQUEST~GET~services
+  - REQUEST~get_services

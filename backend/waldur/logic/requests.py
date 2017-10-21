@@ -1,38 +1,28 @@
 from common.request import WaldurConnection, InvalidTokenException
 from logging import getLogger
 log = getLogger(__name__)
+
 # separator for string format
 sep = "~"
 
 
-class RequestData(object):
+class Request(object):
+    ID = None
+    NAME = None
     """
-    Object for holding request data and executing the request.
-
-
-    Possible requests:
-    Get projects for user
-        GET
-        services
-        -
-
-    Get services for user
-        GET
-        projects
-        -
-
-    todo add more
-
+    Base class for Requests to Waldur API, should not be instantiated directly.
+    Subclass must override process() and if needed set_original()
+    Subclasses must also have NAME and ID variables.
     """
 
     def __init__(self,
                  method=None,
                  endpoint=None,
-                 parameters=None
+                 parameters=None,
                  ):
 
         if endpoint is None:
-            raise ValueError("endpoint must be set for request")
+            raise ValueError("Endpoint must be set for request")
 
         if method is None:
             method = 'GET'
@@ -52,10 +42,25 @@ class RequestData(object):
         self.sep = sep
 
     def set_token(self, token):
+        """
+        :param token: Waldur API authentication token
+        """
         self.token = token
         return self  # builder pattern yo
 
+    def set_original(self, query):
+        """
+        Meant for requests that may need info from the original statement sent to backend.
+        Subclass that needs original statement must override this method.
+        :param query: original query sent to backend
+        """
+        pass
+
     def request(self):
+        """
+        Method to query Waldur API.
+        :return: response from Waldur API
+        """
         # todo figure out how to get this programmatically
         api_url = "https://api.etais.ee/api/"
 
@@ -75,48 +80,48 @@ class RequestData(object):
 
         return response
 
-    def to_string(self):
-        res = "REQUEST" \
-              + self.sep \
-              + self.method \
-              + self.sep \
-              + self.endpoint \
-              + self.sep
+    def process(self):
+        """
+        Processes the Request, i.e. calls request() and formats the response.
+        :return: Human readable response from Waldur API
+        """
+        raise NotImplementedError("Subclass must override this method")
 
-        for key, value in self.parameters.items():
-            res += str(key) + "=" + str(value) + self.sep
-
-        return res.strip(self.sep)
+    def to_string(self):  # todo do we need this?
+        return "REQUEST" + self.sep + type(self).NAME
 
     @staticmethod
     def from_string(string):
+        """
+        Converts request from string to matching Request object
+        :param string: request as string, ex. 'REQUEST~get_projects'
+        :return: Matching Request object
+        """
         tokens = string.strip(sep).split(sep)
 
-        method = tokens[1]
-        endpoint = tokens[2]
-        parameters = {}
-        for i in range(3, len(tokens)):
-            item = tokens[i].split("=")
-            parameters[item[0]] = item[1]
+        request_name = tokens[1]
 
-        # todo implement lazy_hack_solution here
+        if request_name is GetServicesRequest.NAME:
+            return GetServicesRequest
 
-        return RequestData(method, endpoint, parameters)
+        if request_name is GetProjectsRequest.NAME:
+            return GetProjectsRequest
+
+        raise Exception("Unknown request")
 
 
-class GetServicesRequest(RequestData):
-    """
-    GET projects
-    """
+class GetServicesRequest(Request):
+    ID = 1
+    NAME = 'get_services'
 
     def __init__(self):
         super(GetServicesRequest, self).__init__(
             method='GET',
-            endpoint='projects'
+            endpoint='projects',
         )
 
-    def request(self):
-        response = super(GetServicesRequest, self).request()
+    def process(self):
+        response = self.request()
 
         services = response[0]['services']
 
@@ -133,16 +138,18 @@ class GetServicesRequest(RequestData):
         return response_statement
 
 
-class GetProjectsRequest(RequestData):
+class GetProjectsRequest(Request):
+    ID = 2
+    NAME = 'get_projects'
 
     def __init__(self):
         super(GetProjectsRequest, self).__init__(
             method='GET',
-            endpoint='customers'
+            endpoint='customers',
         )
 
-    def request(self):
-        response = super(GetProjectsRequest, self).request()
+    def process(self):
+        response = self.request()
 
         projects = response[0]['projects']
 
@@ -157,12 +164,3 @@ class GetProjectsRequest(RequestData):
             response_statement += "The project is " + str(names)
 
         return response_statement
-
-
-# todo make this less lazy
-# should be able to parse class from string
-def lazy_hack_solution(string):
-    for request in [GetProjectsRequest(), GetServicesRequest()]:
-        if string == request.to_string():
-            return request
-    raise Exception("Unknown request")

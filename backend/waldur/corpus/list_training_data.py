@@ -1,6 +1,6 @@
 
-get_projects = "REQUEST~GET~projects"
-get_services = "REQUEST~GET~customers"
+get_projects = "REQUEST~get_projects"
+get_services = "REQUEST~get_services"
 
 data = [
     [
