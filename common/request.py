@@ -4,6 +4,10 @@ import json
 
 log = getLogger(__name__)
 
+INVALID_TOKEN_MESSAGE = "Needed token to query Waldur API. " \
+                       "Token was either invalid or missing. " \
+                       "Please send token like this '?<TOKEN>'"
+
 
 class InvalidTokenException(Exception):
     pass
@@ -27,38 +31,43 @@ class BackendConnection(object):
 
     def get_response(self, message, user_id):
         log.info("IN: " + message)
-        token = self.get_token(user_id)
         response = None
 
-        log.debug("user_id: " + str(user_id) + " token: " + str(token))
-        if message[:1] == '!':
-            message = message[1:]
+        prefix = message[:1]
+        message = message[1:]
 
-            if message.lower() == 'thanks' or message.lower() == 'ty':  # todo a better solution
-                self.teach(self.last_bot_response, self.last_query)
-
-            try:
-                response = self.query(
-                    message=message,
-                    token=token
-                )
-                response = response['message']
-
-                self.last_query = message
-                self.last_bot_response = response
-            except InvalidTokenException:
-                log.info("Needed token to query Waldur, asking user for token.")
-                response = "Needed token to query Waldur API. " \
-                           "Token was either invalid or missing. " \
-                           "Please send token like this '?<TOKEN>'"
-
-        elif message[:1] == '?':
-            log.info("Received token from user " + str(user_id) + " with a length of " + str(len(message[1:])))
-            self.add_token(user_id, message[1:])
-            response = "Thanks!"
+        if prefix == '!':
+            response = self._handle_message(user_id, message)
+        elif prefix == '?':
+            response = self._handle_token(user_id, message)
 
         log.info("OUT: " + str(response))
         return response
+
+    def _handle_message(self, user_id, message):
+
+        if message.lower() == 'thanks' or message.lower() == 'ty':  # todo a better solution
+            self.teach(self.last_bot_response, self.last_query)
+
+        try:
+            response = self.query(
+                message=message,
+                token=self.get_token(user_id)
+            )
+            response = response['message']
+
+            self.last_query = message
+            self.last_bot_response = response
+        except InvalidTokenException:
+            log.info("Needed token to query Waldur, asking user for token.")
+            response = INVALID_TOKEN_MESSAGE
+
+        return response
+
+    def _handle_token(self, user_id, token):
+        log.info("Received token from user " + str(user_id) + " with a length of " + str(len(token)))
+        self.add_token(user_id, token)
+        return "Thanks!"
 
     def request(self, method, url, data=None):
         request = Request(
