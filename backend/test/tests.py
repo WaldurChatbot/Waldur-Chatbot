@@ -19,7 +19,7 @@ class TestWaldur(TestCase):
     def test_request_with_no_data_response_error_400(self):
         response = self.app.post("/")
         self.assertEqual(400, response.status_code)
-        self.assertIn("message", json.loads(response.get_data()))
+        self.assertIn("data", json.loads(response.get_data()))
 
     @mock.patch('chatterbot.ChatBot.get_response', side_effect=mocked_chatbot_get_response_ok)
     def test_good_request(self, mock_get):
@@ -32,8 +32,8 @@ class TestWaldur(TestCase):
         )
         self.assertEqual(200, response.status_code)
         response = json.loads(response.get_data())
-        self.assertIn('message', response)
-        self.assertEqual("ok", response['message'])
+        self.assertIn('data', response)
+        self.assertEqual("ok", response['data'])
 
     @mock.patch('chatterbot.ChatBot.get_response', side_effect=mocked_chatbot_get_response_bad_token)
     def test_bad_token(self, mock_get):
@@ -46,9 +46,9 @@ class TestWaldur(TestCase):
         )
         self.assertEqual(401, response.status_code)
         response = json.loads(response.get_data())
-        self.assertIn('message', response)
-        self.assertIn("invalid", response['message'])
-        self.assertIn("token", response['message'])
+        self.assertIn('data', response)
+        self.assertIn("invalid", response['data'])
+        self.assertIn("token", response['data'])
 
 
 if __name__ == '__main__':
