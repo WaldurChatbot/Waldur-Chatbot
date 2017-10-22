@@ -70,7 +70,7 @@ class WaldurConnectionTests(TestCase):
     @mock.patch('requests.Session.send', side_effect=mocked_session_send_ok)
     def test_query_responds_with_with_dict_on_correct_request(self, mock_send):
         response = self.conn.query("GET", {}, "projects")
-        self.assertDictEqual({"message": "ok"}, response)
+        self.assertDictEqual({"data": "ok"}, response)
 
     @mock.patch('requests.Session.send', side_effect=mocked_session_send_invalid_token)
     def test_query_responds_with_exception_on_invalid_token(self, mock_send):
