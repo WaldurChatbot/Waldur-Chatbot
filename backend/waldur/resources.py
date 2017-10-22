@@ -6,15 +6,19 @@ from flask import jsonify, request, make_response
 from flask_restful import Resource, reqparse
 
 from common.request import InvalidTokenException
-from common import marshall
 from .logic.requests import Request
 
 log = getLogger(__name__)
 
-INVALID_TOKEN_MESSAGE = "Couldn't query Waldur because of invalid or missing token, please send valid token"
-MISSING_QUERY_MESSAGE = "Parameter 'query' missing from request"
-MISSING_TEACH_MESSAGE = "Request needs parameters 'statement' and 'in_request_to'"
-SYSTEM_ERROR_MESSAGE  = "Internal system error."
+
+def text(s):
+    return {'data': s, 'type': 'text'}
+
+
+INVALID_TOKEN_MESSAGE = text("Couldn't query Waldur because of invalid or missing token, please send valid token")
+MISSING_QUERY_MESSAGE = text("Parameter 'query' missing from request")
+MISSING_TEACH_MESSAGE = text("Request needs parameters 'statement' and 'in_request_to'")
+SYSTEM_ERROR_MESSAGE  = text("Internal system error.")
 
 
 class Query(Resource):
@@ -38,16 +42,16 @@ class Query(Resource):
                 response = self.get_response(query, token)
                 code = 200
             else:
-                response = marshall.text(MISSING_QUERY_MESSAGE)
+                response = MISSING_QUERY_MESSAGE
                 code = 400
 
         except InvalidTokenException as e:
             log.info("InvalidTokenException: " + str(e))
-            response = marshall.text(INVALID_TOKEN_MESSAGE)
+            response = INVALID_TOKEN_MESSAGE
             code = 401
         except Exception:
             for line in traceback.format_exc().split("\n"): log.error(line)
-            response = marshall.text(SYSTEM_ERROR_MESSAGE)
+            response = SYSTEM_ERROR_MESSAGE
             code = 500
 
         log.info("OUT: " + str(response) + " code: " + str(code))
@@ -62,15 +66,9 @@ class Query(Resource):
                 .set_token(token)\
                 .set_original(query)
 
-            response = req.process()
-
-            if req.output == 'text':
-                print(str(marshall.text(response)))
-                return marshall.text(response)
-            elif req.output == 'graph':
-                return marshall.graph(response)
+            return req.process()
         else:
-            return marshall.text(bot_response)
+            return text(bot_response)
 
 
 class Teach(Resource):
@@ -91,15 +89,18 @@ class Teach(Resource):
 
             if statement is not None and in_response_to is not None:
                 self.chatbot.learn_response(Statement(statement), Statement(in_response_to))
-                response = marshall.text("ok")
+                response = text('Added "{}" as a response to "{}"'.format(
+                    statement,
+                    in_response_to
+                ))
                 code = 200
             else:
-                response = marshall.text(MISSING_TEACH_MESSAGE)
+                response = MISSING_TEACH_MESSAGE
                 code = 400
 
         except Exception:
             for line in traceback.format_exc().split("\n"): log.error(line)
-            response = marshall.text(SYSTEM_ERROR_MESSAGE)
+            response = SYSTEM_ERROR_MESSAGE
             code = 500
 
         log.info("OUT: " + str(response) + " code: " + str(code))

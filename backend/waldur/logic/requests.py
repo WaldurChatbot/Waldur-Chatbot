@@ -111,6 +111,12 @@ class Request(object):
 
         raise Exception("Unknown request")
 
+    def marshall(self, data):
+        return {
+            'data': data,
+            'type': self.output
+        }
+
 
 class GetServicesRequest(Request):
     ID = 1
@@ -137,7 +143,7 @@ class GetServicesRequest(Request):
             response_statement  = "Your organisation is using 1 service. "
             response_statement += "This service is " + str(names)
 
-        return response_statement
+        return self.marshall(response_statement)
 
 
 class GetProjectsRequest(Request):
@@ -165,4 +171,4 @@ class GetProjectsRequest(Request):
             response_statement  = "You have 1 project. "
             response_statement += "The project is " + str(names)
 
-        return response_statement
+        return self.marshall(response_statement)

@@ -30,19 +30,20 @@ class BackendConnection(object):
         return None if user_id not in self.tokens else self.tokens.get(user_id)
 
     def get_response(self, message, user_id):
-        log.info("IN: " + message)
+        log.info("IN:  {} {}".format(message, user_id))
         response = None
+        type = 'text'
 
         prefix = message[:1]
         message = message[1:]
 
         if prefix == '!':
-            response = self._handle_message(user_id, message)
+            response, type = self._handle_message(user_id, message)
         elif prefix == '?':
             response = self._handle_token(user_id, message)
 
-        log.info("OUT: " + str(response))
-        return response
+        log.info("OUT: {} {} {}".format(response, type, user_id))
+        return response, type
 
     def _handle_message(self, user_id, message):
 
@@ -54,15 +55,17 @@ class BackendConnection(object):
                 message=message,
                 token=self.get_token(user_id)
             )
-            response = response['message']
+            type     = response['type']
+            response = response['data']
 
             self.last_query = message
             self.last_bot_response = response
         except InvalidTokenException:
             log.info("Needed token to query Waldur, asking user for token.")
+            type = 'text'
             response = INVALID_TOKEN_MESSAGE
 
-        return response
+        return response, type
 
     def _handle_token(self, user_id, token):
         log.info("Received token from user " + str(user_id) + " with a length of " + str(len(token)))
@@ -101,7 +104,7 @@ class BackendConnection(object):
         elif status == 401:
             raise InvalidTokenException
         else:
-            raise Exception(response['message'])
+            raise Exception(response['data'])
 
     def teach(self, statement, in_response_to):
         response, status = self.request(
