@@ -48,7 +48,7 @@ class BackendConnectionTests(TestCase):
         response = self.conn.query("hello", "good_token")
         self.assertDictEqual({"data": "ok"}, response)
 
-    @mock.patch('requests.Session.data', side_effect=mocked_session_send_invalid_token)
+    @mock.patch('requests.Session.send', side_effect=mocked_session_send_invalid_token)
     def test_query_responds_with_exception_on_invalid_token(self, mock_send):
         with self.assertRaises(InvalidTokenException):
             self.conn.query("hello", None)
