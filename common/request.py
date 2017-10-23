@@ -4,6 +4,10 @@ import json
 
 log = getLogger(__name__)
 
+INVALID_TOKEN_MESSAGE = "Needed token to query Waldur API. " \
+                       "Token was either invalid or missing. " \
+                       "Please send token like this '?<TOKEN>'"
+
 
 class InvalidTokenException(Exception):
     pass
@@ -16,6 +20,9 @@ class BackendConnection(object):
         self.session = Session()
         self.tokens = {}  # tokens = { 'user_id': 'token', ... }
 
+        self.last_bot_response = None
+        self.last_query = None
+
     def add_token(self, user_id, token):
         self.tokens[user_id] = token
 
@@ -23,41 +30,53 @@ class BackendConnection(object):
         return None if user_id not in self.tokens else self.tokens.get(user_id)
 
     def get_response(self, message, user_id):
-        log.info("IN: " + message)
-        token = self.get_token(user_id)
+        log.info("IN:  {} {}".format(message, user_id))
         response = None
+        type = 'text'
 
-        log.debug("user_id: " + str(user_id) + " token: " + str(token))
-        if message[:1] == '!':
-            message = message[1:]
-            try:
-                response = self.query(
-                    message=message,
-                    token=token
-                )
-                response = response['message']
-            except InvalidTokenException:
-                log.info("Needed token to query Waldur, asking user for token.")
-                response = "Needed token to query Waldur API. " \
-                           "Token was either invalid or missing. " \
-                           "Please send token like this '?<TOKEN>'"
+        prefix = message[:1]
+        message = message[1:]
 
-        elif message[:1] == '?':
-            log.info("Received token from user " + str(user_id) + " with a length of " + str(len(message[1:])))
-            self.add_token(user_id, message[1:])
-            response = "Thanks!"
+        if prefix == '!':
+            response, type = self._handle_message(user_id, message)
+        elif prefix == '?':
+            response = self._handle_token(user_id, message)
 
-        log.info("OUT: " + str(response))
-        return response
+        log.info("OUT: {} {} {}".format(response, type, user_id))
+        return response, type
 
-    def query(self, message, token=None):
+    def _handle_message(self, user_id, message):
+
+        if message.lower() == 'thanks' or message.lower() == 'ty':  # todo a better solution
+            self.teach(self.last_bot_response, self.last_query)
+
+        try:
+            response = self.query(
+                message=message,
+                token=self.get_token(user_id)
+            )
+            type     = response['type']
+            response = response['data']
+
+            self.last_query = message
+            self.last_bot_response = response
+        except InvalidTokenException:
+            log.info("Needed token to query Waldur, asking user for token.")
+            type = 'text'
+            response = INVALID_TOKEN_MESSAGE
+
+        return response, type
+
+    def _handle_token(self, user_id, token):
+        log.info("Received token from user " + str(user_id) + " with a length of " + str(len(token)))
+        self.add_token(user_id, token)
+        return "Thanks!"
+
+    def request(self, method, url, data=None):
         request = Request(
-            'POST',
-            self.url,
-            data=json.dumps({
-                'query': message,
-                'token': token
-            })
+            method,
+            url,
+            data=json.dumps(data)
         )
 
         prepped = request.prepare()
@@ -68,12 +87,39 @@ class BackendConnection(object):
         response_json = response.json()
         log.info("Received response: " + str(response_json))
 
-        if response.status_code == 200:
-            return response_json
-        elif response.status_code == 401:
+        return response_json, response.status_code
+
+    def query(self, message, token=None):
+        response, status = self.request(
+            'POST',
+            self.url,
+            data={
+                'query': message,
+                'token': token
+            }
+        )
+
+        if status == 200:
+            return response
+        elif status == 401:
             raise InvalidTokenException
         else:
-            raise Exception(response_json['message'])
+            raise Exception(response['data'])
+
+    def teach(self, statement, in_response_to):
+        response, status = self.request(
+            'POST',
+            self.url + '/teach',
+            data={
+                'statement': statement,
+                'in_response_to': in_response_to
+            }
+        )
+
+        if status == 200:
+            return response
+        else:
+            raise Exception(response['message'])
 
 
 class WaldurConnection(object):
@@ -107,6 +153,6 @@ class WaldurConnection(object):
         if response.status_code == 200:
             return response_json
         elif response.status_code == 401:
-            raise InvalidTokenException
+            raise InvalidTokenException("Token is invalid - " + str(self.token))
         else:
             raise Exception(response_json['detail'])

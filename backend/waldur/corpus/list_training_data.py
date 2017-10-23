@@ -1,23 +1,14 @@
 
+get_projects = "REQUEST~get_projects"
+get_services = "REQUEST~get_services"
+
 data = [
     [
-        'Hello',
-        'What the fuck!'
+        'my projects',
+        get_projects
     ],
     [
-        'Do you love me?',
-        'Yes'
-    ],
-    [
-        'asd',
-        'dsa'
+        'my services',
+        get_services
     ]
 ]
-
-response = "REQUEST~GET~services"
-
-for i in ["procjects?", "give projcsts!", "GIVE ME MY PROJECTS!"]:
-    a = [i, response]
-    data.append(a)
-
-
