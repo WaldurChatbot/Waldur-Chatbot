@@ -40,7 +40,9 @@ class Request(object):
         self.method = method
         self.parameters = parameters
         self.output = output
+
         self.token = None
+        self.original = None
         self.sep = sep
 
     def set_token(self, token):
@@ -56,7 +58,8 @@ class Request(object):
         Subclass that needs original statement must override this method.
         :param query: original query sent to backend
         """
-        pass
+        self.original = query
+        return self
 
     def request(self):
         """
@@ -103,11 +106,11 @@ class Request(object):
 
         request_name = tokens[1]
 
-        if request_name is GetServicesRequest.NAME:
-            return GetServicesRequest
+        if request_name == GetServicesRequest.NAME:
+            return GetServicesRequest()
 
-        if request_name is GetProjectsRequest.NAME:
-            return GetProjectsRequest
+        if request_name == GetProjectsRequest.NAME:
+            return GetProjectsRequest()
 
         raise Exception("Unknown request")
 
