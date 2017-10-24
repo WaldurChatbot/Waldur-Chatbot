@@ -41,7 +41,7 @@ class BackendConnection(object):
         elif prefix == '?':
             response = self._handle_token(user_id, message)
 
-        if not isinstance(response, dict):
+        if isinstance(response, str):
             response = {
                 'data': response,
                 'type': 'text'
