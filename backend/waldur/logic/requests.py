@@ -108,9 +108,10 @@ class Request(object):
 
         if request_name == GetServicesRequest.NAME:
             return GetServicesRequest()
-
         if request_name == GetProjectsRequest.NAME:
             return GetProjectsRequest()
+        if request_name == GetVmsRequest.NAME:
+            return GetVmsRequest()
 
         raise Exception("Unknown request")
 
@@ -173,5 +174,33 @@ class GetProjectsRequest(Request):
         if str(len(names)) == 1:
             response_statement  = "You have 1 project. "
             response_statement += "The project is " + str(names)
+
+        return self.marshall(response_statement)
+
+class GetVmsRequest(Request):
+    ID = 3
+    NAME = 'get_vms'
+
+    def __init__(self):
+        super(GetVmsRequest, self).__init__(
+            method='GET',
+            endpoint='openstacktenant-instances',
+        )
+
+    def process(self):
+        response = self.request()
+
+        vms = response
+
+        names = {}
+        for vm in vms:
+            names[vm['name']] = (vm['external_ips'])
+
+        response_statement  = "You have " + str(len(names)) + " virtual machines. "
+        response_statement += "Here are their names and public IPs " + str(names)
+        if str(len(names)) == 1:
+            response_statement  = "You have 1 virtual machine. "
+            response_statement += "The virtual machine is " + str(names.keys())
+            response_statement += "It's public IP is " + str(names.items())
 
         return self.marshall(response_statement)
