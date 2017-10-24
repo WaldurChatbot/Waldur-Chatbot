@@ -2,6 +2,7 @@
 get_projects = "REQUEST~get_projects"
 get_services = "REQUEST~get_services"
 get_vms = "REQUEST~get_vms"
+get_totalcosts = "REQUEST~get_totalcosts"
 
 data = [
     [
@@ -15,5 +16,9 @@ data = [
     [
         'my vms',
         get_vms
+    ],
+    [
+        'graph',
+        get_totalcosts
     ]
 ]
