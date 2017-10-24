@@ -204,3 +204,55 @@ class GetVmsRequest(Request):
             response_statement += "It's public IP is " + str(names.items())
 
         return self.marshall(response_statement)
+
+
+class GetTotalCostGraphRequest(Request):
+    ID = 4
+    NAME = 'get_totalcosts'
+
+    def __init__(self):
+        super(GetTotalCostGraphRequest, self).__init__(
+            method='GET',
+            endpoint='invoices',
+        )
+
+    def process(self):
+        response = self.request()
+
+        data = response
+
+        graphdata = {}
+
+        num_to_month = {
+            1: 'January',
+            2: 'February',
+            3: 'March',
+            4: 'April',
+            5: 'May',
+            6: 'June',
+            7: 'July',
+            8: 'August',
+            9: 'September',
+            10: 'October',
+            11: 'November',
+            12: 'December'
+        }
+
+        plotx = []
+        ploty = []
+
+        lastmonths = 6
+
+        if len(data) >= lastmonths:
+            maxrange = lastmonths
+        else:
+            maxrange = len(data)
+
+        for i in range(maxrange, -1, -1):
+            plotx.append(num_to_month[data[i]['month']] + " " + str(data[i]['year']))
+            ploty.append(data[i]['total'])
+
+        graphdata['x'] = plotx
+        graphdata['y'] = ploty
+
+        return self.marshall(graphdata)
