@@ -43,7 +43,7 @@ class BackendConnection(object):
             response = self._handle_token(user_id, message)
 
         log.info("OUT: {} {} {}".format(response, type, user_id))
-        return response, type
+        return {'data': response, 'type': type}
 
     def _handle_message(self, user_id, message):
 
