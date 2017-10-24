@@ -32,18 +32,26 @@ class BackendConnection(object):
     def get_response(self, message, user_id):
         log.info("IN:  {} {}".format(message, user_id))
         response = None
-        type = 'text'
 
         prefix = message[:1]
         message = message[1:]
 
         if prefix == '!':
-            response, type = self._handle_message(user_id, message)
+            response = self._handle_message(user_id, message)
         elif prefix == '?':
             response = self._handle_token(user_id, message)
 
-        log.info("OUT: {} {} {}".format(response, type, user_id))
-        return {'data': response, 'type': type}
+        if not isinstance(response, dict):
+            response = {
+                'data': response,
+                'type': 'text'
+            }
+
+        if not isinstance(response, list):
+            response = [response]
+
+        log.info("OUT: {} {}".format(response, user_id))
+        return response
 
     def _handle_message(self, user_id, message):
 
@@ -55,17 +63,16 @@ class BackendConnection(object):
                 message=message,
                 token=self.get_token(user_id)
             )
-            type     = response['type']
-            response = response['data']
 
-            self.last_query = message
-            self.last_bot_response = response
+            if len(response) == 1 and response[0]['type'] == 'text':
+                self.last_query = message
+                self.last_bot_response = response[0]['data']
+
         except InvalidTokenException:
             log.info("Needed token to query Waldur, asking user for token.")
-            type = 'text'
             response = INVALID_TOKEN_MESSAGE
 
-        return response, type
+        return response
 
     def _handle_token(self, user_id, token):
         log.info("Received token from user " + str(user_id) + " with a length of " + str(len(token)))

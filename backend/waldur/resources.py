@@ -66,7 +66,7 @@ class Query(Resource):
                 .set_token(token)\
                 .set_original(query)
 
-            return req.process()
+            return [i for i in req.process()]
         else:
             return text(bot_response)
 

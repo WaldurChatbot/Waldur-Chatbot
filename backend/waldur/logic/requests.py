@@ -1,5 +1,6 @@
 from common.request import WaldurConnection, InvalidTokenException
 from logging import getLogger
+
 log = getLogger(__name__)
 
 # separator for string format
@@ -18,8 +19,7 @@ class Request(object):
     def __init__(self,
                  method=None,
                  endpoint=None,
-                 parameters=None,
-                 output='text'
+                 parameters=None
                  ):
 
         if endpoint is None:
@@ -39,7 +39,6 @@ class Request(object):
         self.endpoint = endpoint
         self.method = method
         self.parameters = parameters
-        self.output = output
 
         self.token = None
         self.original = None
@@ -115,12 +114,6 @@ class Request(object):
 
         raise Exception("Unknown request")
 
-    def marshall(self, data):
-        return {
-            'data': data,
-            'type': self.output
-        }
-
 
 class GetServicesRequest(Request):
     ID = 1
@@ -141,13 +134,19 @@ class GetServicesRequest(Request):
         for service in services:
             names.append(service['name'])
 
-        response_statement  = "Your organisation is using " + str(len(names)) + " services. "
+        response_statement = "Your organisation is using " + str(len(names)) + " services. "
         response_statement += "They are " + str(names)
         if str(len(names)) == 1:
-            response_statement  = "Your organisation is using 1 service. "
+            response_statement = "Your organisation is using 1 service. "
             response_statement += "This service is " + str(names)
 
-        return self.marshall(response_statement)
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }, {
+            'data': 'good shit',
+            'type': 'text'
+        }
 
 
 class GetProjectsRequest(Request):
@@ -169,13 +168,17 @@ class GetProjectsRequest(Request):
         for project in projects:
             names.append(project['name'])
 
-        response_statement  = "You have " + str(len(names)) + " projects. "
+        response_statement = "You have " + str(len(names)) + " projects. "
         response_statement += "They are " + str(names)
         if str(len(names)) == 1:
-            response_statement  = "You have 1 project. "
+            response_statement = "You have 1 project. "
             response_statement += "The project is " + str(names)
 
-        return self.marshall(response_statement)
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
+
 
 class GetVmsRequest(Request):
     ID = 3
@@ -196,11 +199,14 @@ class GetVmsRequest(Request):
         for vm in vms:
             names[vm['name']] = (vm['external_ips'])
 
-        response_statement  = "You have " + str(len(names)) + " virtual machines. "
+        response_statement = "You have " + str(len(names)) + " virtual machines. "
         response_statement += "Here are their names and public IPs " + str(names)
         if str(len(names)) == 1:
-            response_statement  = "You have 1 virtual machine. "
+            response_statement = "You have 1 virtual machine. "
             response_statement += "The virtual machine is " + str(names.keys())
             response_statement += "It's public IP is " + str(names.items())
 
-        return self.marshall(response_statement)
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
