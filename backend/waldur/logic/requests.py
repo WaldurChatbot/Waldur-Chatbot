@@ -145,9 +145,6 @@ class GetServicesRequest(Request):
         return {
             'data': response_statement,
             'type': 'text'
-        }, {
-            'data': 'good shit',
-            'type': 'text'
         }
 
 
