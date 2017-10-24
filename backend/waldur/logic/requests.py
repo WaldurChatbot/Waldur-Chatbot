@@ -111,6 +111,8 @@ class Request(object):
             return GetProjectsRequest()
         if request_name == GetVmsRequest.NAME:
             return GetVmsRequest()
+        if request_name == GetTotalCostGraphRequest.NAME:
+            return GetTotalCostGraphRequest()
 
         raise Exception("Unknown request")
 
@@ -253,7 +255,7 @@ class GetTotalCostGraphRequest(Request):
         else:
             maxrange = len(data)
 
-        for i in range(maxrange, -1, -1):
+        for i in range(maxrange-1, -1, -1):
             plotx.append(num_to_month[data[i]['month']] + " " + str(data[i]['year']))
             ploty.append(data[i]['total'])
 

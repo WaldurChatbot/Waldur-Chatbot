@@ -15,3 +15,5 @@ conversations:
   - REQUEST~get_vms
 - - What virtual machines do I have
   - REQUEST~get_vms
+- - Graphtest
+  - REQUEST~get_totalcosts
