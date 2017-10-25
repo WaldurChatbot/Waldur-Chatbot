@@ -66,6 +66,10 @@ class Query(Resource):
                 .set_token(token)\
                 .set_original(query)
 
+            var = req.process()
+
+            if type(var) is dict:
+                return (var,)
             return [i for i in req.process()]
         else:
             return text(bot_response)
