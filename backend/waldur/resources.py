@@ -69,8 +69,9 @@ class Query(Resource):
             var = req.process()
 
             if type(var) is dict:
-                return (var,)
-            return [i for i in req.process()]
+                return [var]
+            else:
+                return [i for i in req.process()]
         else:
             return text(bot_response)
 
