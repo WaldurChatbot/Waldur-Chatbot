@@ -134,9 +134,7 @@ class GetServicesRequest(Request):
 
         services = response[0]['services']
 
-        names = []
-        for service in services:
-            names.append(service['name'])
+        names = [service['name'] for service in services]
 
         if len(names) >= 1:
             response_statement = "Your organisation is using " + str(len(names)) + " services. "
@@ -166,11 +164,10 @@ class GetProjectsRequest(Request):
     def process(self):
         response = self.request()
 
+        # todo take all organization, not only the first
         projects = response[0]['projects']
 
-        names = []
-        for project in projects:
-            names.append(project['name'])
+        names = [project['name'] for project in projects]
 
         if len(names) > 1:
             response_statement = "You have " + str(len(names)) + " projects. "
@@ -200,11 +197,7 @@ class GetVmsRequest(Request):
     def process(self):
         response = self.request()
 
-        vms = response
-
-        names = {}
-        for vm in vms:
-            names[vm['name']] = (vm['external_ips'])
+        names = {vm['name']: vm['external_ips'] for vm in response}
 
         if len(names) > 1:
             response_statement = "You have " + str(len(names)) + " virtual machines. "
@@ -221,6 +214,7 @@ class GetVmsRequest(Request):
             'type': 'text'
         }
 
+
 class GetOrganisationsRequest(Request):
     ID = 4
     NAME = 'get_organisations'
@@ -234,9 +228,7 @@ class GetOrganisationsRequest(Request):
     def process(self):
         response = self.request()
 
-        names = []
-        for organisation in response:
-            names.append(organisation['name'])
+        names = [organisation['name'] for organisation in response]
 
         if len(names) > 1:
             response_statement = "You are part of " + str(len(names)) + " organisations. "
@@ -251,6 +243,7 @@ class GetOrganisationsRequest(Request):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetTotalCostGraphRequest(Request):
     ID = 5
