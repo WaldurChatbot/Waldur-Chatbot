@@ -210,6 +210,7 @@ class GetVmsRequest(Request):
             'type': 'text'
         }
 
+
 class GetTotalCostGraphRequest(Request):
     ID = 4
     NAME = 'get_totalcosts'
