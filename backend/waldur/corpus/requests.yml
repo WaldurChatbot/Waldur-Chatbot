@@ -1,0 +1,23 @@
+categories:
+- Waldur
+conversations:
+- - Please give me my projects
+  - REQUEST~get_projects
+- - My projects pls
+  - REQUEST~get_projects
+- - give projects
+  - REQUEST~get_projects
+- - What services do my organisations use
+  - REQUEST~get_services
+- - Please give me my services
+  - REQUEST~get_services
+- - Please give me my virtual machines
+  - REQUEST~get_vms
+- - What virtual machines do I have
+  - REQUEST~get_vms
+- - What organisations am I part of
+  - REQUEST~get_organisations
+- - Please give me my organisations
+  - REQUEST~get_organisations
+- - Graphtest
+  - REQUEST~get_totalcosts

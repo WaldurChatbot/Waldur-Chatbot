@@ -8,21 +8,34 @@ def mocked_chatbot_get_response_ok(text):
     return "ok"
 
 
+def mocked_chatbot_get_response_request(text):
+    return "REQUEST"
+
+
 def mocked_chatbot_get_response_bad_token(text):
     raise InvalidTokenException
+
+
+def mocked_chatbot_get_response_system_error(text):
+    raise Exception
 
 
 class TestWaldur(TestCase):
     def setUp(self):
         self.app = api.app.test_client()
 
+    def assert_correct_response_form(self, response, type="text"):
+        self.assertIn('data', response)
+        self.assertIn('type', response)
+        self.assertEqual(type, response['type'])
+
     def test_request_with_no_data_response_error_400(self):
         response = self.app.post("/")
         self.assertEqual(400, response.status_code)
-        self.assertIn("message", json.loads(response.get_data()))
+        self.assertIn("data", json.loads(response.get_data()))
 
     @mock.patch('chatterbot.ChatBot.get_response', side_effect=mocked_chatbot_get_response_ok)
-    def test_asd(self, mock_get):
+    def test_good_request(self, mock_get):
         response = self.app.post(
             "/",
             data={
@@ -30,13 +43,12 @@ class TestWaldur(TestCase):
                 'token': "irrelevant token"
             }
         )
-        response = json.load(response.get_data())
         self.assertEqual(200, response.status_code)
-        self.assertIn('message', response)
-        self.assertEqual("ok", response['message'])
+        response = json.loads(response.get_data())
+        self.assert_correct_response_form(response)
 
     @mock.patch('chatterbot.ChatBot.get_response', side_effect=mocked_chatbot_get_response_bad_token)
-    def test_asd(self, mock_get):
+    def test_bad_token(self, mock_get):
         response = self.app.post(
             "/",
             data={
@@ -46,8 +58,20 @@ class TestWaldur(TestCase):
         )
         self.assertEqual(401, response.status_code)
         response = json.loads(response.get_data())
-        self.assertIn('message', response)
-        self.assertIn("invalid token", response['message'])
+        self.assert_correct_response_form(response)
+
+    @mock.patch('chatterbot.ChatBot.get_response', side_effect=mocked_chatbot_get_response_system_error)
+    def test_system_error(self, mock_get):
+        response = self.app.post(
+            "/",
+            data={
+                'query': "irrelevant",
+                'token': "asdqwe123"
+            }
+        )
+        self.assertEqual(500, response.status_code)
+        response = json.loads(response.get_data())
+        self.assert_correct_response_form(response)
 
 
 if __name__ == '__main__':

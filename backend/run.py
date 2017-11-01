@@ -1,9 +1,9 @@
-from configparser import ConfigParser
+import sys
 import traceback
-from os import path
-import sys  # for easily importing common
-from logging.config import fileConfig
+from configparser import ConfigParser
 from logging import getLogger
+from logging.config import fileConfig
+from os import path
 
 # read logging config
 log_file_path = path.join(path.dirname(path.abspath(__file__)), '..', 'logging_config.ini')

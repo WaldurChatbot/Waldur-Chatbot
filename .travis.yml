@@ -7,8 +7,8 @@ install:
         - pip install -r requirements.txt
 
 script:
-        - pytest backend/test/tests.py
-        - pytest common/test/tests.py
+        - pytest backend/test/*test.py
+        - pytest common/test/*test.py
 
 deploy:
         provider: script
