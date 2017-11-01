@@ -1,7 +1,8 @@
 import plotly.offline as offline
 import plotly.graph_objs as go
 import json
-
+import matplotlib.pyplot as plt
+import pandas as pd
 
 myinput = """[
   {
@@ -151,34 +152,20 @@ for i in range((len(data)-1),-1,-1):
 print(plotx)
 print(ploty)
 
-plotdata = [go.Bar(
-                x=plotx,
-                y=ploty
-    )]
+result = {}
 
-plotdata = [go.Bar(
-            x=plotx,
-            y=ploty,
-            text=ploty,
-            textposition = 'auto',
-            marker=dict(
-                color='rgb(158,202,225)',
-                line=dict(
-                    color='rgb(8,48,107)',
-                    width=1.5),
-            ),
-            opacity=0.6
-        )]
+for i in range(len(plotx)):
+    result[plotx[i]] = float(ploty[i])
 
-plotlayout = go.Layout(
-    title='Total costs for last 6 months',
-    width=300,
-    height=300
-)
+print(result)
+dataframe = pd.Series(result)
 
-plotfigure = go.Figure(data=plotdata, layout=plotlayout)
+#plt.style.use = 'default'
+plt.xticks(rotation=45)
 
-offline.plot(plotfigure,
-             image='png',
-             image_width=400,
-             image_height=300)
+print(type(dataframe))
+
+myplot = dataframe.plot(kind="bar", title="testtitle")
+
+fig = myplot.get_figure()
+fig.savefig("test2.png")
