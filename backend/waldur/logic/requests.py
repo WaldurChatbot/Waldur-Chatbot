@@ -290,7 +290,7 @@ class GetTotalCostGraphRequest(Request):
 
         for i in range(maxrange-1, -1, -1):
             plotx.append(num_to_month[data[i]['month']] + " " + str(data[i]['year']))
-            ploty.append(data[i]['total'])
+            ploty.append(float(data[i]['total']))
 
         graphdata['x'] = plotx
         graphdata['y'] = ploty
