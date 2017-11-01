@@ -111,6 +111,8 @@ class Request(object):
             return GetProjectsRequest()
         if request_name == GetVmsRequest.NAME:
             return GetVmsRequest()
+        if request_name == GetOrganisationsRequest.NAME:
+            return GetOrganisationsRequest()
         if request_name == GetTotalCostGraphRequest.NAME:
             return GetTotalCostGraphRequest()
 
@@ -132,15 +134,16 @@ class GetServicesRequest(Request):
 
         services = response[0]['services']
 
-        names = []
-        for service in services:
-            names.append(service['name'])
+        names = [service['name'] for service in services]
 
-        response_statement = "Your organisation is using " + str(len(names)) + " services. "
-        response_statement += "They are " + str(names)
-        if str(len(names)) == 1:
+        if len(names) >= 1:
+            response_statement = "Your organisation is using " + str(len(names)) + " services. "
+            response_statement += "They are " + (", ".join(names))
+        elif len(names) == 1:
             response_statement = "Your organisation is using 1 service. "
-            response_statement += "This service is " + str(names)
+            response_statement += "This service is " + str(names[0])
+        else:
+            response_statement = "Your organisation isn't using any services."
 
         return {
             'data': response_statement,
@@ -161,17 +164,19 @@ class GetProjectsRequest(Request):
     def process(self):
         response = self.request()
 
+        # todo take all organization, not only the first
         projects = response[0]['projects']
 
-        names = []
-        for project in projects:
-            names.append(project['name'])
+        names = [project['name'] for project in projects]
 
-        response_statement = "You have " + str(len(names)) + " projects. "
-        response_statement += "They are " + str(names)
-        if str(len(names)) == 1:
+        if len(names) > 1:
+            response_statement = "You have " + str(len(names)) + " projects. "
+            response_statement += "They are " + (", ".join(names))
+        elif len(names) == 1:
             response_statement = "You have 1 project. "
-            response_statement += "The project is " + str(names)
+            response_statement += "The project is " + str(names[0])
+        else:
+            response_statement = "You don't have any projects."
 
         return {
             'data': response_statement,
@@ -192,26 +197,56 @@ class GetVmsRequest(Request):
     def process(self):
         response = self.request()
 
-        vms = response
+        names = {vm['name']: vm['external_ips'] for vm in response}
 
-        names = {}
-        for vm in vms:
-            names[vm['name']] = (vm['external_ips'])
-
-        response_statement = "You have " + str(len(names)) + " virtual machines. "
-        response_statement += "Here are their names and public IPs " + str(names)
-        if str(len(names)) == 1:
+        if len(names) > 1:
+            response_statement = "You have " + str(len(names)) + " virtual machines. "
+            response_statement += "Here are their names and public IPs " + "; ".join([ vm + ": " + (", ".join(names[vm])) for vm in names.keys()])
+        elif len(names) == 1:
             response_statement = "You have 1 virtual machine. "
-            response_statement += "The virtual machine is " + str(names.keys())
-            response_statement += "It's public IP is " + str(names.items())
+            response_statement += "The virtual machine is " + str(list(names.keys())[0])
+            response_statement += " It's public IP is " + str(list(names.items())[0])
+        else:
+            response_statement = "You don't have any virtual machines."
 
         return {
             'data': response_statement,
             'type': 'text'
         }
 
-class GetTotalCostGraphRequest(Request):
+
+class GetOrganisationsRequest(Request):
     ID = 4
+    NAME = 'get_organisations'
+
+    def __init__(self):
+        super(GetOrganisationsRequest, self).__init__(
+            method='GET',
+            endpoint='customers',
+        )
+
+    def process(self):
+        response = self.request()
+
+        names = [organisation['name'] for organisation in response]
+
+        if len(names) > 1:
+            response_statement = "You are part of " + str(len(names)) + " organisations. "
+            response_statement += "They are " + (", ".join(names))
+        elif len(names) == 1:
+            response_statement = "You are part of 1 organisation. "
+            response_statement += "The organisation is " + str(names[0])
+        else:
+            response_statement = "You you aren't part of any organisation."
+
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
+
+
+class GetTotalCostGraphRequest(Request):
+    ID = 5
     NAME = 'get_totalcosts'
 
     def __init__(self):
