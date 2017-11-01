@@ -3,7 +3,7 @@ get_projects = "REQUEST~get_projects"
 get_services = "REQUEST~get_services"
 get_vms = "REQUEST~get_vms"
 get_organisations = "REQUEST~get_organisations"
-get_totalcosts = "REQUEST~get_totalcosts"
+get_total_costs = "REQUEST~get_totalcosts"
 
 data = [
     [
@@ -15,7 +15,7 @@ data = [
         get_services
     ],
     [
-        'my vms',
+        'my virtual machines',
         get_vms
     ],
     [
@@ -23,7 +23,20 @@ data = [
         get_organisations
     ],
     [
-        'graph',
-        get_totalcosts
+        'my total costs',
+        get_total_costs
     ]
 ]
+
+buffer = []
+for s in ["please", "please give", "give",
+          "i want", "give me", "can i have"]:
+    for ss in data:
+        ss = ss
+        buffer.append([
+            s + " " + ss[0],
+            ss[1]
+        ])
+
+data.extend(buffer)
+
