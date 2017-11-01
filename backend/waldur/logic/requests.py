@@ -223,7 +223,7 @@ class GetOrganisationsRequest(Request):
     def __init__(self):
         super(GetOrganisationsRequest, self).__init__(
             method='GET',
-            endpoint='customers',
+            endpoint='customers'
         )
 
     def process(self):

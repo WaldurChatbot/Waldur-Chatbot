@@ -11,7 +11,7 @@ conversations:
   - REQUEST~get_services
 - - Please give me my services
   - REQUEST~get_services
-- - Please give me my vms
+- - Please give me my virtual machines
   - REQUEST~get_vms
 - - What virtual machines do I have
   - REQUEST~get_vms
