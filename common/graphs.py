@@ -28,6 +28,7 @@ def make_graph(data):
     ax.set_ylabel('Total costs')
     ax.set_xticks(ind + width / 2)
     ax.set_xticklabels(plotx)
+    ax.set_title('Last ' + str(N) + ' months total costs')
 
     autolabel(rects1, ax)
 

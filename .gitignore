@@ -29,3 +29,6 @@ travis_deploy_key
 
 # debug
 debug.py
+
+# graph exports
+common/offline_graphs/*.png

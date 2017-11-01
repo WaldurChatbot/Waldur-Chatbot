@@ -225,6 +225,7 @@ ax.set_xlabel('Months')
 ax.set_ylabel('Total costs')
 ax.set_xticks(ind + width / 2)
 ax.set_xticklabels(plotx)
+ax.set_title('Last ' + str(N) + 'month total costs')
 
 def autolabel(rects, ax):
     # Get y-axis height to calculate label position from.
