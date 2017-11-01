@@ -26,3 +26,5 @@ chatterbotdb.sqlite3.db
 
 # decrypted key
 travis_deploy_key
+
+debug.py
