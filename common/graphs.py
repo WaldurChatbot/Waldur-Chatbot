@@ -2,19 +2,20 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import io
+from logging import getLogger
+
+log = getLogger(__name__)
 
 
 # todo we should make this like requests
 
 def make_graph(data):
-    print("---------------------------------------")
-    print(data)
-    print("---------------------------------------")
+    log.debug(data)
 
     plotx = data['x']
     ploty = data['y']
-    print(plotx)
-    print(ploty)
+    log.debug("x: {}".format(plotx))
+    log.debug("y: {}".format(ploty))
 
     N = len(ploty)
 
