@@ -49,6 +49,7 @@ class Query(Resource):
             response = SYSTEM_ERROR_MESSAGE
             code = 500
 
+        response = self.format_response(response)
         log.info("OUT: " + str(response) + " code: " + str(code))
         return make_response(jsonify(response), code)
 
@@ -80,7 +81,7 @@ class Query(Resource):
         else:
             response = bot_response
 
-        return self.handle_response(response)
+        return response
 
     def handle_input(self, input_query, token):
         req = waiting_for_input[token]
@@ -92,9 +93,9 @@ class Query(Resource):
         if not req.waiting_for_input:
             del waiting_for_input[token]
 
-        return self.handle_response(response)
+        return response
 
-    def handle_response(self, response):
+    def format_response(self, response):
         if response is None:
             raise Exception("Response should not be None")
 

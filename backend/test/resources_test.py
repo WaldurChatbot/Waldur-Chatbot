@@ -25,14 +25,15 @@ class TestWaldur(TestCase):
         self.app = api.app.test_client()
 
     def assert_correct_response_form(self, response, type="text"):
-        self.assertIn('data', response)
-        self.assertIn('type', response)
-        self.assertEqual(type, response['type'])
+        for item in response:
+            self.assertIn('data', item)
+            self.assertIn('type', item)
+            self.assertEqual(type, item['type'])
 
     def test_request_with_no_data_response_error_400(self):
         response = self.app.post("/")
         self.assertEqual(400, response.status_code)
-        self.assertIn("data", json.loads(response.get_data()))
+        self.assert_correct_response_form(json.loads(response.get_data()))
 
     @mock.patch('chatterbot.ChatBot.get_response', side_effect=mocked_chatbot_get_response_ok)
     def test_good_request(self, mock_get):
