@@ -7,6 +7,20 @@ log = getLogger(__name__)
 sep = "~"
 
 
+def text(data):
+    return {
+        'type': 'text',
+        'data': data
+    }
+
+
+def graph(data):
+    return {
+        'type': 'graph',
+        'data': data
+    }
+
+
 class Request(object):
     ID = None
     NAME = None
@@ -39,6 +53,9 @@ class Request(object):
         self.endpoint = endpoint
         self.method = method
         self.parameters = parameters
+
+        self.waiting_for_input = False
+        self.input = None
 
         self.token = None
         self.original = None
@@ -87,9 +104,31 @@ class Request(object):
     def process(self):
         """
         Processes the Request, i.e. calls request() and formats the response.
-        :return: Human readable response from Waldur API
+        :return: Dict or tuple of dicts with 2 keys: 'type' and 'data'
+                    'type' values:  'text' if data is string
+                                    'graph' if data is dict from which a graph can be constructed
+                                    'prompt' if data is a string question for which we expect an answer from client
+                 May return more than 1 dict as a tuple, in which case all dicts are processed sequentially by clienta
         """
         raise NotImplementedError("Subclass must override this method")
+
+    def set_input(self, data):
+        """
+        Method to give input to Request object
+        """
+        self.input = data
+
+    def get_input(self):
+        """
+        Method to get input, input is set back to None after call
+        :return: string input
+        """
+        if self.input is None:
+            raise Exception("No input")  # todo custom exception
+        else:
+            out = self.input.strip()
+            self.input = None
+            return out
 
     def to_string(self):  # todo do we need this?
         return "REQUEST" + self.sep + type(self).NAME
@@ -116,6 +155,8 @@ class Request(object):
             return GetOrganisationsRequest()
         if request_name == GetTotalCostGraphRequest.NAME:
             return GetTotalCostGraphRequest()
+        if request_name == CreateVMRequest.NAME:
+            return CreateVMRequest()
 
         raise Exception("Unknown request")
 
@@ -300,3 +341,92 @@ class GetTotalCostGraphRequest(Request):
             'data': graphdata,
             'type': 'graph'
         }
+
+
+class CreateVMRequest(Request):
+    ID = 6
+    NAME = 'create_vm'
+
+    POSSIBLE_OS = ['centos7', 'debian']  # todo query waldur for possible os'es
+
+    CONFIRM = text('Do you wanna create a VM? [y/n]')
+    ASK_OS  = text('Which os to use? {}')
+    ASK_IP  = text('Add public ip? [y/n]')
+    EXIT = text('Not creating VM')
+
+    def __init__(self):
+        super(CreateVMRequest, self).__init__(
+            method='todo',
+            endpoint='todo',  # todo
+        )
+        self.state = 0
+
+        self.os = None
+        self.public_ip = None
+        self.cloud = None
+        self.project = None
+        self.ram = None
+        self.cores = None
+        self.disk = None
+
+        self.output = None
+
+    def process(self):
+        self.waiting_for_input = True
+        print(self.state)
+
+        if self.state < 2:  # make sure the user wants vm
+            self.handle_confirm()
+        elif self.state < 4:  # ask for os
+            self.handle_os()
+        elif self.state < 6:  # ask for os
+            self.handle_ip()
+
+        print(self.output)
+        return self.output
+
+    def end(self):
+        self.waiting_for_input = False
+        self.output = self.EXIT
+
+    def handle_confirm(self):
+        if self.state == 0:
+            self.output = self.CONFIRM
+            self.state = 1
+        elif self.state == 1:
+            if self.expect(['y', 'yes']):
+                self.state = 2
+                self.handle_os()
+            else:
+                self.end()
+        else:
+            raise Exception("Bad state {} for handle_confirm".format(self.state))
+
+    def handle_os(self):
+        if self.state == 2:
+            self.output = self.ASK_OS['data'].format(self.POSSIBLE_OS)
+            self.state = 3
+        elif self.state == 3:
+            if self.expect(self.POSSIBLE_OS):
+                self.state = 4
+                self.handle_ip()
+            else:
+                self.end()
+        else:
+            raise Exception("Bad state {} for handle_os".format(self.state))
+
+    def handle_ip(self):
+        if self.state == 4:
+            self.output = self.ASK_IP
+            self.state = 5
+        elif self.state == 5:
+            if self.expect(['y', 'yes']):
+                self.state = 6
+                self.end()  # todo continue
+            else:
+                self.end()
+        else:
+            raise Exception("Bad state {} for handle_ip".format(self.state))
+
+    def expect(self, expected):
+        return self.get_input() in expected

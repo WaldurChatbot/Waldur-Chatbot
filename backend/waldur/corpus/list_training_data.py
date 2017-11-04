@@ -25,6 +25,10 @@ data = [
     [
         'my total costs',
         get_total_costs
+    ],
+    [
+        'createvm',
+        'REQUEST~create_vm'
     ]
 ]
 
