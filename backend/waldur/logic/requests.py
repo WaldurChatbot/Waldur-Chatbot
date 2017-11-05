@@ -1,5 +1,5 @@
 from common.request import WaldurConnection, InvalidTokenException
-from nameparser import extract_names, getSimilarNames
+from common.nameparser import extract_names, getSimilarNames
 from logging import getLogger
 
 log = getLogger(__name__)
