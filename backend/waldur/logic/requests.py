@@ -555,6 +555,6 @@ class GetOrganisationsAndIdsRequest(SingleRequest):
         )
 
     def process(self):
-        response = self.request()
+        response = self.send()
 
         return {organisation['name']:organisation["uuid"] for organisation in response}

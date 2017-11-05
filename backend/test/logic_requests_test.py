@@ -1,7 +1,8 @@
 from unittest import TestCase, main, mock
 
-from backend.waldur.logic.requests import GetServicesRequest, InputRequest, QA
+from backend.waldur.logic.requests import GetServicesRequest, InputRequest, QA, GetTotalCostGraphRequest
 from backend.waldur.logic.requests import GetProjectsRequest, GetOrganisationsRequest, GetVmsRequest
+from backend.waldur.logic.requests import GetOrganisationsAndIdsRequest
 
 
 def mocked_query_services_0_names(method, data, endpoint):
@@ -211,6 +212,63 @@ class TestGetOrganisationsRequests(TestCase):
         self.assert_correct_response_format(response)
         self.assertIn("test1", response['data'])
         self.assertIn("test2", response['data'])
+
+
+def mocked_query_get_total_cost_graph_empty(method, data, endpoint):
+    return []
+
+
+class TestGetTotalCostGraphRequest(TestCase):
+    def setUp(self):
+        self.get_graph = GetTotalCostGraphRequest()
+        self.get_graph.set_token("asd")
+
+    def assert_correct_response_format(self, response, type="graph"):
+        self.assertIn('data', response)
+        self.assertIn('type', response)
+        self.assertEqual(type, response['type'])
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_total_cost_graph_empty)
+    def test_get_organisations_0(self, mock):
+        response = self.get_graph.process()
+        self.assert_correct_response_format(response)
+
+
+def mocked_query_get_org_ids_1_name(method, data, endpoint):
+    return create_get_org_ids_response(("test1", "id1"))
+
+
+def mocked_query_get_org_ids_2_names(method, data, endpoint):
+    return create_get_org_ids_response(("test1", "id1"), ("test2", "id2"))
+
+
+def create_get_org_ids_response(*pairs):
+    return [
+        {
+            'name': org,
+            'uuid': id
+        } for org, id in pairs
+    ]
+
+
+class TestGetOrganisationsAndIdsRequests(TestCase):
+    def setUp(self):
+        self.get_org_ids = GetOrganisationsAndIdsRequest()
+        self.get_org_ids.set_token("asd")
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_org_ids_1_name)
+    def test_get_org_ids_1(self, mock):
+        response = self.get_org_ids.process()
+        self.assertIn('test1', response)
+        self.assertIn('id1', response['test1'])
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_org_ids_2_names)
+    def test_get_org_ids_2(self, mock):
+        response = self.get_org_ids.process()
+        self.assertIn('test1', response)
+        self.assertIn('id1', response['test1'])
+        self.assertIn('test2', response)
+        self.assertIn('id2', response['test2'])
 
 
 def returns_true(*args):
