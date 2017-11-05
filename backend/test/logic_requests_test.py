@@ -1,6 +1,6 @@
 from unittest import TestCase, main, mock
 
-from backend.waldur.logic.requests import GetServicesRequest
+from backend.waldur.logic.requests import GetServicesRequest, InputRequest, QA
 from backend.waldur.logic.requests import GetProjectsRequest
 
 
@@ -108,6 +108,90 @@ class TestGetProjectsRequests(TestCase):
         self.assert_correct_response_format(response)
         self.assertIn("test1", response['data'])
         self.assertIn("test2", response['data'])
+
+
+def returns_true(*args):
+    return True
+
+
+class TestInputRequestSingleQuestion(TestCase):
+    QUESTION = "What's up?"
+    ANSWERS  = ['y', 'yes']
+    BAD_END_MSG = "how dare you"
+
+    def setUp(self):
+        self.ir = InputRequest([
+            ('test', QA(self.QUESTION, self.ANSWERS))
+        ], bad_end_msg=self.BAD_END_MSG)
+
+    def test_set_get_input(self):
+        self.ir.set_input("y")
+        self.assertEqual("y", self.ir.input)
+        self.assertEqual("y", self.ir.get_input())
+        self.assertEqual(None, self.ir.input)
+        self.assertEqual(None, self.ir.get_input())
+
+    def test_handle_question_no_input(self):
+        res = self.ir.handle_question()
+        self.assertEqual(res, self.QUESTION)
+
+    @mock.patch('backend.waldur.logic.requests.InputRequest.process', side_effect=returns_true)
+    def test_handle_question_correct_input(self, mock):
+        self.ir.set_input("y")
+        # should reach process method, because we have no more questions after this one
+        reached_process = self.ir.handle_question()
+        self.assertTrue(reached_process)
+
+        self.assertIn('test', self.ir.questions)
+        # _evaluate must have been called, questions dict values should now have answers instead of questions
+        self.assertEqual(self.ir.questions['test'], 'y')
+
+    def test_handle_question_incorrect_input(self):
+        self.ir.set_input("n")
+        res = self.ir.handle_question()
+        self.assertEqual(res, self.BAD_END_MSG)
+
+
+class TestInputRequestMultipleQuestion(TestCase):
+    I1 = "t1"
+    Q1 = "q1"
+    A1 = ['1']
+
+    I2 = "t2"
+    Q2 = "q2"
+    A2 = ['2']
+
+    I3 = "t3"
+    Q3 = "q3"
+    A3 = ['3']
+
+    def setUp(self):
+        self.ir = InputRequest([
+            (self.I1, QA(self.Q1, self.A1)),
+            (self.I2, QA(self.Q2, self.A2)),
+            (self.I3, QA(self.Q3, self.A3)),
+        ])
+
+    @mock.patch('backend.waldur.logic.requests.InputRequest.process', side_effect=returns_true)
+    def test_handle_all_questions(self, mock):
+        question1 = self.ir.handle_question()
+        self.assertEqual(question1, self.Q1)
+
+        self.ir.set_input('1')
+        question2 = self.ir.handle_question()
+        self.assertEqual(question2, self.Q2)
+
+        self.ir.set_input('2')
+        question3 = self.ir.handle_question()
+        self.assertEqual(question3, self.Q3)
+
+        self.ir.set_input('3')
+        reached_process = self.ir.handle_question()
+        self.assertTrue(reached_process)
+
+        self.assertEqual(self.ir.questions[self.I1], '1')
+        self.assertEqual(self.ir.questions[self.I2], '2')
+        self.assertEqual(self.ir.questions[self.I3], '3')
 
 
 if __name__ == '__main__':

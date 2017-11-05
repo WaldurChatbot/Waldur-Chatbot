@@ -126,7 +126,7 @@ class BackendConnection(object):
         if status == 200:
             return response
         else:
-            raise Exception(response['message'])
+            raise Exception(response['data'])
 
 
 class WaldurConnection(object):
