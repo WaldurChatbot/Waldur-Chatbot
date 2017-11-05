@@ -4,3 +4,5 @@ flask_restful
 chatterbot
 matplotlib
 numpy
+nltk
+jellyfish

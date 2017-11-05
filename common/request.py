@@ -147,7 +147,7 @@ class WaldurConnection(object):
         request = Request(
             method=method,
             url=self.api_url + endpoint,
-            data=json.dumps(data)
+            params=data
         )
 
         prepped = request.prepare()

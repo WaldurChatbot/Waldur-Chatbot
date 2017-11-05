@@ -1,4 +1,5 @@
 from common.request import WaldurConnection, InvalidTokenException
+from nameparser import extract_names, getSimilarNames
 from logging import getLogger
 
 log = getLogger(__name__)
@@ -116,6 +117,8 @@ class Request(object):
             return GetOrganisationsRequest()
         if request_name == GetTotalCostGraphRequest.NAME:
             return GetTotalCostGraphRequest()
+        if request_name == GetProjectsByOrganisationRequest.NAME:
+            return GetProjectsByOrganisationRequest()
 
         raise Exception("Unknown request")
 
@@ -245,6 +248,56 @@ class GetOrganisationsRequest(Request):
             'type': 'text'
         }
 
+class GetProjectsByOrganisationRequest(Request):
+    ID = 6
+    NAME = 'get_projects_by_organisation'
+
+    def __init__(self):
+        super(GetProjectsByOrganisationRequest, self).__init__(
+            method='GET',
+            endpoint='projects',
+            parameters={}
+        )
+
+    def process(self):
+
+        firstreq = GetOrganisationsAndIdsRequest()
+        firstreq.token = self.token
+
+        organisations_with_uuid = firstreq.process()
+        organisations = [x for x in organisations_with_uuid]
+
+        extracted_organisations = extract_names(self.original)
+
+        if len(extracted_organisations) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                                 "Please write it out clearly!"
+        else:
+            most_similar = getSimilarNames(extracted_organisations, organisations)
+            if (most_similar == ""):
+                response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
+                                     + extracted_organisations[0] + "\". Please check that an " \
+                                                                    "organisation with that name exists."
+            else:
+
+                self.parameters["customer"] = organisations_with_uuid[most_similar]
+                response = self.request()
+
+                project_names = [project['name'] for project in response]
+
+                if len(project_names) > 1:
+                    response_statement = "You have " + str(len(project_names)) + " projects in " + most_similar + ". "
+                    response_statement += "They are " + (", ".join(project_names)) + ". "
+                elif len(project_names) == 1:
+                    response_statement = "You have 1 project in " + most_similar + ". "
+                    response_statement += "The project is " + str(project_names[0])
+                else:
+                    response_statement = "You don't have any projects in " + most_similar + ". "
+
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
 
 class GetTotalCostGraphRequest(Request):
     ID = 5
@@ -300,3 +353,21 @@ class GetTotalCostGraphRequest(Request):
             'data': graphdata,
             'type': 'graph'
         }
+
+
+# --------------------- REQUESTS FOR INTERNAL USE ---------------------
+
+class GetOrganisationsAndIdsRequest(Request):
+    ID = 99
+    NAME = 'util_get_organisations'
+
+    def __init__(self):
+        super(GetOrganisationsAndIdsRequest, self).__init__(
+            method='GET',
+            endpoint='customers'
+        )
+
+    def process(self):
+        response = self.request()
+
+        return {organisation['name']:organisation["uuid"] for organisation in response}

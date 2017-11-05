@@ -3,6 +3,7 @@ get_projects = "REQUEST~get_projects"
 get_services = "REQUEST~get_services"
 get_vms = "REQUEST~get_vms"
 get_organisations = "REQUEST~get_organisations"
+get_projects_by_organisation = "REQUEST~get_projects_by_organisation"
 get_total_costs = "REQUEST~get_totalcosts"
 
 data = [
@@ -25,6 +26,10 @@ data = [
     [
         'my total costs',
         get_total_costs
+    ],
+    [
+        'my projects of organisation',
+        get_projects_by_organisation
     ]
 ]
 
