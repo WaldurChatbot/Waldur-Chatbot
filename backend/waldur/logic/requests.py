@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from common.request import WaldurConnection, InvalidTokenException
 from logging import getLogger
 
@@ -22,44 +24,18 @@ def graph(data):
 
 
 class Request(object):
-    ID = None
-    NAME = None
     """
     Base class for Requests to Waldur API, should not be instantiated directly.
-    Subclass must override process() and if needed set_original()
+    Subclass must override process()
     Subclasses must also have NAME and ID variables.
     """
 
-    def __init__(self,
-                 method=None,
-                 endpoint=None,
-                 parameters=None
-                 ):
+    ID = None
+    NAME = None
 
-        if endpoint is None:
-            raise ValueError("Endpoint must be set for request")
-
-        if method is None:
-            method = 'GET'
-
-        if parameters is None:
-            parameters = {}
-
-        self.need_values = []
-        for key, value in parameters.items():
-            if value is None:
-                self.need_values.append(key)
-
-        self.endpoint = endpoint
-        self.method = method
-        self.parameters = parameters
-
-        self.waiting_for_input = False
-        self.input = None
-
+    def __init__(self):
         self.token = None
         self.original = None
-        self.sep = sep
 
     def set_token(self, token):
         """
@@ -71,13 +47,12 @@ class Request(object):
     def set_original(self, query):
         """
         Meant for requests that may need info from the original statement sent to backend.
-        Subclass that needs original statement must override this method.
         :param query: original query sent to backend
         """
         self.original = query
         return self
 
-    def request(self):
+    def request(self, method, endpoint, parameters):
         """
         Method to query Waldur API.
         :return: response from Waldur API
@@ -94,9 +69,9 @@ class Request(object):
         )
 
         response = waldur.query(
-            method=self.method,
-            endpoint=self.endpoint,
-            data=self.parameters
+            method=method,
+            endpoint=endpoint,
+            data=parameters
         )
 
         return response
@@ -112,26 +87,8 @@ class Request(object):
         """
         raise NotImplementedError("Subclass must override this method")
 
-    def set_input(self, data):
-        """
-        Method to give input to Request object
-        """
-        self.input = data
-
-    def get_input(self):
-        """
-        Method to get input, input is set back to None after call
-        :return: string input
-        """
-        if self.input is None:
-            raise Exception("No input")  # todo custom exception
-        else:
-            out = self.input.strip()
-            self.input = None
-            return out
-
     def to_string(self):  # todo do we need this?
-        return "REQUEST" + self.sep + type(self).NAME
+        return "REQUEST" + sep + type(self).NAME
 
     @staticmethod
     def from_string(string):
@@ -161,7 +118,167 @@ class Request(object):
         raise Exception("Unknown request")
 
 
-class GetServicesRequest(Request):
+class SingleRequest(Request):
+
+    def __init__(self,
+                 method=None,
+                 endpoint=None,
+                 parameters=None
+                 ):
+        super(SingleRequest, self).__init__()
+
+        if endpoint is None:
+            raise ValueError("Endpoint must be set for request")
+
+        if method is None:
+            method = 'GET'
+
+        if parameters is None:
+            parameters = {}
+
+        self.endpoint = endpoint
+        self.method = method
+        self.parameters = parameters
+
+    def send(self):
+        return super(SingleRequest, self).request(
+            method=self.method,
+            endpoint=self.endpoint,
+            parameters=self.parameters
+        )
+
+    def process(self):
+        raise NotImplementedError("Subclass must override this method")
+
+
+class QA(object):
+
+    def __init__(self, question, possible_answers, *args):
+        self.question = question.format(possible_answers, args)
+        self.possible_answers = possible_answers
+        self.waiting_for_answer = True
+
+        self.answer = None
+
+    def set(self, i):
+        # check if answer is good
+        if i in self.possible_answers:
+            self.answer = i
+            self.waiting_for_answer = False
+            return True
+
+        return False
+
+    def get(self):
+        if self.answer is None:
+            raise Exception("Answer should not be None at this point")
+        return self.answer
+
+
+class InputRequest(Request):
+    """
+    Class intended for requests that may want to prompt user for info.
+    """
+
+    def __init__(self, data, bad_end_msg=None):
+        """
+        Init
+        :param data: list of tuples: [(key,value),(key,value),...], value can be later accessed by self.questions[key]
+        :param bad_end_msg: message to send to client when some input was not ok.
+        """
+        super(InputRequest, self).__init__()
+
+        self.waiting_for_input = True
+        self.input = None
+        self.questions = OrderedDict(data)
+        self.current = None
+        self._next_question()
+        self.bad_end_msg = bad_end_msg
+
+    def set_input(self, data):
+        """
+        Method to give input to Request object
+        """
+        self.input = data
+
+    def get_input(self):
+        """
+        Method to get input, input is set back to None after call
+        :return: string input
+        """
+        if self.input is None:
+            return None
+        else:
+            out = self.input.strip()
+            self.input = None
+            return out
+
+    def _next_question(self):
+        """
+        Sets self.current to the next question
+        """
+        q = list(self.questions)
+        if self.current is None:
+            self.current = q[0]
+            return
+
+        i = q.index(self.current)
+
+        if i + 1 >= len(q):
+            self.current = None
+        else:
+            self.current = q[i + 1]
+
+    def _end(self, done):
+        """
+        Ends the input asking portion and either sends a message for fail or calls implementing classes process method.
+        :param done: boolean - whether all questions have been answered
+        :return: messages to client
+        """
+        self.waiting_for_input = False
+        if done:
+            self._evaluate()
+            return type(self).process(self)
+        else:
+            return self.bad_end_msg
+
+    def _evaluate(self):
+        """
+        Replaces QA objects in questions dict with answers from QA objects.
+        Ex. {'os': QA_OBJECT} -> {'os': 'debian'}
+        """
+        for q in self.questions:
+            self.questions[q] = self.questions[q].get()
+
+    def process(self):
+        raise NotImplementedError("Subclass must override this method")
+
+    def handle_question(self):
+        """
+        Handles current question, if waiting for answer -> asks, else continues to next question
+        :return: message to client
+        """
+        i = self.get_input()
+
+        if self.current is None:
+            return self._end(True)
+
+        question = self.questions[self.current]
+
+        if question.waiting_for_answer:
+            if i is not None:
+                if question.set(i):
+                    self._next_question()
+                    return self.handle_question()
+                else:
+                    return self._end(False)
+            else:
+                return question.question
+        else:
+            raise Exception("Should be at the next question at this point")
+
+
+class GetServicesRequest(SingleRequest):
     ID = 1
     NAME = 'get_services'
 
@@ -172,7 +289,7 @@ class GetServicesRequest(Request):
         )
 
     def process(self):
-        response = self.request()
+        response = self.send()
 
         services = response[0]['services']
 
@@ -193,7 +310,7 @@ class GetServicesRequest(Request):
         }
 
 
-class GetProjectsRequest(Request):
+class GetProjectsRequest(SingleRequest):
     ID = 2
     NAME = 'get_projects'
 
@@ -204,7 +321,7 @@ class GetProjectsRequest(Request):
         )
 
     def process(self):
-        response = self.request()
+        response = self.send()
 
         # todo take all organization, not only the first
         projects = response[0]['projects']
@@ -226,7 +343,7 @@ class GetProjectsRequest(Request):
         }
 
 
-class GetVmsRequest(Request):
+class GetVmsRequest(SingleRequest):
     ID = 3
     NAME = 'get_vms'
 
@@ -237,7 +354,7 @@ class GetVmsRequest(Request):
         )
 
     def process(self):
-        response = self.request()
+        response = self.send()
 
         names = {vm['name']: vm['external_ips'] for vm in response}
 
@@ -257,7 +374,7 @@ class GetVmsRequest(Request):
         }
 
 
-class GetOrganisationsRequest(Request):
+class GetOrganisationsRequest(SingleRequest):
     ID = 4
     NAME = 'get_organisations'
 
@@ -268,7 +385,7 @@ class GetOrganisationsRequest(Request):
         )
 
     def process(self):
-        response = self.request()
+        response = self.send()
 
         names = [organisation['name'] for organisation in response]
 
@@ -287,7 +404,7 @@ class GetOrganisationsRequest(Request):
         }
 
 
-class GetTotalCostGraphRequest(Request):
+class GetTotalCostGraphRequest(SingleRequest):
     ID = 5
     NAME = 'get_totalcosts'
 
@@ -298,7 +415,7 @@ class GetTotalCostGraphRequest(Request):
         )
 
     def process(self):
-        response = self.request()
+        response = self.send()
 
         data = response
 
@@ -343,90 +460,29 @@ class GetTotalCostGraphRequest(Request):
         }
 
 
-class CreateVMRequest(Request):
+class CreateVMRequest(InputRequest):
     ID = 6
     NAME = 'create_vm'
 
     POSSIBLE_OS = ['centos7', 'debian']  # todo query waldur for possible os'es
 
-    CONFIRM = text('Do you wanna create a VM? [y/n]')
-    ASK_OS  = text('Which os to use? {}')
-    ASK_IP  = text('Add public ip? [y/n]')
-    EXIT = text('Not creating VM')
+    CONFIRM = 'Do you wanna create a VM? {}'
+    ASK_OS = 'Which os to use? {}'
+    ASK_IP = 'Add public ip? {}'
+    EXIT = 'Not creating VM'
 
     def __init__(self):
-        super(CreateVMRequest, self).__init__(
-            method='todo',
-            endpoint='todo',  # todo
-        )
-        self.state = 0
-
-        self.os = None
-        self.public_ip = None
-        self.cloud = None
-        self.project = None
-        self.ram = None
-        self.cores = None
-        self.disk = None
-
-        self.output = None
+        super(CreateVMRequest, self).__init__([
+            ('continue', QA(self.CONFIRM, ['y'])),
+            ('os', QA(self.ASK_OS, self.POSSIBLE_OS)),
+        ], bad_end_msg=self.EXIT)
 
     def process(self):
-        self.waiting_for_input = True
-        print(self.state)
-
-        if self.state < 2:  # make sure the user wants vm
-            self.handle_confirm()
-        elif self.state < 4:  # ask for os
-            self.handle_os()
-        elif self.state < 6:  # ask for os
-            self.handle_ip()
-
-        print(self.output)
-        return self.output
-
-    def end(self):
-        self.waiting_for_input = False
-        self.output = self.EXIT
-
-    def handle_confirm(self):
-        if self.state == 0:
-            self.output = self.CONFIRM
-            self.state = 1
-        elif self.state == 1:
-            if self.expect(['y', 'yes']):
-                self.state = 2
-                self.handle_os()
-            else:
-                self.end()
+        if self.waiting_for_input:
+            return super(CreateVMRequest, self).handle_question()
         else:
-            raise Exception("Bad state {} for handle_confirm".format(self.state))
 
-    def handle_os(self):
-        if self.state == 2:
-            self.output = self.ASK_OS['data'].format(self.POSSIBLE_OS)
-            self.state = 3
-        elif self.state == 3:
-            if self.expect(self.POSSIBLE_OS):
-                self.state = 4
-                self.handle_ip()
-            else:
-                self.end()
-        else:
-            raise Exception("Bad state {} for handle_os".format(self.state))
+            # todo create vm using parameters from self.questions
 
-    def handle_ip(self):
-        if self.state == 4:
-            self.output = self.ASK_IP
-            self.state = 5
-        elif self.state == 5:
-            if self.expect(['y', 'yes']):
-                self.state = 6
-                self.end()  # todo continue
-            else:
-                self.end()
-        else:
-            raise Exception("Bad state {} for handle_ip".format(self.state))
+            return text("This is the part where the vm is created, todo")
 
-    def expect(self, expected):
-        return self.get_input() in expected

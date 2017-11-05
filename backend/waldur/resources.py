@@ -6,7 +6,7 @@ from flask import jsonify, request, make_response
 from flask_restful import Resource, reqparse
 
 from common.request import InvalidTokenException
-from .logic.requests import Request, text
+from .logic.requests import SingleRequest, text, InputRequest
 
 log = getLogger(__name__)
 
@@ -66,14 +66,14 @@ class Query(Resource):
         bot_response = str(self.chatbot.get_response(query))
 
         if bot_response.startswith("REQUEST"):
-            req = Request\
+            req = SingleRequest\
                 .from_string(bot_response)\
                 .set_token(token)\
                 .set_original(query)
 
             response = req.process()
 
-            if req.waiting_for_input:
+            if isinstance(req, InputRequest):
                 waiting_for_input[token] = req
             elif token in waiting_for_input:
                 del waiting_for_input[token]

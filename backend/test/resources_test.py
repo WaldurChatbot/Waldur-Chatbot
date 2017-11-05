@@ -4,19 +4,19 @@ from flask import json
 from backend.waldur.waldur import api
 
 
-def mocked_chatbot_get_response_ok(text):
+def return_ok(text):
     return "ok"
 
 
-def mocked_chatbot_get_response_request(text):
+def return_REQUEST(text):
     return "REQUEST"
 
 
-def mocked_chatbot_get_response_bad_token(text):
+def raise_InvalidTokenException(text):
     raise InvalidTokenException
 
 
-def mocked_chatbot_get_response_system_error(text):
+def raise_Exception(text):
     raise Exception
 
 
@@ -35,7 +35,7 @@ class TestWaldur(TestCase):
         self.assertEqual(400, response.status_code)
         self.assert_correct_response_form(json.loads(response.get_data()))
 
-    @mock.patch('chatterbot.ChatBot.get_response', side_effect=mocked_chatbot_get_response_ok)
+    @mock.patch('chatterbot.ChatBot.get_response', side_effect=return_ok)
     def test_good_request(self, mock_get):
         response = self.app.post(
             "/",
@@ -48,7 +48,7 @@ class TestWaldur(TestCase):
         response = json.loads(response.get_data())
         self.assert_correct_response_form(response)
 
-    @mock.patch('chatterbot.ChatBot.get_response', side_effect=mocked_chatbot_get_response_bad_token)
+    @mock.patch('chatterbot.ChatBot.get_response', side_effect=raise_InvalidTokenException)
     def test_bad_token(self, mock_get):
         response = self.app.post(
             "/",
@@ -61,7 +61,7 @@ class TestWaldur(TestCase):
         response = json.loads(response.get_data())
         self.assert_correct_response_form(response)
 
-    @mock.patch('chatterbot.ChatBot.get_response', side_effect=mocked_chatbot_get_response_system_error)
+    @mock.patch('chatterbot.ChatBot.get_response', side_effect=raise_Exception)
     def test_system_error(self, mock_get):
         response = self.app.post(
             "/",
