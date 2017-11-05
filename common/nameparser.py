@@ -6,6 +6,7 @@ from logging import getLogger
 log = getLogger(__name__)
 
 # Stopwords
+nltk.download("stopwords")
 stop = stopwords.words('english')
 
 def preprocess(sentences):
@@ -72,5 +73,4 @@ def getSimilarNames(extracted_names, list_of_names):
         return best[0]
     except Exception as e:
         log.error("An exception occurred while finding similar names: " + str(e))
-
 
