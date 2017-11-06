@@ -28,9 +28,11 @@ def graph(data):
 def loadRequestInModule(module, request):
     for name in dir(module):
         obj = getattr(module, name)
-        if isinstance(obj, type):
-            if obj().NAME == request:
+        if isinstance(obj, type) and "Request" in name:
+            request_name = getattr(obj, "NAME")
+            if request_name == request:
                 return obj()
+    return False
 
 
 class Request(object):
