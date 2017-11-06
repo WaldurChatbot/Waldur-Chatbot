@@ -1,3 +1,4 @@
+from sys import modules
 from collections import OrderedDict
 
 from common.request import WaldurConnection, InvalidTokenException
@@ -22,6 +23,16 @@ def graph(data):
         'type': 'graph',
         'data': data
     }
+
+
+def loadRequestInModule(module, request):
+    for name in dir(module):
+        obj = getattr(module, name)
+        if isinstance(obj, type) and "Request" in name:
+            request_name = getattr(obj, "NAME")
+            if request_name == request:
+                return obj()
+    return False
 
 
 class Request(object):
@@ -102,21 +113,9 @@ class Request(object):
 
         request_name = tokens[1]
 
-        # todo cant this be done in a better, more automatic way?
-        if request_name == GetServicesRequest.NAME:
-            return GetServicesRequest()
-        if request_name == GetProjectsRequest.NAME:
-            return GetProjectsRequest()
-        if request_name == GetVmsRequest.NAME:
-            return GetVmsRequest()
-        if request_name == GetOrganisationsRequest.NAME:
-            return GetOrganisationsRequest()
-        if request_name == GetTotalCostGraphRequest.NAME:
-            return GetTotalCostGraphRequest()
-        if request_name == GetProjectsByOrganisationRequest.NAME:
-            return GetProjectsByOrganisationRequest()
-        if request_name == CreateVMRequest.NAME:
-            return CreateVMRequest()
+        request = loadRequestInModule(modules[__name__], request_name)
+        if request:
+            return request
 
         raise Exception("Unknown request")
 
@@ -440,7 +439,7 @@ class GetProjectsByOrganisationRequest(SingleRequest):
             else:
 
                 self.parameters["customer"] = organisations_with_uuid[most_similar]
-                response = self.request()
+                response = self.send()
 
                 project_names = [project['name'] for project in response]
 
@@ -564,6 +563,6 @@ class GetOrganisationsAndIdsRequest(SingleRequest):
         )
 
     def process(self):
-        response = self.request()
+        response = self.send()
 
         return {organisation['name']:organisation["uuid"] for organisation in response}
