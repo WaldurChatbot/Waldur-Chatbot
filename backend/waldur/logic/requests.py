@@ -25,16 +25,6 @@ def graph(data):
     }
 
 
-def loadRequestInModule(module, request):
-    for name in dir(module):
-        obj = getattr(module, name)
-        if isinstance(obj, type) and "Request" in name:
-            request_name = getattr(obj, "NAME")
-            if request_name == request:
-                return obj()
-    return False
-
-
 class Request(object):
     """
     Base class for Requests to Waldur API, should not be instantiated directly.
@@ -109,13 +99,17 @@ class Request(object):
         :param string: request as string, ex. 'REQUEST~get_projects'
         :return: Matching Request object
         """
+
         tokens = string.strip(sep).split(sep)
 
         request_name = tokens[1]
 
-        request = loadRequestInModule(modules[__name__], request_name)
-        if request:
-            return request
+        def all_subclasses(cls):
+            return cls.__subclasses__() + [g for s in cls.__subclasses__() for g in all_subclasses(s)]
+
+        for request in all_subclasses(Request):
+            if request.NAME == request_name:
+                return request()
 
         raise Exception("Unknown request")
 
@@ -156,7 +150,7 @@ class SingleRequest(Request):
 class QA(object):
 
     def __init__(self, question, possible_answers, *args):
-        self.question = question.format(args, possible_answers)
+        self.question = question.format(possible_answers, args)
         self.possible_answers = possible_answers
         self.waiting_for_answer = True
 
