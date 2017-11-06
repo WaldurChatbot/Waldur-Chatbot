@@ -157,7 +157,7 @@ class SingleRequest(Request):
 class QA(object):
 
     def __init__(self, question, possible_answers, *args):
-        self.question = question.format(possible_answers, args)
+        self.question = question.format(args, possible_answers)
         self.possible_answers = possible_answers
         self.waiting_for_answer = True
 
@@ -527,10 +527,19 @@ class CreateVMRequest(InputRequest):
     EXIT = 'Not creating VM'
 
     def __init__(self):
-        super(CreateVMRequest, self).__init__([
-            ('continue', QA(self.CONFIRM, ['y'])),
-            ('os', QA(self.ASK_OS, self.POSSIBLE_OS)),
-        ], bad_end_msg=self.EXIT)
+        super(CreateVMRequest, self).__init__(
+            [
+                (
+                    'continue',
+                    QA(self.CONFIRM, ['y'])
+                ),
+                (
+                    'os',
+                    QA(self.ASK_OS, self.POSSIBLE_OS)
+                ),
+            ],
+            bad_end_msg=self.EXIT
+        )
 
     def process(self):
         if self.waiting_for_input:
