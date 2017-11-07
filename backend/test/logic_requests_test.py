@@ -63,22 +63,27 @@ def mocked_query_get_projects_0_names(method, data, endpoint):
 
 
 def mocked_query_get_projects_1_name(method, data, endpoint):
-    return create_get_projects_response("test1")
+    return create_get_projects_response(("org1", {"test1"}))
 
 
 def mocked_query_get_projects_2_names(method, data, endpoint):
-    return create_get_projects_response("test1", "test2")
+    return create_get_projects_response(("org2", {"test1", "test2"}))
 
 
-def create_get_projects_response(*names):
+def mocked_query_get_projects_2_organisations(method, data, endpoint):
+    return create_get_projects_response(("org1", {"test1", "test2"}), ("org2", {"test3"}))
+
+
+def create_get_projects_response(*pairs):
     return [
         {
+            'name': org,
             'projects': [
                 {
                     'name': name
                 } for name in names
             ]
-        }
+        } for org, names in pairs
     ]
 
 
@@ -96,14 +101,26 @@ class TestGetProjectsRequests(RequestTestCase):
     def test_get_projects_1(self, mock):
         response = self.get_projects.process()
         self.assert_correct_response_format(response)
+        self.assertIn("org1", response['data'])
         self.assertIn("test1", response['data'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_projects_2_names)
     def test_get_projects_2(self, mock):
         response = self.get_projects.process()
         self.assert_correct_response_format(response)
+        self.assertIn("org2", response['data'])
         self.assertIn("test1", response['data'])
         self.assertIn("test2", response['data'])
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_projects_2_organisations)
+    def test_get_projects_3(self, mock):
+        response = self.get_projects.process()
+        self.assert_correct_response_format(response)
+        self.assertIn("org1", response['data'])
+        self.assertIn("test1", response['data'])
+        self.assertIn("test2", response['data'])
+        self.assertIn("org2", response['data'])
+        self.assertIn("test3", response['data'])
 
 
 def mocked_query_get_vms_0_names(method, data, endpoint):
