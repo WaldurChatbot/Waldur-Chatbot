@@ -1,4 +1,3 @@
-from sys import modules
 from collections import OrderedDict
 
 from common.request import WaldurConnection, InvalidTokenException
@@ -356,7 +355,8 @@ class GetVmsRequest(SingleRequest):
 
         if len(names) > 1:
             response_statement = "You have " + str(len(names)) + " virtual machines. "
-            response_statement += "Here are their names and public IPs " + "; ".join([ vm + ": " + (", ".join(names[vm])) for vm in names.keys()])
+            response_statement += "Here are their names and public IPs "
+            response_statement += "; ".join([vm + ": " + (", ".join(names[vm])) for vm in names.keys()])
         elif len(names) == 1:
             response_statement = "You have 1 virtual machine. "
             response_statement += "The virtual machine is " + str(list(names.keys())[0])
@@ -426,7 +426,7 @@ class GetProjectsByOrganisationRequest(SingleRequest):
                                  "Please write it out clearly!"
         else:
             most_similar = getSimilarNames(extracted_organisations, organisations)
-            if (most_similar == ""):
+            if most_similar == "":
                 response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
                                      + extracted_organisations[0] + "\". Please check that an " \
                                                                     "organisation with that name exists."
@@ -559,4 +559,4 @@ class GetOrganisationsAndIdsRequest(SingleRequest):
     def process(self):
         response = self.send()
 
-        return {organisation['name']:organisation["uuid"] for organisation in response}
+        return {organisation['name']: organisation["uuid"] for organisation in response}

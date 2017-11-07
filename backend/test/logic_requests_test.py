@@ -1,23 +1,28 @@
 from unittest import TestCase, main, mock
 
-from backend.waldur.logic.requests import GetServicesRequest, InputRequest, QA, GetTotalCostGraphRequest
-from backend.waldur.logic.requests import GetProjectsRequest, GetOrganisationsRequest, GetVmsRequest
-from backend.waldur.logic.requests import GetOrganisationsAndIdsRequest
+from backend.waldur.logic.requests import *
 
 
-def mocked_query_services_0_names(method, data, endpoint):
-    return create_services_response()
+class RequestTestCase(TestCase):
+    def assert_correct_response_format(self, response, response_type="text"):
+        self.assertIn('data', response)
+        self.assertIn('type', response)
+        self.assertEqual(response_type, response['type'])
 
 
-def mocked_query_services_1_name(method, data, endpoint):
-    return create_services_response("test1")
+def mocked_query_get_services_0_names(method, data, endpoint):
+    return create_get_services_response()
 
 
-def mocked_query_services_2_names(method, data, endpoint):
-    return create_services_response("test1", "test2")
+def mocked_query_get_services_1_name(method, data, endpoint):
+    return create_get_services_response("test1")
 
 
-def create_services_response(*names):
+def mocked_query_get_services_2_names(method, data, endpoint):
+    return create_get_services_response("test1", "test2")
+
+
+def create_get_services_response(*names):
     return [
         {
             'services': [
@@ -29,28 +34,23 @@ def create_services_response(*names):
     ]
 
 
-class TestGetServicesRequests(TestCase):
+class TestGetServicesRequests(RequestTestCase):
     def setUp(self):
         self.get_services = GetServicesRequest()
         self.get_services.set_token("asd")
 
-    def assert_correct_response_format(self, response, type="text"):
-        self.assertIn('data', response)
-        self.assertIn('type', response)
-        self.assertEqual(type, response['type'])
-
-    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_services_0_names)
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_services_0_names)
     def test_get_services_0(self, mock):
         response = self.get_services.process()
         self.assert_correct_response_format(response)
 
-    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_services_1_name)
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_services_1_name)
     def test_get_services_1(self, mock):
         response = self.get_services.process()
         self.assert_correct_response_format(response)
         self.assertIn("test1", response['data'])
 
-    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_services_2_names)
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_services_2_names)
     def test_get_services_2(self, mock):
         response = self.get_services.process()
         self.assert_correct_response_format(response)
@@ -58,19 +58,19 @@ class TestGetServicesRequests(TestCase):
         self.assertIn("test2", response['data'])
 
 
-def mocked_query_projects_0_names(method, data, endpoint):
-    return create_projects_response()
+def mocked_query_get_projects_0_names(method, data, endpoint):
+    return create_get_projects_response()
 
 
-def mocked_query_projects_1_name(method, data, endpoint):
-    return create_projects_response("test1")
+def mocked_query_get_projects_1_name(method, data, endpoint):
+    return create_get_projects_response("test1")
 
 
-def mocked_query_projects_2_names(method, data, endpoint):
-    return create_projects_response("test1", "test2")
+def mocked_query_get_projects_2_names(method, data, endpoint):
+    return create_get_projects_response("test1", "test2")
 
 
-def create_projects_response(*names):
+def create_get_projects_response(*names):
     return [
         {
             'projects': [
@@ -82,30 +82,25 @@ def create_projects_response(*names):
     ]
 
 
-class TestGetProjectsRequests(TestCase):
+class TestGetProjectsRequests(RequestTestCase):
     def setUp(self):
-        self.get_services = GetProjectsRequest()
-        self.get_services.set_token("asd")
+        self.get_projects = GetProjectsRequest()
+        self.get_projects.set_token("asd")
 
-    def assert_correct_response_format(self, response, type="text"):
-        self.assertIn('data', response)
-        self.assertIn('type', response)
-        self.assertEqual(type, response['type'])
-
-    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_projects_0_names)
-    def test_get_services_0(self, mock):
-        response = self.get_services.process()
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_projects_0_names)
+    def test_get_projects_0(self, mock):
+        response = self.get_projects.process()
         self.assert_correct_response_format(response)
 
-    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_projects_1_name)
-    def test_get_services_1(self, mock):
-        response = self.get_services.process()
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_projects_1_name)
+    def test_get_projects_1(self, mock):
+        response = self.get_projects.process()
         self.assert_correct_response_format(response)
         self.assertIn("test1", response['data'])
 
-    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_projects_2_names)
-    def test_get_services_2(self, mock):
-        response = self.get_services.process()
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_projects_2_names)
+    def test_get_projects_2(self, mock):
+        response = self.get_projects.process()
         self.assert_correct_response_format(response)
         self.assertIn("test1", response['data'])
         self.assertIn("test2", response['data'])
@@ -116,7 +111,7 @@ def mocked_query_get_vms_0_names(method, data, endpoint):
 
 
 def mocked_query_get_vms_1_name(method, data, endpoint):
-    return create_get_vms_response(("test1",["1.1","1.0"]))
+    return create_get_vms_response(("test1", ["1.1", "1.0"]))
 
 
 def mocked_query_get_vms_2_names(method, data, endpoint):
@@ -132,15 +127,10 @@ def create_get_vms_response(*pairs):
     ]
 
 
-class TestGetVmsRequests(TestCase):
+class TestGetVmsRequests(RequestTestCase):
     def setUp(self):
         self.get_vms = GetVmsRequest()
         self.get_vms.set_token("asd")
-
-    def assert_correct_response_format(self, response, type="text"):
-        self.assertIn('data', response)
-        self.assertIn('type', response)
-        self.assertEqual(type, response['type'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_vms_0_names)
     def test_get_vms_0(self, mock):
@@ -185,15 +175,10 @@ def create_get_organisations_response(*names):
     ]
 
 
-class TestGetOrganisationsRequests(TestCase):
+class TestGetOrganisationsRequests(RequestTestCase):
     def setUp(self):
         self.get_organisations = GetOrganisationsRequest()
         self.get_organisations.set_token("asd")
-
-    def assert_correct_response_format(self, response, type="text"):
-        self.assertIn('data', response)
-        self.assertIn('type', response)
-        self.assertEqual(type, response['type'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_organisations_0_names)
     def test_get_organisations_0(self, mock):
@@ -218,20 +203,15 @@ def mocked_query_get_total_cost_graph_empty(method, data, endpoint):
     return []
 
 
-class TestGetTotalCostGraphRequest(TestCase):
+class TestGetTotalCostGraphRequest(RequestTestCase):
     def setUp(self):
         self.get_graph = GetTotalCostGraphRequest()
         self.get_graph.set_token("asd")
 
-    def assert_correct_response_format(self, response, type="graph"):
-        self.assertIn('data', response)
-        self.assertIn('type', response)
-        self.assertEqual(type, response['type'])
-
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_total_cost_graph_empty)
     def test_get_organisations_0(self, mock):
         response = self.get_graph.process()
-        self.assert_correct_response_format(response)
+        self.assert_correct_response_format(response, "graph")
 
 
 def mocked_query_get_org_ids_1_name(method, data, endpoint):
@@ -245,9 +225,9 @@ def mocked_query_get_org_ids_2_names(method, data, endpoint):
 def create_get_org_ids_response(*pairs):
     return [
         {
-            'name': org,
-            'uuid': id
-        } for org, id in pairs
+            'name': name,
+            'uuid': uuid
+        } for name, uuid in pairs
     ]
 
 
@@ -277,7 +257,7 @@ def returns_true(*args):
 
 class TestInputRequestSingleQuestion(TestCase):
     QUESTION = "What's up?"
-    ANSWERS  = ['y', 'yes']
+    ANSWERS = ['y', 'yes']
     BAD_END_MSG = "how dare you"
 
     def setUp(self):
