@@ -6,6 +6,8 @@ from logging import getLogger
 log = getLogger(__name__)
 
 # Stopwords
+nltk.download("punkt")
+nltk.download('averaged_perceptron_tagger')
 nltk.download("stopwords")
 stop = stopwords.words('english')
 
