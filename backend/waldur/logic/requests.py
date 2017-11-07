@@ -103,10 +103,10 @@ class Request(object):
 
         request_name = tokens[1]
 
-        def all_subclasses(cls):
+        def all_subclasses(cls=Request):
             return cls.__subclasses__() + [g for s in cls.__subclasses__() for g in all_subclasses(s)]
 
-        for request in all_subclasses(Request):
+        for request in all_subclasses():
             if request.NAME == request_name:
                 return request()
 
@@ -318,17 +318,20 @@ class GetProjectsRequest(SingleRequest):
     def process(self):
         response = self.send()
 
-        # todo take all organization, not only the first
-        projects = response[0]['projects']
+        len_all = 0
+        statement = ""
+        for organisation in response:
+            names = [project['name'] for project in organisation['projects']]
+            len_all += len(names)
+            if len(names) > 0:
+                statement += "\nOrganisation '" + organisation['name'] + "':\n    " + "\n    ".join(names)
 
-        names = [project['name'] for project in projects]
-
-        if len(names) > 1:
-            response_statement = "You have " + str(len(names)) + " projects. "
-            response_statement += "They are " + (", ".join(names))
-        elif len(names) == 1:
-            response_statement = "You have 1 project. "
-            response_statement += "The project is " + str(names[0])
+        if len_all > 0:
+            if len_all == 1:
+                response_statement = "You have 1 project in total."
+            else:
+                response_statement = "You have " + str(len_all) + " projects in total."
+            response_statement += statement
         else:
             response_statement = "You don't have any projects."
 
