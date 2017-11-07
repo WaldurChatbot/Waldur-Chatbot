@@ -157,7 +157,7 @@ class TestGetProjectsRequests(RequestTestCase):
         self.assertNotIn("org2", response['data'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_use_case_3_regular_get_projects)
-    def test_get_projects_4(self, mock):
+    def test_get_projects_5(self, mock):
         response = self.get_projects.process()
         self.assert_correct_response_format(response)
         correct_response = "You have 3 projects in total.\nOrganisation 'Waldur Chatbot testbed (LTAT.05.005)':\n    "
@@ -165,7 +165,7 @@ class TestGetProjectsRequests(RequestTestCase):
         self.assertEqual(correct_response, response['data'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_use_case_3_alt_a_get_projects)
-    def test_get_projects_4(self, mock):
+    def test_get_projects_6(self, mock):
         response = self.get_projects.process()
         self.assert_correct_response_format(response)
         correct_response = "You have 1 project in total.\nOrganisation 'Waldur Chatbot testbed (LTAT.05.005)':\n    "
@@ -173,7 +173,7 @@ class TestGetProjectsRequests(RequestTestCase):
         self.assertEqual(correct_response, response['data'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_use_case_3_alt_b_get_projects)
-    def test_get_projects_4(self, mock):
+    def test_get_projects_7(self, mock):
         response = self.get_projects.process()
         self.assert_correct_response_format(response)
         self.assertEqual("You don't have any projects.", response['data'])
