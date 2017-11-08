@@ -20,13 +20,13 @@ script:
 
 deploy:
      -  provider: script
-        script: sh .travis/deploy.sh
+        script: bash .travis/deploy.sh
         on:
                 branch: master
                 python: '3.5'
 
      -  provider: script
-        script: sh .travis/deploy.sh
+        script: bash .travis/deploy.sh
         on:
                 branch: develop
                 python: '3.5'
