@@ -126,7 +126,7 @@ class BackendConnection(object):
         if status == 200:
             return response
         else:
-            raise Exception(response['message'])
+            raise Exception(response['data'])
 
 
 class WaldurConnection(object):
@@ -147,7 +147,7 @@ class WaldurConnection(object):
         request = Request(
             method=method,
             url=self.api_url + endpoint,
-            data=json.dumps(data)
+            params=data
         )
 
         prepped = request.prepare()

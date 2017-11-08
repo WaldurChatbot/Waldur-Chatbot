@@ -2,6 +2,9 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import io
+from logging import getLogger
+
+log = getLogger(__name__)
 
 
 def make_graph(data):
@@ -12,6 +15,10 @@ def totalCostsBarGraph(data):
 
     plotx = data['x']
     ploty = data['y']
+
+    log.debug(data)
+    log.debug("x: {}".format(plotx))
+    log.debug("y: {}".format(ploty))
 
     N = len(ploty)
 

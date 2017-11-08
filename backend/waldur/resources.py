@@ -6,19 +6,19 @@ from flask import jsonify, request, make_response
 from flask_restful import Resource, reqparse
 
 from common.request import InvalidTokenException
-from .logic.requests import Request
+from .logic.requests import SingleRequest, text, InputRequest
 
 log = getLogger(__name__)
-
-
-def text(s):
-    return {'data': s, 'type': 'text'}
 
 
 INVALID_TOKEN_MESSAGE = text("Couldn't query Waldur because of invalid or missing token, please send valid token")
 MISSING_QUERY_MESSAGE = text("Parameter 'query' missing from request")
 MISSING_TEACH_MESSAGE = text("Request needs parameters 'statement' and 'in_request_to'")
 SYSTEM_ERROR_MESSAGE  = text("Internal system error.")
+
+# dict that holds all tokens that are in the middle of a request that needs input
+# { token: Request, ... }
+waiting_for_input = {}
 
 
 class Query(Resource):
@@ -38,12 +38,7 @@ class Query(Resource):
             query = args['query']
             token = args['token']
 
-            if query is not None:
-                response = self.get_response(query, token)
-                code = 200
-            else:
-                response = MISSING_QUERY_MESSAGE
-                code = 400
+            response, code = self.handle_query(query, token)
 
         except InvalidTokenException as e:
             log.info("InvalidTokenException: " + str(e))
@@ -54,26 +49,63 @@ class Query(Resource):
             response = SYSTEM_ERROR_MESSAGE
             code = 500
 
+        response = self.format_response(response)
         log.info("OUT: " + str(response) + " code: " + str(code))
         return make_response(jsonify(response), code)
+
+    def handle_query(self, query, token):
+        if query is not None:
+            if token is not None and token in waiting_for_input:
+                return self.handle_input(query, token), 200
+            else:
+                return self.get_response(query, token), 200
+        else:
+            return MISSING_QUERY_MESSAGE, 400
 
     def get_response(self, query, token):
         bot_response = str(self.chatbot.get_response(query))
 
         if bot_response.startswith("REQUEST"):
-            req = Request\
+            req = SingleRequest\
                 .from_string(bot_response)\
                 .set_token(token)\
                 .set_original(query)
 
             response = req.process()
 
-            if isinstance(response, dict):
-                return [response]
+            if isinstance(req, InputRequest):
+                waiting_for_input[token] = req
+            elif token in waiting_for_input:
+                del waiting_for_input[token]
 
-            return [i for i in response]
         else:
-            return text(bot_response)
+            response = bot_response
+
+        return response
+
+    def handle_input(self, input_query, token):
+        req = waiting_for_input[token]
+
+        req.set_input(input_query)
+
+        response = req.process()
+
+        if not req.waiting_for_input:
+            del waiting_for_input[token]
+
+        return response
+
+    def format_response(self, response):
+        if response is None:
+            raise Exception("Response should not be None")
+
+        if isinstance(response, dict):
+            return [response]
+
+        if isinstance(response, str):
+            return [text(response)]
+
+        return list(response)
 
 
 class Teach(Resource):

@@ -6,12 +6,13 @@
 #  - Starts process in background
 #  - Checks if process is still alive 5 seconds after execution
 
-
-NAME="Waldur-Chatbot"
-DIRECT="backend"
-SCRIPT="run.py"
-
 # we are working on the assumption that the remote server already has cloned this repo
+
+# get arguments from command line
+NAME=${1}
+PATH_TO_SCRIPT=${2}
+SCRIPT=${3}
+
 cd ${NAME}
 git stash
 git checkout master
@@ -24,9 +25,9 @@ sudo pip install -r requirements.txt --upgrade
 [ -f pid ] && kill `cat pid`
 
 # start process and save pid to file 'pid'
-cd ${DIRECT}
+cd ${PATH_TO_SCRIPT}
 nohup python3.5 ${SCRIPT} > /dev/null 2>&1 & echo $! > ../pid
-echo "Started ${DIRECT}/${SCRIPT}"
+echo "Started ${PATH_TO_SCRIPT}/${SCRIPT}"
 
 sleep 5
 

@@ -2,4 +2,7 @@ requests
 flask
 flask_restful
 chatterbot
-plotly
+matplotlib
+numpy
+nltk
+jellyfish
