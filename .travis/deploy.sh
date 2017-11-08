@@ -14,6 +14,10 @@ DECRYPTED_KEY=${TRAVIS_DIR}"deploy_rsa"
 BRANCH=${TRAVIS_BRANCH}
 CLONE_URL="https://github.com/"${TRAVIS_REPO_SLUG}
 
+echo "SCRIPT=${SCRIPT}"
+echo "BRANCH=${BRANCH}"
+echo "CLONE_URL=${CLONE_URL}"
+
 # encrypted variables in travis
 if [ "${BRANCH}" == "master" ]
 then
