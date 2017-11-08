@@ -15,6 +15,22 @@ SCRIPT=${3}
 BRANCH=${4}
 CLONE_URL=${5}
 
+# install stuff if necessary
+if ! command -v git || ! command -v pip
+then
+    sudo apt-get update
+fi
+
+if ! command -v git
+then
+    sudo apt-get install -y git
+fi
+
+if ! command -v pip3
+then
+    sudo apt-get install -y python3-pip
+fi
+
 # if dir exists, we assume the repo is already cloned
 if cd ${NAME}
 then
@@ -27,7 +43,7 @@ else
 fi
 
 # install requirements
-sudo pip install -r requirements.txt --upgrade
+sudo pip3 install -r requirements.txt --upgrade
 
 # kill process if running
 [ -f pid ] && kill `cat pid`
