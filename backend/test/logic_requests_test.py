@@ -358,7 +358,7 @@ class TestInputRequestSingleQuestion(TestCase):
 
         self.assertIn('test', self.ir.questions)
         # _evaluate must have been called, questions dict values should now have answers instead of questions
-        self.assertEqual(self.ir.questions['test'], 'y')
+        self.assertEqual(self.ir.parameters['test'], 'y')
 
     def test_handle_question_incorrect_input(self):
         self.ir.set_input("n")
@@ -403,9 +403,9 @@ class TestInputRequestMultipleQuestion(TestCase):
         reached_process = self.ir.handle_question()
         self.assertTrue(reached_process)
 
-        self.assertEqual(self.ir.questions[self.I1], '1')
-        self.assertEqual(self.ir.questions[self.I2], '2')
-        self.assertEqual(self.ir.questions[self.I3], '3')
+        self.assertEqual(self.ir.parameters[self.I1], '1')
+        self.assertEqual(self.ir.parameters[self.I2], '2')
+        self.assertEqual(self.ir.parameters[self.I3], '3')
 
 
 if __name__ == '__main__':
