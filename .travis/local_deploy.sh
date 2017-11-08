@@ -24,6 +24,7 @@ then
 else
     git clone -b ${BRANCH} ${CLONE_URL}
     cd ${NAME}
+fi
 
 # install requirements
 sudo pip install -r requirements.txt --upgrade
