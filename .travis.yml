@@ -19,8 +19,14 @@ script:
         - pytest common/test/*test.py
 
 deploy:
-        provider: script
+     -  provider: script
         script: sh .travis/deploy.sh
         on:
                 branch: master
+                python: '3.5'
+
+     -  provider: script
+        script: sh .travis/deploy.sh
+        on:
+                branch: develop
                 python: '3.5'

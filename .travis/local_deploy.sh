@@ -12,11 +12,18 @@
 NAME=${1}
 PATH_TO_SCRIPT=${2}
 SCRIPT=${3}
+BRANCH=${4}
+CLONE_URL=${5}
 
-cd ${NAME}
-git stash
-git checkout master
-git pull
+# if dir exists, we assume the repo is already cloned
+if cd ${NAME}
+then
+    git stash
+    git checkout ${BRANCH}
+    git pull
+else
+    git clone -b ${BRANCH} ${CLONE_URL}
+    cd ${NAME}
 
 # install requirements
 sudo pip install -r requirements.txt --upgrade
