@@ -286,9 +286,9 @@ class GetServicesRequest(SingleRequest):
     def process(self):
         response = self.send()
 
-        services = response[0]['services']
+        #services = response[0]['services']
 
-        names = [service['name'] for service in services]
+        names = set([service['name'] for services in response for service in services["services"]])
 
         if len(names) >= 1:
             response_statement = "Your organisation is using " + str(len(names)) + " services. "
@@ -403,12 +403,12 @@ class GetOrganisationsRequest(SingleRequest):
         }
 
 
-class GetProjectsByOrganisationRequest(SingleRequest):
+class GetServicesByOrganisationRequest(SingleRequest):
     ID = 6
-    NAME = 'get_projects_by_organisation'
+    NAME = 'get_services_by_organisation'
 
     def __init__(self):
-        super(GetProjectsByOrganisationRequest, self).__init__(
+        super(GetServicesByOrganisationRequest, self).__init__(
             method='GET',
             endpoint='projects',
             parameters={}
@@ -426,7 +426,7 @@ class GetProjectsByOrganisationRequest(SingleRequest):
 
         if len(extracted_organisations) == 0:
             response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
-                                 "Please write it out clearly!"
+                                 "Please write it out capital case!"
         else:
             most_similar = getSimilarNames(extracted_organisations, organisations)
             if most_similar == "":
@@ -438,16 +438,16 @@ class GetProjectsByOrganisationRequest(SingleRequest):
                 self.parameters["customer"] = organisations_with_uuid[most_similar]
                 response = self.send()
 
-                project_names = [project['name'] for project in response]
+                service_names = set([service['name'] for services in response for service in services["services"]])
 
-                if len(project_names) > 1:
-                    response_statement = "You have " + str(len(project_names)) + " projects in " + most_similar + ". "
-                    response_statement += "They are " + (", ".join(project_names)) + ". "
-                elif len(project_names) == 1:
-                    response_statement = "You have 1 project in " + most_similar + ". "
-                    response_statement += "The project is " + str(project_names[0])
+                if len(service_names) > 1:
+                    response_statement = "You have " + str(len(service_names)) + " services in use in " + most_similar + ". "
+                    response_statement += "They are " + (", ".join(service_names)) + ". "
+                elif len(service_names) == 1:
+                    response_statement = "You have 1 service in use in " + most_similar + ". "
+                    response_statement += "The service is " + str(service_names[0])
                 else:
-                    response_statement = "You don't have any projects in " + most_similar + ". "
+                    response_statement = "You don't have any services in use in " + most_similar + ". "
 
         return {
             'data': response_statement,
