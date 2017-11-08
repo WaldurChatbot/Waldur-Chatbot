@@ -190,6 +190,8 @@ class InputRequest(Request):
         self._next_question()
         self.bad_end_msg = bad_end_msg
 
+        self.parameters = dict()
+
     def set_input(self, data):
         """
         Method to give input to Request object
@@ -243,7 +245,10 @@ class InputRequest(Request):
         Ex. {'os': QA_OBJECT} -> {'os': 'debian'}
         """
         for q in self.questions:
-            self.questions[q] = self.questions[q].get()
+            self.parameters[q] = self.questions[q].get()
+
+        if self.parameters is None:
+            raise Exception("parameters should not be None at this point")
 
     def process(self):
         raise NotImplementedError("Subclass must override this method")
@@ -539,9 +544,8 @@ class CreateVMRequest(InputRequest):
 
     def process(self):
         if self.waiting_for_input:
-            return super(CreateVMRequest, self).handle_question()
+            return self.handle_question()
         else:
-
             # todo create vm using parameters from self.questions
 
             return text("This is the part where the vm is created, todo")

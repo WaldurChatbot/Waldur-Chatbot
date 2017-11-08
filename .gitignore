@@ -32,3 +32,6 @@ debug.py
 
 # graph exports
 common/offline_graphs/*.png
+
+#notes
+notes.txt
