@@ -22,7 +22,7 @@ echo "BRANCH=${BRANCH}"
 echo "CLONE_URL=${CLONE_URL}"
 
 # install stuff if necessary
-if ! command -v git || ! command -v pip
+if ! command -v git || ! command -v pip3
 then
     sudo apt-get update
 fi

@@ -4,11 +4,6 @@
 # Moves remote deploy script to remote machine and executes it
 
 echo "Starting deployment"
-# encrypted variables in travis
-USER=${PRODUSER}
-REMOTE=${PRODREMOTE}
-KEY=${encrypted_35a0e268d508_key}
-IV=${encrypted_35a0e268d508_iv}
 
 # variables in .travis.yml
 SCRIPT=${LOCAL_DEPLOY_SCRIPT}
@@ -18,6 +13,21 @@ DECRYPTED_KEY=${TRAVIS_DIR}"deploy_rsa"
 # general travis variable
 BRANCH=${TRAVIS_BRANCH}
 CLONE_URL="git@github.com:"${TRAVIS_REPO_SLUG}
+
+# encrypted variables in travis
+if [ "${BRANCH}" == "master" ]
+then
+    USER=${PRODUSER}
+    REMOTE=${PRODREMOTE}
+elif [ "${BRANCH}" == "develop" ]
+then
+    USER=${DEVUSER}
+    REMOTE=${DEVREMOTE}
+else
+    exit 1
+fi
+KEY=${encrypted_35a0e268d508_key}
+IV=${encrypted_35a0e268d508_iv}
 
 echo "Decrypting private key"
 openssl aes-256-cbc \
