@@ -15,6 +15,7 @@ SCRIPT=${3}
 BRANCH=${4}
 CLONE_URL=${5}
 
+hostname
 echo "NAME=${NAME}"
 echo "PATH_TO_SCRIPT=${PATH_TO_SCRIPT}"
 echo "SCRIPT=${SCRIPT}"
