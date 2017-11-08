@@ -15,6 +15,12 @@ SCRIPT=${3}
 BRANCH=${4}
 CLONE_URL=${5}
 
+echo "NAME=${NAME}"
+echo "PATH_TO_SCRIPT=${PATH_TO_SCRIPT}"
+echo "SCRIPT=${SCRIPT}"
+echo "BRANCH=${BRANCH}"
+echo "CLONE_URL=${CLONE_URL}"
+
 # install stuff if necessary
 if ! command -v git || ! command -v pip
 then
