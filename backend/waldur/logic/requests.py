@@ -186,9 +186,6 @@ class InputRequest(Request):
         """
         super(InputRequest, self).__init__()
 
-        # without a token, the bot doesn't know who to ask questions
-        self.check_token()
-
         self.waiting_for_input = True
         self.input = None
         self.questions = OrderedDict(data)
@@ -257,7 +254,9 @@ class InputRequest(Request):
             raise Exception("parameters should not be None at this point")
 
     def process(self):
-        raise NotImplementedError("Subclass must override this method")
+        # bot needs token to know who to query
+        self.check_token()
+        #raise NotImplementedError("Subclass must override this method")
 
     def handle_question(self):
         """
@@ -549,6 +548,8 @@ class CreateVMRequest(InputRequest):
         )
 
     def process(self):
+        super(CreateVMRequest, self).process()
+
         if self.waiting_for_input:
             return self.handle_question()
         else:
