@@ -61,8 +61,7 @@ class Request(object):
         # todo figure out how to get this programmatically
         api_url = "https://api.etais.ee/api/"
 
-        if self.token is None:
-            raise InvalidTokenException("Token is missing")
+        self.check_token()
 
         waldur = WaldurConnection(
             api_url=api_url,
@@ -76,6 +75,10 @@ class Request(object):
         )
 
         return response
+
+    def check_token(self, message="Token is missing"):
+        if self.token is None:
+            raise InvalidTokenException(message)
 
     def process(self):
         """
@@ -178,10 +181,13 @@ class InputRequest(Request):
     def __init__(self, data, bad_end_msg=None):
         """
         Init
-        :param data: list of tuples: [(key,value),(key,value),...], value can be later accessed by self.questions[key]
+        :param data: list of tuples: [(key,value),(key,value),...], value can be later accessed by self.parameters[key]
         :param bad_end_msg: message to send to client when some input was not ok.
         """
         super(InputRequest, self).__init__()
+
+        # without a token, the bot doesn't know who to ask questions
+        self.check_token()
 
         self.waiting_for_input = True
         self.input = None
