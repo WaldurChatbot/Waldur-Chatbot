@@ -10,15 +10,26 @@ log = getLogger(__name__)
 
 
 class WaldurResource(Resource):
-
+    """
+    Parent class of all Waldur resources
+    """
     def __init__(self, chatbot):
+        """
+        :param chatbot: Chatterbot bot
+        """
         self.chatbot = chatbot
         self.response = None
 
 
 class Query(WaldurResource):
+    """
+    Resource to get answers from the underlying Chatterbot
+    """
 
     def __init__(self, chatbot, tokens_for_input):
+        """
+        :param tokens_for_input: dict of {token: InputRequest, ...}
+        """
         super(Query, self).__init__(chatbot)
         self.tokens_for_input = tokens_for_input
 
@@ -70,6 +81,9 @@ class Query(WaldurResource):
 
 
 class Teach(WaldurResource):
+    """
+    Resource to give answers to the underlying Chatterbot
+    """
 
     def __init__(self, chatbot):
         super(Teach, self).__init__(chatbot)

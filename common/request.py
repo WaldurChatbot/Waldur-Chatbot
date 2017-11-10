@@ -1,12 +1,9 @@
 from logging import getLogger
 from requests import Session, Request
+from .utils import obscure
 import json
 
 log = getLogger(__name__)
-
-INVALID_TOKEN_MESSAGE = "Needed token to query Waldur API. " \
-                       "Token was either invalid or missing. " \
-                       "Please send token like this '?<TOKEN>'"
 
 
 class InvalidTokenError(Exception):
@@ -15,13 +12,14 @@ class InvalidTokenError(Exception):
 
 class BackendConnection(object):
 
+    INVALID_TOKEN_MESSAGE = "Needed token to query Waldur API. " \
+                            "Token was either invalid or missing. " \
+                            "Please send token like this '?<TOKEN>'"
+
     def __init__(self, backend_url):
         self.url = backend_url
         self.session = Session()
         self.tokens = {}  # tokens = { 'user_id': 'token', ... }
-
-        self.last_bot_response = None
-        self.last_query = None
 
     def add_token(self, user_id, token):
         self.tokens[user_id] = token
@@ -30,7 +28,7 @@ class BackendConnection(object):
         return None if user_id not in self.tokens else self.tokens.get(user_id)
 
     def get_response(self, message, user_id):
-        log.info("IN:  {} {}".format(message, user_id))
+        log.info("IN:  message={} user_id={}".format(message, user_id))
         response = None
 
         prefix = message[:1]
@@ -41,22 +39,10 @@ class BackendConnection(object):
         elif prefix == '?':
             response = self._handle_token(user_id, message)
 
-        if isinstance(response, str):
-            response = {
-                'data': response,
-                'type': 'text'
-            }
-
-        if not isinstance(response, list):
-            response = [response]
-
-        log.info("OUT: {} {}".format(response, user_id))
+        log.info("OUT: response={} user_id={}".format(response, user_id))
         return response
 
     def _handle_message(self, user_id, message):
-
-        if message.lower() == 'thanks' or message.lower() == 'ty':  # todo a better solution
-            self.teach(self.last_bot_response, self.last_query)
 
         try:
             response = self.query(
@@ -64,18 +50,14 @@ class BackendConnection(object):
                 token=self.get_token(user_id)
             )
 
-            if len(response) == 1 and response[0]['type'] == 'text':
-                self.last_query = message
-                self.last_bot_response = response[0]['data']
-
         except InvalidTokenError:
             log.info("Needed token to query Waldur, asking user for token.")
-            response = INVALID_TOKEN_MESSAGE
+            response = self.INVALID_TOKEN_MESSAGE
 
         return response
 
     def _handle_token(self, user_id, token):
-        log.info("Received token from user " + str(user_id) + " with a length of " + str(len(token)))
+        log.info("Received token {} from user {}".format(obscure(token), user_id))
         self.add_token(user_id, token)
         return "Thanks!"
 
@@ -111,7 +93,7 @@ class BackendConnection(object):
         elif status == 401:
             raise InvalidTokenError
         else:
-            raise Exception(response['data'])
+            raise Exception(response['message'])
 
     def teach(self, statement, in_response_to):
         response, status = self.request(
@@ -126,7 +108,7 @@ class BackendConnection(object):
         if status == 200:
             return response
         else:
-            raise Exception(response['data'])
+            raise Exception(response['message'])
 
 
 class WaldurConnection(object):

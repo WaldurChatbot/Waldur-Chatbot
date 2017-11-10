@@ -20,6 +20,7 @@ def init_bot():
         storage_adapter='chatterbot.storage.SQLStorageAdapter',
         trainer='chatterbot.trainers.ChatterBotCorpusTrainer',
         database='./chatterbotdb.sqlite3',
+        logger=log,
         logic_adapters=[
             'chatterbot.logic.BestMatch',
             {
