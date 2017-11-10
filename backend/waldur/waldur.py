@@ -1,5 +1,6 @@
 from logging import getLogger
 from os import path
+import traceback
 
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
@@ -47,7 +48,17 @@ def train_bot(chatbot):
 
 def init_api(chatbot):
     log.info("Creating Flask api")
-    api = Api(
+
+    class WaldurApi(Api):
+        """
+        Adds error logging to Api
+        """
+        def handle_error(self, e):
+            for line in traceback.format_exc().split("\n"):
+                log.error(line)
+            return super(WaldurApi, self).handle_error(e)
+
+    api = WaldurApi(
         app=Flask(chatbot.name),
         errors={
             'InvalidTokenError': {

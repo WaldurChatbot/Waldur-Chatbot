@@ -87,7 +87,5 @@ class Teach(WaldurResource):
         :return: response, code
         """
 
-        print("Resources")
-        print(self.chatbot)
         self.chatbot.learn_response(Statement(self.statement), Statement(self.previous_statement))
         return text("Added '{}' as a response to '{}'".format(self.statement, self.previous_statement)), 200

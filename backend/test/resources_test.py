@@ -1,7 +1,9 @@
-from unittest import TestCase, main, mock, skip
-from common.request import InvalidTokenError
+from unittest import TestCase, main, mock
+
 from flask import json
+
 from backend.waldur.waldur import init_api, init_bot
+from common.request import InvalidTokenError
 
 
 def return_ok(text):
@@ -115,7 +117,7 @@ class TeachTests(WaldurTests):
         previous_statement = "Hi"
 
         # Non-taught bot should mirror the statement back
-        #self.assertEqual(previous_statement, str(self.bot.get_response(previous_statement)))
+        # self.assertEqual(previous_statement, str(self.bot.get_response(previous_statement)))
 
         response = self.post(
             data={
@@ -126,7 +128,7 @@ class TeachTests(WaldurTests):
         self.assert_correct_response_form(json.loads(response.get_data()))
 
         # Bot should know how to answer
-        #self.assertEqual(statement, str(self.bot.get_response(previous_statement)))
+        # self.assertEqual(statement, str(self.bot.get_response(previous_statement)))
 
 
 if __name__ == '__main__':

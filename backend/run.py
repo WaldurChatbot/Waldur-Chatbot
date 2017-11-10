@@ -1,24 +1,26 @@
+import os
 import sys
 import traceback
 from configparser import ConfigParser
 from logging import getLogger
 from logging.config import fileConfig
-from os import path
 
-# general conf
-config = ConfigParser()
-config.read('../configuration.ini')
-port = config['backend']['port']
-
-# logging conf
-log_file_path = path.join(path.dirname(path.abspath(__file__)), '..', 'logging_config.ini')
-fileConfig(log_file_path, disable_existing_loggers=False)
-
+fileConfig('../logging_config.ini')
 log = getLogger(__name__)
+
+# If config file location is setup in environment variables
+# then read conf from there, otherwise from project root
+if 'WALDUR_CONFIG' in os.environ:
+    config_path = os.environ['WALDUR_CONFIG']
+else:
+    config_path = '../configuration.ini'
+
+log.info("Reading config from {}".format(config_path))
+config = ConfigParser()
+config.read(config_path)
 
 # insert backend and common to path
 sys.path.insert(0, '../')
-
 
 if __name__ == '__main__':
     try:
@@ -30,6 +32,7 @@ if __name__ == '__main__':
         api = init_api(chatbot)
         app = api.app
 
+        port = config['backend']['port']
         log.info("Launching WaldurChatbot API on port {}".format(port))
         app.run(port=port)
     except:
