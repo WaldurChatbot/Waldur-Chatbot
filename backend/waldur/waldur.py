@@ -1,4 +1,3 @@
-import json
 from logging import getLogger
 from os import path
 
@@ -58,17 +57,17 @@ def init_api(chatbot):
         }
     )
 
+    # dict that holds all tokens that are in the middle of a request that needs input
+    # { token: Request, ... }
+    tokens_for_input = {}
+
     @api.representation('application/json')
     def output_json(data, code, headers=None):
-
-        print(str(data))
 
         if isinstance(data, dict):
             data = [data]
         else:
             data = list(data)
-
-        print(str(data))
 
         resp = make_response(jsonify(data), code)
         resp.headers.extend(headers or {})
@@ -83,7 +82,20 @@ def init_api(chatbot):
         log.info("OUT: {} data={}".format(response, response.get_data()))
         return response
 
-    api.add_resource(Query, '/',       resource_class_kwargs={'chatbot': chatbot})
-    api.add_resource(Teach, '/teach/', resource_class_kwargs={'chatbot': chatbot})
+    api.add_resource(
+        Query,
+        '/',
+        resource_class_kwargs={
+            'chatbot': chatbot,
+            'tokens_for_input': tokens_for_input
+        }
+    )
+    api.add_resource(
+        Teach,
+        '/teach/',
+        resource_class_kwargs={
+            'chatbot': chatbot
+        }
+    )
 
     return api

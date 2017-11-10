@@ -8,10 +8,6 @@ from .logic.requests import Request, text, InputRequest
 
 log = getLogger(__name__)
 
-# dict that holds all tokens that are in the middle of a request that needs input
-# { token: Request, ... }
-waiting_for_input = {}
-
 
 class WaldurResource(Resource):
 
@@ -21,11 +17,14 @@ class WaldurResource(Resource):
 
 
 class Query(WaldurResource):
-    __name__ = ''
 
-    def __init__(self, chatbot):
+    def __init__(self, chatbot, tokens_for_input):
         super(Query, self).__init__(chatbot)
-        self.parser = query_parser
+        self.tokens_for_input = tokens_for_input
+
+        args = query_parser.parse_args()
+        self.query = args.query
+        self.token = args.token
 
     def post(self):
         """
@@ -35,63 +34,60 @@ class Query(WaldurResource):
         :param: token - Waldur API token
         :return: response, code
         """
-        args = self.parser.parse_args()
-        self.handle_query(args.query, args.token)
+
+        if self.token is not None and self.token in self.tokens_for_input:
+            self._handle_input()
+        else:
+            self._handle_query()
 
         return self.response, 200
 
-    def handle_query(self, query, token=None):
-        if token is not None and token in waiting_for_input:
-            self.handle_input(query, token)
-        else:
-            self.set_response(query, token)
-
-    def set_response(self, query, token=None):
-        bot_response = str(self.chatbot.get_response(query))
+    def _handle_query(self):
+        bot_response = str(self.chatbot.get_response(self.query))
 
         if bot_response.startswith("REQUEST"):
             req = Request\
                 .from_string(bot_response)\
-                .set_token(token)\
-                .set_original(query)
+                .set_token(self.token)\
+                .set_original(self.query)
 
             self.response = req.process()
 
             if isinstance(req, InputRequest):
-                waiting_for_input[token] = req
+                self.tokens_for_input[self.token] = req
 
         else:
             self.response = text(bot_response)
 
-    def handle_input(self, input_query, token):
-        req = waiting_for_input[token]
-
-        req.set_input(input_query)
+    def _handle_input(self):
+        req = self.tokens_for_input[self.token]\
+            .set_input(self.query)
 
         self.response = req.process()
 
         if not req.waiting_for_input:
-            del waiting_for_input[token]
+            del self.tokens_for_input[self.token]
 
 
 class Teach(WaldurResource):
 
     def __init__(self, chatbot):
         super(Teach, self).__init__(chatbot)
-        self.parser = teach_parser
+
+        args = teach_parser.parse_args()
+        self.statement = args.statement
+        self.previous_statement = args.previous_statement
 
     def post(self):
         """
         Entry point for POST /teach
-        Teaches the bot that statement 'statement' is good in response to 'in_response_to' statement
+        Teaches the bot that 'statement' is a valid response to 'previous_statement'
         :param: statement
-        :param: in_response_to
+        :param: previous_statement
         :return: response, code
         """
-        args = self.parser.parse_args()
-        self.handle_teach(args.statement, args.in_response_to)
-        return self.response, 200
 
-    def handle_teach(self, statement, in_response_to):
-        self.chatbot.learn_response(Statement(statement), Statement(in_response_to))
-        self.response = text("Added '{}' as a response to '{}'".format(statement, in_response_to))
+        print("Resources")
+        print(self.chatbot)
+        self.chatbot.learn_response(Statement(self.statement), Statement(self.previous_statement))
+        return text("Added '{}' as a response to '{}'".format(self.statement, self.previous_statement)), 200

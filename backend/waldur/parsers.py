@@ -21,10 +21,10 @@ teach_parser.add_argument(Argument(
     name='statement',
     required=True,
     type=str,
-    help="Required. Statement that is a possible response to 'in_response_to' statement."
+    help="Required. Statement that is a possible response to 'previous_statement'."
 ))
 teach_parser.add_argument(Argument(
-    name='in_response_to',
+    name='previous_statement',
     required=True,
     type=str,
     help="Required. Statement to which 'statement' is a possible response."

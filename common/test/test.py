@@ -11,19 +11,19 @@ class MockResponse:
         return self.data
 
 
-def mocked_session_send_ok(request, *args, **kwargs):
+def send_ok(request, *args, **kwargs):
     return MockResponse({"data": "ok"}, 200)
 
 
-def mocked_session_send_invalid_token(request, *args, **kwargs):
+def send_invalid_token(request, *args, **kwargs):
     return MockResponse({"data": "Invalid token"}, 401)
 
 
-def mocked_session_send_error(request, *args, **kwargs):
+def send_error(request, *args, **kwargs):
     return MockResponse({"data": "System error"}, 500)
 
 
-def mocked_session_send_error_from_waldur_api(request, *args, **kwargs):
+def send_error_from_waldur_api(request, *args, **kwargs):
     return MockResponse({"detail": "System error"}, 500)
 
 
@@ -43,17 +43,17 @@ class BackendConnectionTests(TestCase):
     def test_none_if_no_token(self):
         self.assertEqual(None, self.conn.get_token(222))
 
-    @mock.patch('requests.Session.send', side_effect=mocked_session_send_ok)
+    @mock.patch('requests.Session.send', side_effect=send_ok)
     def test_query_responds_with_with_dict_on_correct_request(self, mock_send):
         response = self.conn.query("hello", "good_token")
         self.assertDictEqual({"data": "ok"}, response)
 
-    @mock.patch('requests.Session.send', side_effect=mocked_session_send_invalid_token)
+    @mock.patch('requests.Session.send', side_effect=send_invalid_token)
     def test_query_responds_with_exception_on_invalid_token(self, mock_send):
         with self.assertRaises(InvalidTokenError):
             self.conn.query("hello", None)
 
-    @mock.patch('requests.Session.send', side_effect=mocked_session_send_error)
+    @mock.patch('requests.Session.send', side_effect=send_error)
     def test_query_responds_with_exception_on_error(self, mock_send):
         with self.assertRaises(Exception) as context:
             self.conn.query("hello", None)
@@ -65,22 +65,22 @@ class BackendConnectionTests(TestCase):
 class WaldurConnectionTests(TestCase):
 
     def setUp(self):
-        self.conn = WaldurConnection("https://url.api", "good token")
+        self.conn = WaldurConnection("https://url.api", "test token")
 
-    @mock.patch('requests.Session.send', side_effect=mocked_session_send_ok)
+    @mock.patch('requests.Session.send', side_effect=send_ok)
     def test_query_responds_with_with_dict_on_correct_request(self, mock_send):
-        response = self.conn.query("GET", {}, "projects")
+        response = self.conn.query("GET", {}, "test")
         self.assertDictEqual({"data": "ok"}, response)
 
-    @mock.patch('requests.Session.send', side_effect=mocked_session_send_invalid_token)
+    @mock.patch('requests.Session.send', side_effect=send_invalid_token)
     def test_query_responds_with_exception_on_invalid_token(self, mock_send):
         with self.assertRaises(InvalidTokenError):
-            self.conn.query("GET", {}, "projects")
+            self.conn.query("GET", {}, "test")
 
-    @mock.patch('requests.Session.send', side_effect=mocked_session_send_error_from_waldur_api)
+    @mock.patch('requests.Session.send', side_effect=send_error_from_waldur_api)
     def test_query_responds_with_exception_on_error(self, mock_send):
         with self.assertRaises(Exception) as context:
-            self.conn.query("GET", {}, "projects")
+            self.conn.query("GET", {}, "test")
 
         # assert that message is added to exception from response
         self.assertTrue("System error" in str(context.exception))

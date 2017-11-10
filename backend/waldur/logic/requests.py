@@ -200,6 +200,7 @@ class InputRequest(Request):
         Method to give input to Request object
         """
         self.input = data
+        return self
 
     def get_input(self):
         """
