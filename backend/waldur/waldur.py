@@ -1,45 +1,89 @@
+import json
 from logging import getLogger
 from os import path
 
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
-from flask import Flask
+from flask import Flask, request, make_response, jsonify
 from flask_restful import Api
 
-from .corpus.list_training_data import data
+from .corpus.list_training_data import waldur_list_corpus
 from .resources import Query, Teach
 
 log = getLogger(__name__)
 
-chatbot = ChatBot(
-    'Waldur',
-    storage_adapter='chatterbot.storage.SQLStorageAdapter',
-    trainer='chatterbot.trainers.ChatterBotCorpusTrainer',
-    database='./chatterbotdb.sqlite3',
-    logic_adapters=[
-        'chatterbot.logic.BestMatch',
-        {
-            'import_path': 'chatterbot.logic.LowConfidenceAdapter',
-            'threshold': 0.7,
-            'default_response': 'I am sorry, but I do not understand.'
+
+def init_bot():
+    log.info("Creating bot")
+    return ChatBot(
+        'Waldur',
+        storage_adapter='chatterbot.storage.SQLStorageAdapter',
+        trainer='chatterbot.trainers.ChatterBotCorpusTrainer',
+        database='./chatterbotdb.sqlite3',
+        logic_adapters=[
+            'chatterbot.logic.BestMatch',
+            {
+                'import_path': 'chatterbot.logic.LowConfidenceAdapter',
+                'threshold': 0.7,
+                'default_response': 'I am sorry, but I do not understand.'
+            }
+        ]
+    )
+
+
+def train_bot(chatbot):
+    log.info("Training bot on chatterbot corpus")
+    chatbot.train("chatterbot.corpus.english.greetings")
+
+    log.info("Training bot on waldur corpus")
+    waldur_corpus = path.join(path.dirname(path.abspath(__file__)), 'corpus')
+    chatbot.train(waldur_corpus)
+
+    chatbot.set_trainer(ListTrainer)
+    for conversation in waldur_list_corpus:
+        chatbot.train(conversation)
+
+    return chatbot
+
+
+def init_api(chatbot):
+    log.info("Creating Flask api")
+    api = Api(
+        app=Flask(chatbot.name),
+        errors={
+            'InvalidTokenError': {
+                'message': 'Missing token',
+                'status': 401
+            }
         }
-    ]
-)
+    )
 
-log.info("Training chatterbot")
-chatbot.train("chatterbot.corpus.english.greetings")
+    @api.representation('application/json')
+    def output_json(data, code, headers=None):
 
-corpus_path = path.join(path.dirname(path.abspath(__file__)), 'corpus')
-chatbot.train(corpus_path)
+        print(str(data))
 
-chatbot.set_trainer(ListTrainer)
-for conversation in data:
-    chatbot.train(conversation)
+        if isinstance(data, dict):
+            data = [data]
+        else:
+            data = list(data)
 
-log.info("Creating Flask app")
-app = Flask("Waldur")
+        print(str(data))
 
-log.info("Creating Flask api")
-api = Api(app)
-api.add_resource(Query, '/',       resource_class_kwargs={'chatbot': chatbot})
-api.add_resource(Teach, '/teach/', resource_class_kwargs={'chatbot': chatbot})
+        resp = make_response(jsonify(data), code)
+        resp.headers.extend(headers or {})
+        return resp
+
+    @api.app.before_request
+    def log_request():
+        log.info("IN:  {} data={}".format(request, request.get_data()))
+
+    @api.app.after_request
+    def log_response(response):
+        log.info("OUT: {} data={}".format(response, response.get_data()))
+        return response
+
+    api.add_resource(Query, '/',       resource_class_kwargs={'chatbot': chatbot})
+    api.add_resource(Teach, '/teach/', resource_class_kwargs={'chatbot': chatbot})
+
+    return api

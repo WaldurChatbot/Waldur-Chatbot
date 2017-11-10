@@ -7,7 +7,7 @@ get_services_by_organisation = "REQUEST~get_services_by_organisation"
 get_total_costs = "REQUEST~get_totalcosts"
 create_vm = "REQUEST~create_vm"
 
-data = [
+waldur_list_corpus = [
     [
         'my projects',
         get_projects
@@ -41,12 +41,12 @@ data = [
 buffer = []
 for s in ["please", "please give", "give",
           "i want", "give me", "can i have"]:
-    for ss in data:
+    for ss in waldur_list_corpus:
         ss = ss
         buffer.append([
             s + " " + ss[0],
             ss[1]
         ])
 
-data.extend(buffer)
+waldur_list_corpus.extend(buffer)
 

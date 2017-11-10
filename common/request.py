@@ -9,7 +9,7 @@ INVALID_TOKEN_MESSAGE = "Needed token to query Waldur API. " \
                        "Please send token like this '?<TOKEN>'"
 
 
-class InvalidTokenException(Exception):
+class InvalidTokenError(Exception):
     pass
 
 
@@ -68,7 +68,7 @@ class BackendConnection(object):
                 self.last_query = message
                 self.last_bot_response = response[0]['data']
 
-        except InvalidTokenException:
+        except InvalidTokenError:
             log.info("Needed token to query Waldur, asking user for token.")
             response = INVALID_TOKEN_MESSAGE
 
@@ -109,7 +109,7 @@ class BackendConnection(object):
         if status == 200:
             return response
         elif status == 401:
-            raise InvalidTokenException
+            raise InvalidTokenError
         else:
             raise Exception(response['data'])
 
@@ -160,6 +160,6 @@ class WaldurConnection(object):
         if response.status_code == 200:
             return response_json
         elif response.status_code == 401:
-            raise InvalidTokenException("Token is invalid - " + str(self.token))
+            raise InvalidTokenError("Token is invalid - " + str(self.token))
         else:
             raise Exception(response_json['detail'])

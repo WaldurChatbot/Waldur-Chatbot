@@ -1,144 +1,97 @@
-import traceback
 from logging import getLogger
 
 from chatterbot.conversation import Statement
-from flask import jsonify, request, make_response
-from flask_restful import Resource, reqparse
+from flask_restful import Resource
 
-from common.request import InvalidTokenException
-from .logic.requests import SingleRequest, text, InputRequest
+from .parsers import query_parser, teach_parser
+from .logic.requests import Request, text, InputRequest
 
 log = getLogger(__name__)
-
-
-INVALID_TOKEN_MESSAGE = text("Couldn't query Waldur because of invalid or missing token, please send valid token")
-MISSING_QUERY_MESSAGE = text("Parameter 'query' missing from request")
-MISSING_TEACH_MESSAGE = text("Request needs parameters 'statement' and 'in_request_to'")
-SYSTEM_ERROR_MESSAGE  = text("Internal system error.")
 
 # dict that holds all tokens that are in the middle of a request that needs input
 # { token: Request, ... }
 waiting_for_input = {}
 
 
-class Query(Resource):
+class WaldurResource(Resource):
+
+    def __init__(self, chatbot):
+        self.chatbot = chatbot
+        self.response = None
+
+
+class Query(WaldurResource):
     __name__ = ''
 
     def __init__(self, chatbot):
-        log.info("Initializing Query class")
-        self.parser = reqparse.RequestParser()
-        self.parser.add_argument('query')
-        self.parser.add_argument('token')
-        self.chatbot = chatbot
+        super(Query, self).__init__(chatbot)
+        self.parser = query_parser
 
     def post(self):
-        try:
-            log.info("IN:  " + str(request.json))
-            args = self.parser.parse_args()
-            query = args['query']
-            token = args['token']
+        """
+        Entry point for POST /
+        Gets a response statement from the bot
+        :param: query - question/input for bot
+        :param: token - Waldur API token
+        :return: response, code
+        """
+        args = self.parser.parse_args()
+        self.handle_query(args.query, args.token)
 
-            response, code = self.handle_query(query, token)
+        return self.response, 200
 
-        except InvalidTokenException as e:
-            log.info("InvalidTokenException: " + str(e))
-            response = INVALID_TOKEN_MESSAGE
-            code = 401
-        except Exception:
-            for line in traceback.format_exc().split("\n"): log.error(line)
-            response = SYSTEM_ERROR_MESSAGE
-            code = 500
-
-        response = self.format_response(response)
-        log.info("OUT: " + str(response) + " code: " + str(code))
-        return make_response(jsonify(response), code)
-
-    def handle_query(self, query, token):
-        if query is not None:
-            if token is not None and token in waiting_for_input:
-                return self.handle_input(query, token), 200
-            else:
-                return self.get_response(query, token), 200
+    def handle_query(self, query, token=None):
+        if token is not None and token in waiting_for_input:
+            self.handle_input(query, token)
         else:
-            return MISSING_QUERY_MESSAGE, 400
+            self.set_response(query, token)
 
-    def get_response(self, query, token):
+    def set_response(self, query, token=None):
         bot_response = str(self.chatbot.get_response(query))
 
         if bot_response.startswith("REQUEST"):
-            req = SingleRequest\
+            req = Request\
                 .from_string(bot_response)\
                 .set_token(token)\
                 .set_original(query)
 
-            response = req.process()
+            self.response = req.process()
 
             if isinstance(req, InputRequest):
                 waiting_for_input[token] = req
-            elif token in waiting_for_input:
-                del waiting_for_input[token]
 
         else:
-            response = bot_response
-
-        return response
+            self.response = text(bot_response)
 
     def handle_input(self, input_query, token):
         req = waiting_for_input[token]
 
         req.set_input(input_query)
 
-        response = req.process()
+        self.response = req.process()
 
         if not req.waiting_for_input:
             del waiting_for_input[token]
 
-        return response
 
-    def format_response(self, response):
-        if response is None:
-            raise Exception("Response should not be None")
-
-        if isinstance(response, dict):
-            return [response]
-
-        if isinstance(response, str):
-            return [text(response)]
-
-        return list(response)
-
-
-class Teach(Resource):
+class Teach(WaldurResource):
 
     def __init__(self, chatbot):
-        log.info("Initializing TeachBot class")
-        self.parser = reqparse.RequestParser()
-        self.parser.add_argument('statement')
-        self.parser.add_argument('in_response_to')
-        self.chatbot = chatbot
+        super(Teach, self).__init__(chatbot)
+        self.parser = teach_parser
 
     def post(self):
-        try:
-            log.info("IN:  " + str(request.json))
-            args = self.parser.parse_args()
-            statement = args['statement']
-            in_response_to = args['in_response_to']
+        """
+        Entry point for POST /teach
+        Teaches the bot that statement 'statement' is good in response to 'in_response_to' statement
+        :param: statement
+        :param: in_response_to
+        :return: response, code
+        """
+        args = self.parser.parse_args()
+        self.handle_teach(args.statement, args.in_response_to)
+        return self.response, 200
 
-            if statement is not None and in_response_to is not None:
-                self.chatbot.learn_response(Statement(statement), Statement(in_response_to))
-                response = text('Added "{}" as a response to "{}"'.format(
-                    statement,
-                    in_response_to
-                ))
-                code = 200
-            else:
-                response = MISSING_TEACH_MESSAGE
-                code = 400
-
-        except Exception:
-            for line in traceback.format_exc().split("\n"): log.error(line)
-            response = SYSTEM_ERROR_MESSAGE
-            code = 500
-
-        log.info("OUT: " + str(response) + " code: " + str(code))
-        return make_response(jsonify(response), code)
+    def handle_teach(self, statement, in_response_to):
+        self.chatbot.learn_response(Statement(statement), Statement(in_response_to))
+        self.response = text("Added '{}' as a response to '{}'".format(statement, in_response_to))

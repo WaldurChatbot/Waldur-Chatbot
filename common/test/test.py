@@ -1,5 +1,5 @@
 from unittest import TestCase, main, mock
-from ..request import BackendConnection, InvalidTokenException, WaldurConnection
+from ..request import BackendConnection, InvalidTokenError, WaldurConnection
 
 
 class MockResponse:
@@ -37,7 +37,7 @@ class BackendConnectionTests(TestCase):
         token = 321
         self.conn.add_token(user, token)
         self.assertIn(user, self.conn.tokens)
-        self.assertEqual(token, self.conn.tokens.get(user))
+        self.assertEqual(token, self.conn.tokens.get_answer(user))
         self.assertEqual(token, self.conn.get_token(user))
 
     def test_none_if_no_token(self):
@@ -50,7 +50,7 @@ class BackendConnectionTests(TestCase):
 
     @mock.patch('requests.Session.send', side_effect=mocked_session_send_invalid_token)
     def test_query_responds_with_exception_on_invalid_token(self, mock_send):
-        with self.assertRaises(InvalidTokenException):
+        with self.assertRaises(InvalidTokenError):
             self.conn.query("hello", None)
 
     @mock.patch('requests.Session.send', side_effect=mocked_session_send_error)
@@ -74,7 +74,7 @@ class WaldurConnectionTests(TestCase):
 
     @mock.patch('requests.Session.send', side_effect=mocked_session_send_invalid_token)
     def test_query_responds_with_exception_on_invalid_token(self, mock_send):
-        with self.assertRaises(InvalidTokenException):
+        with self.assertRaises(InvalidTokenError):
             self.conn.query("GET", {}, "projects")
 
     @mock.patch('requests.Session.send', side_effect=mocked_session_send_error_from_waldur_api)

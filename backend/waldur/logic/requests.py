@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from common.request import WaldurConnection, InvalidTokenException
+from common.request import WaldurConnection, InvalidTokenError
 from common.nameparser import extract_names, getSimilarNames
 from logging import getLogger
 
@@ -78,7 +78,7 @@ class Request(object):
 
     def check_token(self, message="Token is missing"):
         if self.token is None:
-            raise InvalidTokenException(message)
+            raise InvalidTokenError(message)
 
     def process(self):
         """
@@ -158,7 +158,7 @@ class QA(object):
 
         self.answer = None
 
-    def set(self, i):
+    def check_answer(self, i):
         # check if answer is good
         if i in self.possible_answers:
             self.answer = i
@@ -167,7 +167,7 @@ class QA(object):
 
         return False
 
-    def get(self):
+    def get_answer(self):
         if self.answer is None:
             raise Exception("Answer should not be None at this point")
         return self.answer
@@ -248,7 +248,7 @@ class InputRequest(Request):
         Ex. {'os': QA_OBJECT} -> {'os': 'debian'}
         """
         for q in self.questions:
-            self.parameters[q] = self.questions[q].get()
+            self.parameters[q] = self.questions[q].get_answer()
 
         if self.parameters is None:
             raise Exception("parameters should not be None at this point")
@@ -256,7 +256,8 @@ class InputRequest(Request):
     def process(self):
         # bot needs token to know who to query
         self.check_token()
-        #raise NotImplementedError("Subclass must override this method")
+        if self.waiting_for_input:
+            return self.handle_question()
 
     def handle_question(self):
         """
@@ -272,7 +273,7 @@ class InputRequest(Request):
 
         if question.waiting_for_answer:
             if i is not None:
-                if question.set(i):
+                if question.check_answer(i):
                     self._next_question()
                     return self.handle_question()
                 else:
@@ -550,12 +551,7 @@ class CreateVMRequest(InputRequest):
     def process(self):
         super(CreateVMRequest, self).process()
 
-        if self.waiting_for_input:
-            return self.handle_question()
-        else:
-            # todo create vm using parameters from self.questions
-
-            return text("This is the part where the vm is created, todo")
+        return text("This is the part where the vm is created, todo")
 
 
 # --------------------- REQUESTS FOR INTERNAL USE ---------------------
