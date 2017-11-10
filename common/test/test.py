@@ -37,7 +37,7 @@ class BackendConnectionTests(TestCase):
         token = 321
         self.conn.add_token(user, token)
         self.assertIn(user, self.conn.tokens)
-        self.assertEqual(token, self.conn.tokens.get_answer(user))
+        self.assertEqual(token, self.conn.tokens[user])
         self.assertEqual(token, self.conn.get_token(user))
 
     def test_none_if_no_token(self):
