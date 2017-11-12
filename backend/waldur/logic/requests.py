@@ -364,16 +364,16 @@ class GetVmsRequest(SingleRequest):
     def process(self):
         response = self.send()
 
-        names = {vm['name']: vm['external_ips'] for vm in response}
+        names = {vm['name']: (["None"] if len(vm['external_ips']) == 0 else vm['external_ips']) for vm in response}
 
         if len(names) > 1:
             response_statement = "You have " + str(len(names)) + " virtual machines. "
-            response_statement += "Here are their names and public IPs "
-            response_statement += "; ".join([vm + ": " + (", ".join(names[vm])) for vm in names.keys()])
+            response_statement += "Here are their names and public IPs: "
+            response_statement += "; ".join([vm + ": " + (", ".join(names[vm])) for vm in names.keys()]) + ". "
         elif len(names) == 1:
             response_statement = "You have 1 virtual machine. "
             response_statement += "The virtual machine is " + str(list(names.keys())[0])
-            response_statement += " It's public IP is " + str(list(names.items())[0])
+            response_statement += " and it's public IP is " + str(list(names.values())[0]) + ". "
         else:
             response_statement = "You don't have any virtual machines."
 
@@ -458,6 +458,59 @@ class GetServicesByOrganisationRequest(SingleRequest):
                     response_statement += "The service is " + str(service_names[0])
                 else:
                     response_statement = "You don't have any services in use in " + most_similar + ". "
+
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
+
+class GetVmsByOrganisationRequest(SingleRequest):
+    ID = 7
+    NAME = 'get_vms_by_organisation'
+
+    def __init__(self):
+        super(GetVmsByOrganisationRequest, self).__init__(
+            method='GET',
+            endpoint='openstacktenant-instances',
+            parameters={}
+        )
+
+    def process(self):
+
+        firstreq = GetOrganisationsAndIdsRequest()
+        firstreq.token = self.token
+
+        organisations_with_uuid = firstreq.process()
+        organisations = [x for x in organisations_with_uuid]
+
+        extracted_organisations = extract_names(self.original)
+
+        if len(extracted_organisations) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                                 "Please write it out in capital case!"
+        else:
+            most_similar = getSimilarNames(extracted_organisations, organisations)
+            if most_similar == "":
+                response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
+                                     + extracted_organisations[0] + "\". Please check that an " \
+                                                                    "organisation with that name exists."
+            else:
+
+                self.parameters["customer"] = organisations_with_uuid[most_similar]
+                response = self.send()
+
+                vm_names = {vm['name']: (["None"] if len(vm['external_ips']) == 0 else vm['external_ips']) for vm in response}
+
+                if len(vm_names) > 1:
+                    response_statement = "You have " + str(len(vm_names)) + " virtual machines in " + most_similar + ". "
+                    response_statement += "Here are their names and public IPs: "
+                    response_statement += "; ".join([vm + ": " + (", ".join(vm_names[vm])) for vm in vm_names.keys()]) + ". "
+                elif len(vm_names) == 1:
+                    response_statement = "You have 1 virtual machine in " + most_similar + ". "
+                    response_statement += "The virtual machine is " + str(list(vm_names.keys())[0])
+                    response_statement += " and it's public IP: " + str(", ".join(list(vm_names.values())[0])) + ". "
+                else:
+                    response_statement = "You don't have any virtual machines in " + most_similar + ". "
 
         return {
             'data': response_statement,
