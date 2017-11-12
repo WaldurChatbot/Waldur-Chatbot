@@ -23,3 +23,7 @@ conversations:
   - REQUEST~get_totalcosts
 - - Please give me my services in organisation
   - REQUEST~get_services_by_organisation
+- - Please give me my virtual machines in organisation
+  - REQUEST~get_vms_by_organisation
+- - What vms do i have in organisation
+  - REQUEST~get_vms_by_organisation

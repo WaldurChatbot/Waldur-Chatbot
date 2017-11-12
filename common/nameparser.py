@@ -1,5 +1,5 @@
 import nltk
-import jellyfish
+import difflib
 from nltk.corpus import stopwords
 from logging import getLogger
 
@@ -66,9 +66,12 @@ def getSimilarNames(extracted_names, list_of_names):
     try:
         log.info("Looking for similar names to " + str(extracted_names))
         best = ["", 0]
+        results = []
+        matcher = difflib.SequenceMatcher()
         for extraction in extracted_names:
             for name in list_of_names:
-                similarity = jellyfish.jaro_winkler(extraction.lower(), name.lower())
+                matcher.set_seqs(extraction.lower(), name.lower())
+                similarity = matcher.ratio()
                 if 0.5 < similarity > best[1]:
                     best = [name, similarity]
         log.info("Found most similar name \"" + str(best[0]) + "\" with confidence " + str(best[1]))
@@ -76,16 +79,3 @@ def getSimilarNames(extracted_names, list_of_names):
         return best[0]
     except Exception as e:
         log.error("An exception occurred while finding similar names: " + str(e))
-
-if __name__ == '__main__':
-    string1 = "Give me the projects of Waldur"
-    string2 = "Are there any services in LTAT.05.005"
-    string3 = "Does Waldur And Maie support any services?"
-    string4 = "Does Wldr Maie support any services?"
-    string5 = "How many participants are in Tartu Ülikool organisation?"
-    string6 = "Please give me my projects in organisation Waldur C"
-    string7 = "Please give me my projects in organisation Chatbot testbed"
-    names_from_query = extract_names(string6)
-
-    print(names_from_query)
-    print(getSimilarNames(names_from_query, ["Waldur Chatbot testbed (LTAT.05.005)", "Waldur Maie"]))

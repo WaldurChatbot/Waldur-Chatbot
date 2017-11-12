@@ -52,14 +52,15 @@ class BackendConnection(object):
 
         except InvalidTokenError:
             log.info("Needed token to query Waldur, asking user for token.")
-            response = self.INVALID_TOKEN_MESSAGE
+            return [{'type': 'text', 'data': self.INVALID_TOKEN_MESSAGE}]
 
         return response
 
     def _handle_token(self, user_id, token):
         log.info("Received token {} from user {}".format(obscure(token), user_id))
         self.add_token(user_id, token)
-        return "Thanks!"
+        return [{'type': 'text', 'data': 'Thanks!'}]
+
 
     def request(self, method, url, data=None):
         request = Request(
