@@ -5,6 +5,7 @@ from flask_restful import Resource
 
 from .parsers import query_parser, teach_parser
 from .logic.requests import Request, text, InputRequest
+from common.utils import obscure
 
 log = getLogger(__name__)
 
@@ -37,6 +38,8 @@ class Query(WaldurResource):
         self.query = args.query
         self.token = args.token
 
+        log.info("Query initialized with {{query: '{}', token: '{}'}}".format(self.query, obscure(self.token)))
+
     def post(self):
         """
         Entry point for POST /
@@ -51,6 +54,7 @@ class Query(WaldurResource):
         else:
             self._handle_query()
 
+        log.info("Query response: {}".format(self.response))
         return self.response, 200
 
     def _handle_query(self):
@@ -91,6 +95,9 @@ class Teach(WaldurResource):
         args = teach_parser.parse_args()
         self.statement = args.statement
         self.previous_statement = args.previous_statement
+
+        log.info("Teach initialized with {{statement: '{}', previous_statement: '{}'}}"
+                 .format(self.statement, self.previous_statement))
 
     def post(self):
         """

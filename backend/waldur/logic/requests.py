@@ -101,7 +101,6 @@ class Request(object):
         :param string: request as string, ex. 'REQUEST~get_projects'
         :return: Matching Request object
         """
-
         tokens = string.strip(sep).split(sep)
 
         request_name = tokens[1]
@@ -187,13 +186,12 @@ class InputRequest(Request):
         super(InputRequest, self).__init__()
 
         self.waiting_for_input = True
-        self.input = None
         self.questions = OrderedDict(data)
+        self.bad_end_msg = bad_end_msg
+        self.parameters = dict()
+        self.input = None
         self.current = None
         self._next_question()
-        self.bad_end_msg = bad_end_msg
-
-        self.parameters = dict()
 
     def set_input(self, data):
         """
