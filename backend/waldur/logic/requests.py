@@ -544,6 +544,7 @@ class GetVmsByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
+
 class GetPrivateCloudsRequest(SingleRequest):
     ID = 9
     NAME = 'get_private_clouds'
@@ -557,14 +558,23 @@ class GetPrivateCloudsRequest(SingleRequest):
     def process(self):
         response = self.send()
 
-        names = [cloud['name'] for cloud in response]
+        clouds = [cloud['name'] for cloud in response]
 
-        if len(names) >= 1:
-            response_statement = "You have " + str(len(names)) + " private clouds. "
-            response_statement += "They are " + (", ".join(names)) + ". "
-        elif len(names) == 1:
-            response_statement = "Your have 1 private cloud. "
-            response_statement += "It's name is " + str(names[0]) + ". "
+        if len(clouds) >= 1:
+            response_statement = \
+                "You have {n} private clouds. " \
+                "They are {clouds}." \
+                .format(
+                    n=len(clouds),
+                    clouds=", ".join(clouds)
+                )
+        elif len(clouds) == 1:
+            response_statement = \
+                "You have 1 private cloud. " \
+                "It's name is {cloud}." \
+                .format(
+                    cloud=clouds[0]
+                )
         else:
             response_statement = "You don't have any private clouds."
 
