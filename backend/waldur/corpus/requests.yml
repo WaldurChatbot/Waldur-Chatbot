@@ -31,3 +31,7 @@ conversations:
   - REQUEST~get_private_clouds
 - - Please give me my clouds
   - REQUEST~get_private_clouds
+- - Who is working in my organisation
+  - REQUEST~get_team_of_organisation
+- - Please give me the team members of organisation
+  - REQUEST~get_team_of_organisation

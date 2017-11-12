@@ -6,6 +6,7 @@ get_organisations = "REQUEST~get_organisations"
 get_private_clouds = "REQUEST~get_private_clouds"
 get_services_by_organisation = "REQUEST~get_services_by_organisation"
 get_vms_by_organisation = "REQUEST~get_vms_by_organisation"
+get_team_of_organisation = "REQUEST~get_team_of_organisation"
 get_total_costs = "REQUEST~get_totalcosts"
 create_vm = "REQUEST~create_vm"
 
@@ -41,6 +42,10 @@ waldur_list_corpus = [
     [
         'my virtual machines of organisation',
         get_vms_by_organisation
+    ],
+    [
+        'my team members of organisation',
+        get_team_of_organisation
     ],
     [
         'createvm',

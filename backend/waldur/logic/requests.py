@@ -487,7 +487,6 @@ class GetServicesByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
-
 class GetVmsByOrganisationRequest(SingleRequest):
     ID = 8
     NAME = 'get_vms_by_organisation'
@@ -527,8 +526,7 @@ class GetVmsByOrganisationRequest(SingleRequest):
                             response}
 
                 if len(vm_names) > 1:
-                    response_statement = "You have " + str(
-                        len(vm_names)) + " virtual machines in " + most_similar + ". "
+                    response_statement = "You have " + str(len(vm_names)) + " virtual machines in " + most_similar + ". "
                     response_statement += "Here are their names and public IPs: "
                     response_statement += "; ".join(
                         [vm + ": " + (", ".join(vm_names[vm])) for vm in vm_names.keys()]) + ". "
@@ -544,6 +542,59 @@ class GetVmsByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
+class GetTeamOfOrganisationRequest(SingleRequest):
+    ID = 10
+    NAME = 'get_team_of_organisation'
+
+    def __init__(self):
+        super(GetTeamOfOrganisationRequest, self).__init__(
+            method='GET',
+            endpoint='customers'
+        )
+
+    def process(self):
+
+        firstreq = GetOrganisationsAndIdsRequest()
+        firstreq.token = self.token
+
+        organisations_with_uuid = firstreq.process()
+        organisations = [x for x in organisations_with_uuid]
+
+        extracted_organisations = extract_names(self.original)
+
+        if len(extracted_organisations) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                                 "Please write it out in capital case!"
+        else:
+            most_similar = getSimilarNames(extracted_organisations, organisations)
+            if most_similar == "":
+                response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
+                                     + extracted_organisations[0] + "\". Please check that an " \
+                                                                    "organisation with that name exists."
+            else:
+
+                self.endpoint += "/" + organisations_with_uuid[most_similar]
+                response = self.send()
+
+                owners = [owner['full_name'] for owner in response["owners"]]
+                supportusers = [supportuser['full_name'] for supportuser in response["support_users"]]
+
+                response_statement = "The following people are team members of " + most_similar + ": "
+                if len(owners) > 1:
+                    response_statement += "\nOwners: " + (", ".join(owners)) + "."
+                elif len(owners) == 1:
+                    response_statement += "\nThe owner: " + str(owners[0]) + "."
+                if len(supportusers) > 1:
+                    response_statement = "\nSupport: " + (", ".join(owners)) + ". "
+                elif len(supportusers) == 1:
+                    response_statement += "\nThe support: " + str(supportusers[0]) + ". "
+                if len(owners) + len(supportusers) == 0:
+                    response_statement = "The organisation " + most_similar + " doesn't have any team members. "
+
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
 
 class GetPrivateCloudsRequest(SingleRequest):
     ID = 9

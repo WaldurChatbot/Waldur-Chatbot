@@ -5,4 +5,4 @@ chatterbot
 matplotlib
 numpy
 nltk
-jellyfish
+difflib
