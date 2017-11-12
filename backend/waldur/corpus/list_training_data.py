@@ -3,6 +3,7 @@ get_projects = "REQUEST~get_projects"
 get_services = "REQUEST~get_services"
 get_vms = "REQUEST~get_vms"
 get_organisations = "REQUEST~get_organisations"
+get_private_clouds = "REQUEST~get_private_clouds"
 get_services_by_organisation = "REQUEST~get_services_by_organisation"
 get_vms_by_organisation = "REQUEST~get_vms_by_organisation"
 get_total_costs = "REQUEST~get_totalcosts"
@@ -28,6 +29,10 @@ waldur_list_corpus = [
     [
         'my total costs',
         get_total_costs
+    ],
+    [
+        'my private clouds',
+        get_private_clouds
     ],
     [
         'my services of organisation',

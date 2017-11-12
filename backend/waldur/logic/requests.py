@@ -467,7 +467,7 @@ class GetServicesByOrganisationRequest(SingleRequest):
         }
 
 class GetVmsByOrganisationRequest(SingleRequest):
-    ID = 7
+    ID = 8
     NAME = 'get_vms_by_organisation'
 
     def __init__(self):
@@ -513,6 +513,35 @@ class GetVmsByOrganisationRequest(SingleRequest):
                     response_statement += " and it's public IP: " + str(", ".join(list(vm_names.values())[0])) + ". "
                 else:
                     response_statement = "You don't have any virtual machines in " + most_similar + ". "
+
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
+
+class GetPrivateCloudsRequest(SingleRequest):
+    ID = 9
+    NAME = 'get_private_clouds'
+
+    def __init__(self):
+        super(GetPrivateCloudsRequest, self).__init__(
+            method='GET',
+            endpoint='openstack-tenants',
+        )
+
+    def process(self):
+        response = self.send()
+
+        names = [cloud['name'] for cloud in response]
+
+        if len(names) >= 1:
+            response_statement = "You have " + str(len(names)) + " private clouds. "
+            response_statement += "They are " + (", ".join(names)) + ". "
+        elif len(names) == 1:
+            response_statement = "Your have 1 private cloud. "
+            response_statement += "It's name is " + str(names[0]) + ". "
+        else:
+            response_statement = "You don't have any private clouds."
 
         return {
             'data': response_statement,
