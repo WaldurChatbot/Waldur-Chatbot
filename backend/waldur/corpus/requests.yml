@@ -27,3 +27,7 @@ conversations:
   - REQUEST~get_vms_by_organisation
 - - What vms do i have in organisation
   - REQUEST~get_vms_by_organisation
+- - Please give me my private clouds
+  - REQUEST~get_private_clouds
+- - Please give me my clouds
+  - REQUEST~get_private_clouds
