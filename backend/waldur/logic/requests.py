@@ -116,7 +116,6 @@ class Request(object):
 
 
 class SingleRequest(Request):
-
     def __init__(self,
                  method=None,
                  endpoint=None,
@@ -149,7 +148,6 @@ class SingleRequest(Request):
 
 
 class QA(object):
-
     def __init__(self, question, possible_answers, *args):
         self.question = question.format(possible_answers, args)
         self.possible_answers = possible_answers
@@ -296,16 +294,23 @@ class GetServicesRequest(SingleRequest):
     def process(self):
         response = self.send()
 
-        #services = response[0]['services']
+        services = set([service['name'] for services in response for service in services["services"]])
 
-        names = set([service['name'] for services in response for service in services["services"]])
-
-        if len(names) >= 1:
-            response_statement = "Your organisation is using " + str(len(names)) + " services. "
-            response_statement += "They are " + (", ".join(names))
-        elif len(names) == 1:
-            response_statement = "Your organisation is using 1 service. "
-            response_statement += "This service is " + str(names[0])
+        if len(services) >= 1:
+            response_statement = \
+                "Your organisation is using {n} services. " \
+                "They are {services}." \
+                .format(
+                    n=len(services),
+                    services=", ".join(services)
+                )
+        elif len(services) == 1:
+            response_statement = \
+                "Your organization is using 1 service. " \
+                "This service is {service}." \
+                .format(
+                    service=services[0]
+                )
         else:
             response_statement = "Your organisation isn't using any services."
 
@@ -367,13 +372,21 @@ class GetVmsRequest(SingleRequest):
         names = {vm['name']: (["None"] if len(vm['external_ips']) == 0 else vm['external_ips']) for vm in response}
 
         if len(names) > 1:
-            response_statement = "You have " + str(len(names)) + " virtual machines. "
-            response_statement += "Here are their names and public IPs: "
-            response_statement += "; ".join([vm + ": " + (", ".join(names[vm])) for vm in names.keys()]) + ". "
+            response_statement = \
+                "You have {n} virtual machines. " \
+                "Here are their names and public IPs: {ips}." \
+                .format(
+                    n=len(names),
+                    ips="; ".join([vm + ": " + (", ".join(names[vm])) for vm in names.keys()])
+                )
         elif len(names) == 1:
-            response_statement = "You have 1 virtual machine. "
-            response_statement += "The virtual machine is " + str(list(names.keys())[0])
-            response_statement += " and it's public IP is " + str(list(names.values())[0]) + ". "
+            response_statement = \
+                "You have 1 virtual machine. " \
+                "The virtual machine is {vm} and it's public IP is {ip}." \
+                .format(
+                    vm=list(names.keys())[0],
+                    ip=list(names.values())[0]
+                )
         else:
             response_statement = "You don't have any virtual machines."
 
@@ -396,14 +409,23 @@ class GetOrganisationsRequest(SingleRequest):
     def process(self):
         response = self.send()
 
-        names = [organisation['name'] for organisation in response]
+        organisations = [organisation['name'] for organisation in response]
 
-        if len(names) > 1:
-            response_statement = "You are part of " + str(len(names)) + " organisations. "
-            response_statement += "They are " + (", ".join(names))
-        elif len(names) == 1:
-            response_statement = "You are part of 1 organisation. "
-            response_statement += "The organisation is " + str(names[0])
+        if len(organisations) > 1:
+            response_statement = \
+                "You are part of {n} organisations. " \
+                "They are {organisations}" \
+                .format(
+                    n=len(organisations),
+                    organisations=", ".join(organisations)
+                )
+        elif len(organisations) == 1:
+            response_statement = \
+                "You are part of 1 organisation. " \
+                "The organisation is {organisation}" \
+                .format(
+                    organisation=organisations[0]
+                )
         else:
             response_statement = "You you aren't part of any organisation."
 
@@ -451,7 +473,8 @@ class GetServicesByOrganisationRequest(SingleRequest):
                 service_names = set([service['name'] for services in response for service in services["services"]])
 
                 if len(service_names) > 1:
-                    response_statement = "You have " + str(len(service_names)) + " services in use in " + most_similar + ". "
+                    response_statement = "You have " + str(
+                        len(service_names)) + " services in use in " + most_similar + ". "
                     response_statement += "They are " + (", ".join(service_names)) + ". "
                 elif len(service_names) == 1:
                     response_statement = "You have 1 service in use in " + most_similar + ". "
@@ -463,6 +486,7 @@ class GetServicesByOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetVmsByOrganisationRequest(SingleRequest):
     ID = 7
@@ -499,12 +523,15 @@ class GetVmsByOrganisationRequest(SingleRequest):
                 self.parameters["customer"] = organisations_with_uuid[most_similar]
                 response = self.send()
 
-                vm_names = {vm['name']: (["None"] if len(vm['external_ips']) == 0 else vm['external_ips']) for vm in response}
+                vm_names = {vm['name']: (["None"] if len(vm['external_ips']) == 0 else vm['external_ips']) for vm in
+                            response}
 
                 if len(vm_names) > 1:
-                    response_statement = "You have " + str(len(vm_names)) + " virtual machines in " + most_similar + ". "
+                    response_statement = "You have " + str(
+                        len(vm_names)) + " virtual machines in " + most_similar + ". "
                     response_statement += "Here are their names and public IPs: "
-                    response_statement += "; ".join([vm + ": " + (", ".join(vm_names[vm])) for vm in vm_names.keys()]) + ". "
+                    response_statement += "; ".join(
+                        [vm + ": " + (", ".join(vm_names[vm])) for vm in vm_names.keys()]) + ". "
                 elif len(vm_names) == 1:
                     response_statement = "You have 1 virtual machine in " + most_similar + ". "
                     response_statement += "The virtual machine is " + str(list(vm_names.keys())[0])
@@ -560,7 +587,7 @@ class GetTotalCostGraphRequest(SingleRequest):
         else:
             maxrange = len(data)
 
-        for i in range(maxrange-1, -1, -1):
+        for i in range(maxrange - 1, -1, -1):
             plotx.append(num_to_month[data[i]['month']] + " " + str(data[i]['year']))
             ploty.append(float(data[i]['total']))
 
