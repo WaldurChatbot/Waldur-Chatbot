@@ -265,12 +265,12 @@ class TestGetVmsRequests(RequestTestCase):
     def test_get_vms_3(self, mock):
         response = self.get_vms.process()
         self.assert_correct_response_format(response)
+        self.assertIn("You have 2 virtual machines. Here are their names and public IPs: ", response['data'])
         correct_response = "You have 2 virtual machines. Here are their names and public IPs: WaldurChatbot Develop: "
         correct_response += "193.40.11.164; WaldurChatbot Production: 193.40.11.175."
-        c_response2 = "You have 2 virtual machines. Here are their names and public IPs: WaldurChatbot Production:"
+        c_response2 = "You have 2 virtual machines. Here are their names and public IPs: WaldurChatbot Production: "
         c_response2 += "193.40.11.175; WaldurChatbot Develop: 193.40.11.164."
-        #self.assertEqual(correct_response, response['data'])
-        #self.assertTrue(correct_response == response['data'] or c_response2 == response['data'])
+        self.assertTrue(correct_response == response['data'] or c_response2 == response['data'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_use_case_12_alt_b_get_vms)
     def test_get_vms_4(self, mock):
@@ -290,12 +290,12 @@ class TestGetVmsRequests(RequestTestCase):
     def test_get_vms_6(self, mock):
         response = self.get_vms.process()
         self.assert_correct_response_format(response)
+        self.assertIn("You have 2 virtual machines. Here are their names and public IPs: ", response['data'])
         correct_response = "You have 2 virtual machines. Here are their names and public IPs: WaldurChatbot Develop: "
         correct_response += "193.40.11.164, localhost; WaldurChatbot Production: 193.40.11.175."
-        c_response2 = "You have 2 virtual machines. Here are their names and public IPs: WaldurChatbot Production:"
+        c_response2 = "You have 2 virtual machines. Here are their names and public IPs: WaldurChatbot Production: "
         c_response2 += "193.40.11.175; WaldurChatbot Develop: 193.40.11.164, localhost."
-        #self.assertEqual(correct_response, response['data'])
-        #self.assertTrue(correct_response == response['data'] or c_response2 == response['data'])
+        self.assertTrue(correct_response == response['data'] or c_response2 == response['data'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_use_case_12_alt_b_two_ips_get_vms)
     def test_get_vms_7(self, mock):
