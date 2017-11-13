@@ -191,6 +191,10 @@ def mocked_query_get_vms_2_names(method, data, endpoint):
     return create_get_vms_response(("test1", ["1.1"]), ("test2", ["1.2"]))
 
 
+def mocked_query_get_vms_no_ip(method, data, endpoint):
+    return create_get_vms_response(("test1", []))
+
+
 def mocked_query_use_case_12_regular_get_vms(method, data, endpoint):
     vm_1 = "WaldurChatbot Develop"
     vm_1_ip_1 = "193.40.11.164"
@@ -223,6 +227,12 @@ def mocked_query_use_case_12_alt_b_two_ips_get_vms(method, data, endpoint):
     vm_1_ip_1 = "193.40.11.164"
     vm_1_ip_2 = "localhost"
     return create_get_vms_response((vm_1, [vm_1_ip_1, vm_1_ip_2]))
+
+
+def mocked_query_use_case_12_alt_b_no_ip_get_vms(method, data, endpoint):
+    vm_1 = "WaldurChatbot Develop"
+    vm_1_ip_1 = "None"
+    return create_get_vms_response((vm_1, [vm_1_ip_1]))
 
 
 def create_get_vms_response(*pairs):
@@ -303,6 +313,21 @@ class TestGetVmsRequests(RequestTestCase):
         self.assert_correct_response_format(response)
         correct_response = "You have 1 virtual machine. The virtual machine is WaldurChatbot Develop and it's public IP"
         correct_response += "(s): 193.40.11.164, localhost."
+        self.assertEqual(correct_response, response['data'])
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_vms_no_ip)
+    def test_get_vms_8(self, mock):
+        response = self.get_vms.process()
+        self.assert_correct_response_format(response)
+        self.assertIn("test1", response['data'])
+        self.assertIn("None", response['data'])
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_use_case_12_alt_b_no_ip_get_vms)
+    def test_get_vms_9(self, mock):
+        response = self.get_vms.process()
+        self.assert_correct_response_format(response)
+        correct_response = "You have 1 virtual machine. The virtual machine is WaldurChatbot Develop and it's public IP"
+        correct_response += "(s): None."
         self.assertEqual(correct_response, response['data'])
 
 
