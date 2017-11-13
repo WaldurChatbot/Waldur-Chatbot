@@ -184,11 +184,11 @@ def mocked_query_get_vms_0_names(method, data, endpoint):
 
 
 def mocked_query_get_vms_1_name(method, data, endpoint):
-    return create_get_vms_response(("test1", ["1.1", "1.0"]))
+    return create_get_vms_response([("test1", ["1.1", "1.0"])])
 
 
 def mocked_query_get_vms_2_names(method, data, endpoint):
-    return create_get_vms_response(("test1", ["1.1"]), ("test2", ["1.2"]))
+    return create_get_vms_response([("test1", ["1.1"]), ("test2", ["1.2"])])
 
 
 def mocked_query_use_case_12_regular_get_vms(method, data, endpoint):
@@ -196,13 +196,13 @@ def mocked_query_use_case_12_regular_get_vms(method, data, endpoint):
     vm_1_ip_1 = "193.40.11.164"
     vm_2 = "WaldurChatbot Production"
     vm_2_ip_1 = "193.40.11.175"
-    return create_get_vms_response((vm_1, {vm_1_ip_1}), (vm_2, {vm_2_ip_1}))
+    return create_get_vms_response([(vm_1, {vm_1_ip_1}), (vm_2, {vm_2_ip_1})])
 
 
 def mocked_query_use_case_12_alt_b_get_vms(method, data, endpoint):
     vm_1 = "WaldurChatbot Develop"
     vm_1_ip_1 = "193.40.11.164"
-    return create_get_vms_response((vm_1, {vm_1_ip_1}))
+    return create_get_vms_response([(vm_1, {vm_1_ip_1})])
 
 
 def mocked_query_use_case_12_alt_c_get_vms(method, data, endpoint):
@@ -215,22 +215,22 @@ def mocked_query_use_case_12_regular_two_ips_get_vms(method, data, endpoint):
     vm_1_ip_2 = "localhost"
     vm_2 = "WaldurChatbot Production"
     vm_2_ip_1 = "193.40.11.175"
-    return create_get_vms_response((vm_1, [vm_1_ip_1, vm_1_ip_2]), (vm_2, {vm_2_ip_1}))
+    return create_get_vms_response([(vm_1, [vm_1_ip_1, vm_1_ip_2]), (vm_2, {vm_2_ip_1})])
 
 
 def mocked_query_use_case_12_alt_b_two_ips_get_vms(method, data, endpoint):
     vm_1 = "WaldurChatbot Develop"
     vm_1_ip_1 = "193.40.11.164"
     vm_1_ip_2 = "localhost"
-    return create_get_vms_response((vm_1, [vm_1_ip_1, vm_1_ip_2]))
+    return create_get_vms_response([(vm_1, [vm_1_ip_1, vm_1_ip_2])])
 
 
-def create_get_vms_response(*pairs):
+def create_get_vms_response(*list):
     return [
         {
             'name': name,
             'external_ips': external_ips
-        } for name, external_ips in pairs
+        } for pairs in list for name, external_ips in pairs
     ]
 
 
