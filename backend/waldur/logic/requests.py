@@ -382,10 +382,10 @@ class GetVmsRequest(SingleRequest):
         elif len(names) == 1:
             response_statement = \
                 "You have 1 virtual machine. " \
-                "The virtual machine is {vm} and it's public IP is {ip}." \
+                "The virtual machine is {vm} and it's public IP(s): {ip}." \
                 .format(
                     vm=list(names.keys())[0],
-                    ip=list(names.values())[0]
+                    ip=", ".join(list(names.values())[0])
                 )
         else:
             response_statement = "You don't have any virtual machines."
