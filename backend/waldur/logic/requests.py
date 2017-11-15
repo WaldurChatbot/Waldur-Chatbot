@@ -256,6 +256,8 @@ class InputRequest(Request):
         if self.waiting_for_input:
             return self.handle_question()
 
+        return None
+
     def handle_question(self):
         """
         Handles current question, if waiting for answer -> asks, else continues to next question
@@ -718,7 +720,10 @@ class CreateVMRequest(InputRequest):
         )
 
     def process(self):
-        super(CreateVMRequest, self).process()
+        question = super(CreateVMRequest, self).process()
+
+        if question is not None:
+            return text(question)
 
         return text("This is the part where the vm is created, todo")
 
