@@ -120,7 +120,7 @@ class WaldurConnection(object):
             api_url += '/'
 
         self.api_url = api_url
-        self.token = token
+        self.token = (token).strip()
         self.session = Session()
 
     def query(self, method, data, endpoint):
