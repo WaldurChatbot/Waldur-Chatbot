@@ -29,7 +29,6 @@ def preprocess(sentences):
         log.error("An exception occurred while preprocessing: " + str(e))
 
 
-
 def extract_names(sentences):
     """
     Extracts names from user input
@@ -53,6 +52,7 @@ def extract_names(sentences):
         return names
     except Exception as e:
         log.error("An exception occurred while extracting names: " + str(e))
+
 
 def getSimilarNames(extracted_names, list_of_names):
     """

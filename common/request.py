@@ -61,7 +61,6 @@ class BackendConnection(object):
         self.add_token(user_id, token)
         return [{'type': 'text', 'data': 'Thanks!'}]
 
-
     def request(self, method, url, data=None):
         request = Request(
             method,
@@ -94,7 +93,7 @@ class BackendConnection(object):
         elif status == 401:
             raise InvalidTokenError
         else:
-            raise Exception(response['message'])
+            raise Exception(response[0]['message'])
 
     def teach(self, statement, in_response_to):
         response, status = self.request(
@@ -109,7 +108,7 @@ class BackendConnection(object):
         if status == 200:
             return response
         else:
-            raise Exception(response['message'])
+            raise Exception(response[0]['message'])
 
 
 class WaldurConnection(object):
