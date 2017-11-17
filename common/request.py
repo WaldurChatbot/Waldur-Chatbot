@@ -28,7 +28,7 @@ class BackendConnection(object):
         return None if user_id not in self.tokens else self.tokens.get(user_id)
 
     def get_response(self, message, user_id):
-        log.info("IN:  message={} user_id={}".format(message, user_id))
+        log.info(f"IN:  message={message} user_id={user_id}")
         response = None
 
         prefix = message[:1]
@@ -39,7 +39,7 @@ class BackendConnection(object):
         elif prefix == '?':
             response = self._handle_token(user_id, message)
 
-        log.info("OUT: response={} user_id={}".format(response, user_id))
+        log.info(f"OUT: response={response} user_id={user_id}")
         return response
 
     def _handle_message(self, user_id, message):
@@ -57,7 +57,7 @@ class BackendConnection(object):
         return response
 
     def _handle_token(self, user_id, token):
-        log.info("Received token {} from user {}".format(obscure(token), user_id))
+        log.info(f"Received token {obscure(token)} from user {user_id}")
         self.add_token(user_id, token)
         return [{'type': 'text', 'data': 'Thanks!'}]
 
@@ -70,11 +70,11 @@ class BackendConnection(object):
 
         prepped = request.prepare()
         prepped.headers['Content-Type'] = 'application/json'
-        log.info("Sending request: " + str(request.data))
+        log.info(f"Sending request: {request.data}")
         response = self.session.send(prepped)
 
         response_json = response.json()
-        log.info("Received response: " + str(response_json))
+        log.info(f"Received response: {response_json}")
 
         return response_json, response.status_code
 
@@ -119,7 +119,7 @@ class WaldurConnection(object):
             api_url += '/'
 
         self.api_url = api_url
-        self.token = (token).strip()
+        self.token = token.strip()
         self.session = Session()
 
     def query(self, method, data, endpoint):
@@ -142,6 +142,6 @@ class WaldurConnection(object):
         if response.status_code == 200:
             return response_json
         elif response.status_code == 401:
-            raise InvalidTokenError("Token is invalid - " + str(self.token))
+            raise InvalidTokenError()
         else:
             raise Exception(response_json['detail'])

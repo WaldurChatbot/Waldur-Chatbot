@@ -1,6 +1,5 @@
 from logging import getLogger
 from os import path
-import traceback
 
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
@@ -55,28 +54,10 @@ def init_api(chatbot):
         Adds error logging to Api
         """
         def handle_error(self, e):
-            from common.request import InvalidTokenError
-            log_error = True
-
-            if isinstance(e, InvalidTokenError):
-                log_error = False
-                log.info("InvalidTokenError: {}".format(e))
-
-            if log_error:
-                for line in traceback.format_exc().split("\n"):
-                    log.error(line)
-
+            log.exception(e)
             return super(WaldurApi, self).handle_error(e)
 
-    api = WaldurApi(
-        app=Flask(chatbot.name),
-        errors={
-            'InvalidTokenError': {
-                'message': 'Missing token',
-                'status': 401
-            }
-        }
-    )
+    api = WaldurApi(app=Flask(chatbot.name))
 
     @api.representation('application/json')
     def output_json(data, code, headers=None):

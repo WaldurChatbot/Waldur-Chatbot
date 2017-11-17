@@ -86,7 +86,6 @@ class Request(object):
         :return: Dict or tuple of dicts with 2 keys: 'type' and 'data'
                     'type' values:  'text' if data is string
                                     'graph' if data is dict from which a graph can be constructed
-                                    'prompt' if data is a string question for which we expect an answer from client
                  May return more than 1 dict as a tuple, in which case all dicts are processed sequentially by clienta
         """
         raise NotImplementedError("Subclass must override this method")
@@ -544,6 +543,7 @@ class GetVmsByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
+
 class GetTeamOfOrganisationRequest(SingleRequest):
     ID = 10
     NAME = 'get_team_of_organisation'
@@ -597,6 +597,7 @@ class GetTeamOfOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetPrivateCloudsRequest(SingleRequest):
     ID = 9
