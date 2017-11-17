@@ -78,10 +78,6 @@ def init_api(chatbot):
         }
     )
 
-    # dict that holds all tokens that are in the middle of a request that needs input
-    # { token: Request, ... }
-    tokens_for_input = {}
-
     @api.representation('application/json')
     def output_json(data, code, headers=None):
 
@@ -102,6 +98,10 @@ def init_api(chatbot):
     def log_response(response):
         log.info("OUT: {} data={}".format(response, response.get_data()))
         return response
+
+    # dict that holds all tokens that are in the middle of a request that needs input
+    # { token: Request, ... }
+    tokens_for_input = {}
 
     api.add_resource(
         Query,
