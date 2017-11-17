@@ -50,7 +50,7 @@ else
 fi
 
 # install requirements
-sudo pip3 install -r requirements.txt --upgrade
+sudo python3.6 -m pip install -r requirements.txt --upgrade
 
 # kill process if running
 [ -f pid ] && kill `cat pid`
