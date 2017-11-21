@@ -178,7 +178,7 @@ class TestGetProjectsRequests(RequestTestCase):
         self.assert_correct_response_format(response)
         self.assertEqual("You don't have any projects.", response['data'])
 
-
+"""
 def mocked_query_get_vms_0_names(method, data, endpoint):
     return create_get_vms_response()
 
@@ -329,7 +329,7 @@ class TestGetVmsRequests(RequestTestCase):
         correct_response = "You have 1 virtual machine. The virtual machine is WaldurChatbot Develop and it's public IP"
         correct_response += "(s): None."
         self.assertEqual(correct_response, response['data'])
-
+"""
 
 def mocked_query_get_organisations_0_names(method, data, endpoint):
     return create_get_organisations_response()

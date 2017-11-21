@@ -15,6 +15,10 @@ conversations:
   - REQUEST~get_vms
 - - What virtual machines do I have
   - REQUEST~get_vms
+- - What vms do i have
+  - REQUEST~get_vms
+- - Please give me my vms
+  - REQUEST~get_vms
 - - What organisations am I part of
   - REQUEST~get_organisations
 - - Please give me my organisations
