@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 
 from chatterbot.conversation import Statement
 from flask_restful import Resource
@@ -7,7 +7,7 @@ from .parsers import query_parser, teach_parser
 from .logic.requests import Request, text, InputRequest, InvalidTokenError
 from common.utils import obscure
 
-log = getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class WaldurResource(Resource):
@@ -41,6 +41,10 @@ class Query(WaldurResource):
 
         log.info(f"Query initialized with {{query: '{self.query}', token: '{obscure(self.token)}'}}")
 
+        if log.isEnabledFor(logging.DEBUG):
+            obscured_tokens = {obscure(x): self.tokens_for_input[x] for x in self.tokens_for_input}
+            log.debug(f"Tokens waiting for input: {obscured_tokens}")
+
     def post(self):
         """
         Entry point for POST /
@@ -54,16 +58,16 @@ class Query(WaldurResource):
                 self._handle_input()
             else:
                 self._handle_query()
-
         except InvalidTokenError:
             self.response = dict(message='Invalid Waldur API token')
             self.code = 401
 
-        log.info("Query response: {}".format(self.response))
+        log.info(f"Query response: {self.response} code: {self.code}")
         return self.response, self.code
 
     def _handle_query(self):
         bot_response = str(self.chatbot.get_response(self.query))
+        log.debug(f"Bot response: '{bot_response}'")
 
         if bot_response.startswith("REQUEST"):
             req = Request\
