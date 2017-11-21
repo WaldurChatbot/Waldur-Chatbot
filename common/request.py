@@ -11,10 +11,16 @@ class InvalidTokenError(Exception):
 
 
 class BackendConnection(object):
+    """
+    Convenience class for python implementations of waldur chatbot.
+    Provides methods for easily querying Waldur Chatbot Rest service.
+    """
 
     INVALID_TOKEN_MESSAGE = "Needed token to query Waldur API. " \
                             "Token was either invalid or missing. " \
                             "Please send token like this '?<TOKEN>'"
+
+    RECEIVED_TOKEN_MESSAGE = "Thanks!"
 
     def __init__(self, backend_url):
         self.url = backend_url
@@ -28,40 +34,40 @@ class BackendConnection(object):
         return None if user_id not in self.tokens else self.tokens.get(user_id)
 
     def get_response(self, message, user_id):
+        """
+        Get response to query from WaldurBot API
+        :param message: message to get response to
+        :param user_id: user id who queried, important for token
+        :return: response from WaldurBot API
+        """
+
         log.info(f"IN:  message={message} user_id={user_id}")
-        response = None
-
-        prefix = message[:1]
-        message = message[1:]
-
-        if prefix == '!':
-            response = self._handle_message(user_id, message)
-        elif prefix == '?':
-            response = self._handle_token(user_id, message)
-
-        log.info(f"OUT: response={response} user_id={user_id}")
-        return response
-
-    def _handle_message(self, user_id, message):
 
         try:
-            response = self.query(
+            response = self._query(
                 message=message,
                 token=self.get_token(user_id)
             )
 
         except InvalidTokenError:
             log.info("Needed token to query Waldur, asking user for token.")
-            return [{'type': 'text', 'data': self.INVALID_TOKEN_MESSAGE}]
+            response = [{'type': 'text', 'data': self.INVALID_TOKEN_MESSAGE}]
 
+        log.info(f"OUT: response={response} user_id={user_id}")
         return response
 
-    def _handle_token(self, user_id, token):
+    def set_token(self, token, user_id):
+        """
+        Sets token for user.
+        :param token: users token
+        :param user_id: users id
+        :return: response
+        """
         log.info(f"Received token {obscure(token)} from user {user_id}")
         self.add_token(user_id, token)
-        return [{'type': 'text', 'data': 'Thanks!'}]
+        return [{'type': 'text', 'data': self.RECEIVED_TOKEN_MESSAGE}]
 
-    def request(self, method, url, data=None):
+    def _request(self, method, url, data=None):
         request = Request(
             method,
             url,
@@ -78,8 +84,8 @@ class BackendConnection(object):
 
         return response_json, response.status_code
 
-    def query(self, message, token=None):
-        response, status = self.request(
+    def _query(self, message, token=None):
+        response, status = self._request(
             'POST',
             self.url,
             data={
@@ -95,8 +101,8 @@ class BackendConnection(object):
         else:
             raise Exception(response[0]['message'])
 
-    def teach(self, statement, in_response_to):
-        response, status = self.request(
+    def _teach(self, statement, in_response_to):
+        response, status = self._request(
             'POST',
             self.url + '/teach',
             data={
@@ -112,6 +118,9 @@ class BackendConnection(object):
 
 
 class WaldurConnection(object):
+    """
+    Class for querying Waldur API
+    """
 
     def __init__(self, api_url, token):
 

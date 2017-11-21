@@ -45,18 +45,18 @@ class BackendConnectionTests(TestCase):
 
     @mock.patch('requests.Session.send', side_effect=send_ok)
     def test_query_responds_with_with_dict_on_correct_request(self, mock_send):
-        response = self.conn.query("hello", "good_token")[0]
+        response = self.conn._query("hello", "good_token")[0]
         self.assertDictEqual({"data": "ok"}, response)
 
     @mock.patch('requests.Session.send', side_effect=send_invalid_token)
     def test_query_responds_with_exception_on_invalid_token(self, mock_send):
         with self.assertRaises(InvalidTokenError):
-            self.conn.query("hello", None)
+            self.conn._query("hello", None)
 
     @mock.patch('requests.Session.send', side_effect=send_error)
     def test_query_responds_with_exception_on_error(self, mock_send):
         with self.assertRaises(Exception) as context:
-            self.conn.query("hello", None)
+            self.conn._query("hello", None)
 
         # assert that message is added to exception from response
         self.assertTrue("System error" in str(context.exception))
