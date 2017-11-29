@@ -689,6 +689,10 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
 class GetTotalCostGraphRequest(SingleRequest):
     ID = 5
     NAME = 'get_totalcosts'
+    HELP = ("---\n"
+            "GET TOTAL COST GRAPH REQUEST\n"
+            "I AM A WELL DEFINED HELP MESSAGE\n"
+            "---")
 
     def __init__(self):
         super(GetTotalCostGraphRequest, self).__init__(
@@ -778,7 +782,7 @@ class CreateVMRequest(InputRequest):
 
 
 class GetHelpRequest(SingleRequest):
-    ID = 11
+    ID = None  # todo in future, if help has parameters, give help an ID so that you can see the help for help
     NAME = 'get_help'
 
     def __init__(self):
@@ -808,7 +812,6 @@ class GetHelpRequest(SingleRequest):
 # --------------------- REQUESTS FOR INTERNAL USE ---------------------
 
 class GetOrganisationsAndIdsRequest(SingleRequest):
-    ID = 99
     NAME = 'util_get_organisations'
 
     def __init__(self):
