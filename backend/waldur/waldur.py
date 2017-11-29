@@ -22,9 +22,15 @@ def init_bot():
         logger=log,
         logic_adapters=[
             'chatterbot.logic.BestMatch',
+            #{
+            #    'import_path':'chatterbot.logic.BestMatch',
+            #    'statement_comparison_function"': 'chatterbot.comparisons.JaccardSimilarity',
+            #    "response_selection_method": "chatterbot.response_selection.get_first_response"
+            #},
+
             {
                 'import_path': 'chatterbot.logic.LowConfidenceAdapter',
-                'threshold': 0.7,
+                'threshold': 0.5,
                 'default_response': 'I am sorry, but I do not understand.'
             }
         ]

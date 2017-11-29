@@ -3,7 +3,7 @@ from collections import OrderedDict
 from logging import getLogger
 
 from common.request import WaldurConnection, InvalidTokenError
-from waldur.nameparser import extract_names, getSimilarNames
+from ..nameparser import extract_names, getSimilarNames
 
 log = getLogger(__name__)
 
