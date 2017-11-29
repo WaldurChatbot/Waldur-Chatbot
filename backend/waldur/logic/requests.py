@@ -34,6 +34,7 @@ class Request(object):
 
     ID = None
     NAME = None
+    HELP = None
 
     def __init__(self):
         self.token = None
@@ -94,6 +95,7 @@ class Request(object):
     def to_string(self):  # todo do we need this?
         return "REQUEST" + sep + type(self).NAME
 
+
     @staticmethod
     def from_string(string):
         """
@@ -104,9 +106,6 @@ class Request(object):
         tokens = string.strip(sep).split(sep)
 
         request_name = tokens[1]
-
-        def all_subclasses(cls=Request):
-            return cls.__subclasses__() + [g for s in cls.__subclasses__() for g in all_subclasses(s)]
 
         for request in all_subclasses():
             if request.NAME == request_name:
@@ -778,6 +777,34 @@ class CreateVMRequest(InputRequest):
         return text("This is the part where the vm is created, todo")
 
 
+class GetHelpRequest(SingleRequest):
+    ID = 11
+    NAME = 'get_help'
+
+    def __init__(self):
+        super(GetHelpRequest, self).__init__(
+            endpoint='git gud'
+        )
+
+    def process(self):
+
+        subclasses = all_subclasses()
+
+        response_statement = ""
+
+        for request in subclasses:
+            if request.ID is not None:
+                helpmsg = request.HELP
+                if request.HELP is None:
+                    helpmsg = request.NAME + " does not have HELP defined"
+                response_statement += helpmsg + "\n"
+
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
+
+
 # --------------------- REQUESTS FOR INTERNAL USE ---------------------
 
 class GetOrganisationsAndIdsRequest(SingleRequest):
@@ -794,3 +821,7 @@ class GetOrganisationsAndIdsRequest(SingleRequest):
         response = self.send()
 
         return {organisation['name']: organisation["uuid"] for organisation in response}
+
+
+def all_subclasses(cls=Request):
+    return cls.__subclasses__() + [g for s in cls.__subclasses__() for g in all_subclasses(s)]
