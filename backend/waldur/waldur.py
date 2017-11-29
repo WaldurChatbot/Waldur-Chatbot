@@ -7,7 +7,7 @@ from flask import Flask, request, make_response, jsonify
 from flask_restful import Api
 
 from .corpus.list_training_data import waldur_list_corpus
-from .resources import Query, Teach
+from .resources import Query, Teach, Authenticate
 
 log = getLogger(__name__)
 
@@ -84,6 +84,10 @@ def init_api(chatbot):
     # { token: Request, ... }
     tokens_for_input = {}
 
+    # dict that holds tokens that are waiting for pickup by frontend
+    # { user_id: token, ... }
+    auth_tokens = {}
+
     api.add_resource(
         Query,
         '/',
@@ -97,6 +101,13 @@ def init_api(chatbot):
         '/teach/',
         resource_class_kwargs={
             'chatbot': chatbot
+        }
+    )
+    api.add_resource(
+        Authenticate,
+        '/authenticate/',
+        resource_class_kwargs={
+            'auth_tokens': auth_tokens
         }
     )
 

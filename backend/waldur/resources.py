@@ -3,7 +3,7 @@ import logging
 from chatterbot.conversation import Statement
 from flask_restful import Resource
 
-from .parsers import query_parser, teach_parser
+from .parsers import query_parser, teach_parser, auth_parser_post, auth_parser_get
 from .logic.requests import Request, text, InputRequest, InvalidTokenError
 from common.utils import obscure
 
@@ -119,3 +119,34 @@ class Teach(WaldurResource):
 
         self.chatbot.learn_response(Statement(self.statement), Statement(self.previous_statement))
         return text(f"Added '{self.statement}' as a response to '{self.previous_statement}'"), 200
+
+
+class Authenticate(Resource):
+    """
+    Resource to intermediate token to frontend
+    Not very secure
+    """
+
+    def __init__(self, auth_tokens):
+        self.auth_tokens = auth_tokens
+
+    def post(self):
+        args = auth_parser_post.parse_args()
+
+        log.info(f"token {obscure(args.token)} received for {args.user_id}")
+
+        self.auth_tokens[args.user_id] = args.token
+
+        return text("ok"), 200
+
+    def get(self):
+        args = auth_parser_get.parse_args()
+
+        log.info(f"token asked for {args.user_id}")
+
+        if args.user_id in self.auth_tokens:
+            token = self.auth_tokens[args.user_id]
+            del self.auth_tokens[args.user_id]
+            return text(token), 200
+        else:
+            return text(f"No token for {args.user_id}"), 404

@@ -639,6 +639,11 @@ class GetPrivateCloudsRequest(SingleRequest):
 class GetTotalCostGraphRequest(SingleRequest):
     ID = 5
     NAME = 'get_totalcosts'
+    HELP = \
+    """
+    Hello, this is helptext
+    
+    """
 
     def __init__(self):
         super(GetTotalCostGraphRequest, self).__init__(
