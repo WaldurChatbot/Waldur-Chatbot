@@ -4,6 +4,7 @@ get_services = "REQUEST~get_services"
 get_vms = "REQUEST~get_vms"
 get_organisations = "REQUEST~get_organisations"
 get_private_clouds = "REQUEST~get_private_clouds"
+get_private_clouds_by_organisation = "REQUEST~get_private_clouds_by_organisation"
 get_services_by_organisation = "REQUEST~get_services_by_organisation"
 get_vms_by_organisation = "REQUEST~get_vms_by_organisation"
 get_team_of_organisation = "REQUEST~get_team_of_organisation"
@@ -38,6 +39,14 @@ waldur_list_corpus = [
     [
         'my private clouds',
         get_private_clouds
+    ],
+    [
+        'my private clouds of organisation',
+        get_private_clouds_by_organisation
+    ],
+    [
+        'my private clouds in',
+        get_private_clouds_by_organisation
     ],
     [
         'my services of organisation',

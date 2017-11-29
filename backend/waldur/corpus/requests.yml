@@ -41,3 +41,7 @@ conversations:
   - REQUEST~get_team_of_organisation
 - - help me
   - REQUEST~get_help
+- - Please give me my private clouds of organisation
+  - REQUEST~get_private_clouds_by_organisation
+- - What private clouds do I have in organisation
+  - REQUEST~get_private_clouds_by_organisation
