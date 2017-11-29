@@ -635,6 +635,57 @@ class GetPrivateCloudsRequest(SingleRequest):
             'type': 'text'
         }
 
+class GetPrivateCloudsByOrganisationRequest(SingleRequest):
+    ID = 11
+    NAME = 'get_private_clouds_by_organisation'
+
+    def __init__(self):
+        super(GetPrivateCloudsByOrganisationRequest, self).__init__(
+            method='GET',
+            endpoint='openstack-tenants',
+            parameters={}
+        )
+
+    def process(self):
+
+        firstreq = GetOrganisationsAndIdsRequest()
+        firstreq.token = self.token
+
+        organisations_with_uuid = firstreq.process()
+        organisations = [x for x in organisations_with_uuid]
+
+        extracted_organisations = extract_names(self.original)
+
+        if len(extracted_organisations) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                                 "Please write it out in capital case!"
+        else:
+            most_similar = getSimilarNames(extracted_organisations, organisations)
+            if most_similar == "":
+                response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
+                                     + extracted_organisations[0] + "\". Please check that an " \
+                                                                    "organisation with that name exists."
+            else:
+
+                self.parameters["customer"] = organisations_with_uuid[most_similar]
+                response = self.send()
+
+                clouds = [cloud["name"] for cloud in response]
+
+                if len(clouds) > 1:
+                    response_statement = "You have " + str(len(clouds)) + " private clouds in " + most_similar + ". "
+                    response_statement += "Here are their names: "
+                    response_statement += ", ".join(clouds) + ". "
+                elif len(clouds) == 1:
+                    response_statement = "You have 1 private cloud in " + most_similar + ". "
+                    response_statement += "The cloud is " + clouds[0] + "."
+                else:
+                    response_statement = "You don't have any private clouds in " + most_similar + ". "
+
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
 
 class GetTotalCostGraphRequest(SingleRequest):
     ID = 5
