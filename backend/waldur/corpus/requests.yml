@@ -39,3 +39,5 @@ conversations:
   - REQUEST~get_team_of_organisation
 - - Please give me the team members of organisation
   - REQUEST~get_team_of_organisation
+- - help me
+  - REQUEST~get_help
