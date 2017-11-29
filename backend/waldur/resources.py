@@ -4,6 +4,7 @@ from chatterbot.conversation import Statement
 from flask_restful import Resource
 
 from .parsers import query_parser, teach_parser
+from .nameparser import extract_names
 from .logic.requests import Request, text, InputRequest, InvalidTokenError
 from common.utils import obscure
 
@@ -66,7 +67,13 @@ class Query(WaldurResource):
         return self.response, self.code
 
     def _handle_query(self):
-        bot_response = str(self.chatbot.get_response(self.query))
+
+        # Todo: Make it look better
+        names_excluded = self.query
+        for x in extract_names(self.query):
+            names_excluded = names_excluded.replace(x,"").strip()
+        
+        bot_response = str(self.chatbot.get_response(names_excluded))
         log.debug(f"Bot response: '{bot_response}'")
 
         if bot_response.startswith("REQUEST"):

@@ -1,9 +1,9 @@
-from collections import OrderedDict
-
 import itertools
-from common.request import WaldurConnection, InvalidTokenError
-from common.nameparser import extract_names, getSimilarNames
+from collections import OrderedDict
 from logging import getLogger
+
+from common.request import WaldurConnection, InvalidTokenError
+from waldur.nameparser import extract_names, getSimilarNames
 
 log = getLogger(__name__)
 
