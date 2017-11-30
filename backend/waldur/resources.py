@@ -137,7 +137,7 @@ class Authenticate(Resource):
 
         self.auth_tokens[args.user_id] = args.token
 
-        return text("ok"), 200
+        return {'message': 'ok'}, 200
 
     def get(self):
         args = auth_parser_get.parse_args()
@@ -147,6 +147,6 @@ class Authenticate(Resource):
         if args.user_id in self.auth_tokens:
             token = self.auth_tokens[args.user_id]
             del self.auth_tokens[args.user_id]
-            return text(token), 200
+            return {'token': token}, 200
         else:
-            return text(f"No token for {args.user_id}"), 404
+            return {'message': f"No token for {args.user_id}"}, 404
