@@ -27,7 +27,7 @@ if __name__ == '__main__':
         from backend.waldur.waldur import init_api, init_bot, train_bot
 
         chatbot = init_bot()
-        train_bot(chatbot)
+        #train_bot(chatbot)
 
         api = init_api(chatbot)
         app = api.app

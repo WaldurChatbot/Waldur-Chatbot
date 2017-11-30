@@ -18,20 +18,26 @@ class BackendConnection(object):
 
     INVALID_TOKEN_MESSAGE = "Needed token to query Waldur API. " \
                             "Token was either invalid or missing. " \
-                            "Please send token like this '?<TOKEN>'"
+                            "Please send token like this '?<TOKEN>' " \
+                            "or use the following url."
 
     RECEIVED_TOKEN_MESSAGE = "Thanks!"
 
-    def __init__(self, backend_url):
+    def __init__(self, backend_url, auth_url):
         self.url = backend_url
+        self.auth_url = auth_url
         self.session = Session()
         self.tokens = {}  # tokens = { 'user_id': 'token', ... }
 
     def add_token(self, user_id, token):
+        log.debug(f"Adding token {obscure(token)} for {user_id}")
         self.tokens[user_id] = token
 
     def get_token(self, user_id):
-        return None if user_id not in self.tokens else self.tokens.get(user_id)
+        if user_id in self.tokens or self._authenticate(user_id):
+            return self.tokens.get(user_id)
+
+        return None
 
     def get_response(self, message, user_id):
         """
@@ -51,7 +57,10 @@ class BackendConnection(object):
 
         except InvalidTokenError:
             log.info("Needed token to query Waldur, asking user for token.")
-            response = [{'type': 'text', 'data': self.INVALID_TOKEN_MESSAGE}]
+            response = [
+                {'type': 'text', 'data': self.INVALID_TOKEN_MESSAGE},
+                {'type': 'text', 'data': self.auth_url + f"/auth/?user_id={user_id}"}
+            ]
 
         log.info(f"OUT: response={response} user_id={user_id}")
         return response
@@ -85,6 +94,7 @@ class BackendConnection(object):
         return response_json, response.status_code
 
     def _query(self, message, token=None):
+        log.debug(f"query: message={message}, token={obscure(token)}")
         response, status = self._request(
             'POST',
             self.url,
@@ -102,6 +112,7 @@ class BackendConnection(object):
             raise Exception(response[0]['message'])
 
     def _teach(self, statement, in_response_to):
+        log.debug(f"teach: statement={statement}, in_response_to={in_response_to}")
         response, status = self._request(
             'POST',
             self.url + '/teach',
@@ -113,6 +124,21 @@ class BackendConnection(object):
 
         if status == 200:
             return response
+        else:
+            raise Exception(response[0]['message'])
+
+    def _authenticate(self, user_id):
+        log.debug(f"authenticate: user_id={user_id}")
+        response, status = self._request(
+            'GET',
+            self.url + f"/authenticate/?user_id={user_id}"
+        )
+
+        if status == 200:
+            self.add_token(user_id, response[0]['token'])
+            return True
+        elif status == 404:
+            return False
         else:
             raise Exception(response[0]['message'])
 

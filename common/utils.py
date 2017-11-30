@@ -10,7 +10,7 @@ def obscure(item, start=3, end=3):
     if item is None:
         return None
 
-    total_length = len(item)
+    total_length = len(str(item))
     removed_length = start + end
 
     if removed_length > total_length:

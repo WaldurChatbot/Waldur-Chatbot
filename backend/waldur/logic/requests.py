@@ -686,6 +686,7 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
+
 class GetTotalCostGraphRequest(SingleRequest):
     ID = 5
     NAME = 'get_totalcosts'
