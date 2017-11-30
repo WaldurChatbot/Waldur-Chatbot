@@ -19,7 +19,7 @@ class BackendConnection(object):
     INVALID_TOKEN_MESSAGE = "Needed token to query Waldur API. " \
                             "Token was either invalid or missing. " \
                             "Please send token like this '?<TOKEN>' " \
-                            "or use the following url."
+                            "or use the following url: {url}."
 
     RECEIVED_TOKEN_MESSAGE = "Thanks!"
 
@@ -57,9 +57,13 @@ class BackendConnection(object):
 
         except InvalidTokenError:
             log.info("Needed token to query Waldur, asking user for token.")
+
+            # No need for invalid token, so we discard it.
+            if user_id in self.tokens:
+                del self.tokens[user_id]
+
             response = [
-                {'type': 'text', 'data': self.INVALID_TOKEN_MESSAGE},
-                {'type': 'text', 'data': self.auth_url + f"/auth/{user_id}"}
+                {'type': 'text', 'data': self.INVALID_TOKEN_MESSAGE.format(self.auth_url + f"/auth/{user_id}")}
             ]
 
         log.info(f"OUT: response={response} user_id={user_id}")
