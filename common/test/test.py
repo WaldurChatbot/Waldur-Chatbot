@@ -15,6 +15,10 @@ def send_ok(request, *args, **kwargs):
     return MockResponse([{"data": "ok"}], 200)
 
 
+def send_no_token(request, *args, **kwargs):
+    return MockResponse([{"message": "No token"}], 404)
+
+
 def send_invalid_token(request, *args, **kwargs):
     return MockResponse([{"message": "Invalid token"}], 401)
 
@@ -40,7 +44,8 @@ class BackendConnectionTests(TestCase):
         self.assertEqual(token, self.conn.tokens[user])
         self.assertEqual(token, self.conn.get_token(user))
 
-    def test_none_if_no_token(self):
+    @mock.patch('requests.Session.send', side_effect=send_no_token)
+    def test_none_if_no_token(self, mock_send):
         self.assertEqual(None, self.conn.get_token(222))
 
     @mock.patch('requests.Session.send', side_effect=send_ok)
