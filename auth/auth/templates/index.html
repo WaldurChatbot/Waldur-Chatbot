@@ -1,17 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Authentication</title>
-</head>
-<body>
-    <form action="/auth/" method="post">
+{% extends "base.html" %}
+{% block body %}
+    <form action="/auth/{{ user_id }}" method="post">
         <label>
             Token:
             <input type="text" name="token">
-            <input type="hidden" name="user_id" value="{{user_id}}">
         </label>
         <button name="submit" type="submit">Submit</button>
     </form>
-</body>
-</html>
+{% endblock %}
