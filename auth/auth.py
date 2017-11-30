@@ -1,4 +1,3 @@
-
 from flask import Flask, request, render_template
 from requests import post
 import logging
@@ -19,23 +18,17 @@ def auth():
         return render_template('index.html', user_id=user_id)
 
     if request.method == 'POST':
-        token = request.form['token']
-        user_id = request.form['user_id']
 
-        log.info(f"{token}{user_id}")
-        return send_token_to_backend(token, user_id)
+        # Send the token to Waldur Chatbot
+        response = post("http://localhost:4567/authenticate/", data={
+            'token': request.form['token'],
+            'user_id': request.form['user_id']
+        })
 
-
-def send_token_to_backend(token, user_id):
-    response = post("http://localhost:4567/authenticate/", data={
-        'token': token,
-        'user_id': user_id
-    })
-
-    if response.ok:
-        return "Authenticated!"
-    else:
-        return "Error connecting to backend!"
+        if response.ok:
+            return "Authenticated!"
+        else:
+            return "Error connecting to backend!"
 
 
 if __name__ == '__main__':
