@@ -59,7 +59,7 @@ class BackendConnection(object):
             log.info("Needed token to query Waldur, asking user for token.")
             response = [
                 {'type': 'text', 'data': self.INVALID_TOKEN_MESSAGE},
-                {'type': 'text', 'data': self.auth_url + f"/auth/?user_id={user_id}"}
+                {'type': 'text', 'data': self.auth_url + f"/auth/{user_id}"}
             ]
 
         log.info(f"OUT: response={response} user_id={user_id}")

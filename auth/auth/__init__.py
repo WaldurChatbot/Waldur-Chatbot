@@ -18,7 +18,7 @@ def auth(user_id):
         if response.ok:
             message = "Authenticated!"
         else:
-            message = "Error connecting to backend!"
+            message = "Couldn't authenticate."
 
         return render_template('sent.html', message=message)
 
