@@ -19,7 +19,7 @@ class BackendConnection(object):
     INVALID_TOKEN_MESSAGE = "Needed token to query Waldur API. " \
                             "Token was either invalid or missing. " \
                             "Please send token like this '?<TOKEN>' " \
-                            "or use the following url: {url}."
+                            "or use the following url: {}."
 
     RECEIVED_TOKEN_MESSAGE = "Thanks!"
 
