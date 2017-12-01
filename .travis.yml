@@ -7,7 +7,6 @@ env:
         - NAME=Waldur-Chatbot
         - TRAVIS_DIR=.travis/
         - LOCAL_DEPLOY_SCRIPT=local_deploy.sh
-        - AUTH_DEPLOY_SCRIPT=auth_deploy.sh
         - PATH_TO_RUN_SCRIPT=backend
         - RUN_SCRIPT=run.py
 

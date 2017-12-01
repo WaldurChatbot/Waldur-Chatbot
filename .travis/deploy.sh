@@ -7,7 +7,6 @@ echo "Starting deployment"
 
 # variables in .travis.yml
 SCRIPT=${LOCAL_DEPLOY_SCRIPT}
-AUTH_SCRIPT=${AUTH_DEPLOY_SCRIPT}
 ENCRYPTED_KEY=${TRAVIS_DIR}"deploy_rsa.enc"
 DECRYPTED_KEY=${TRAVIS_DIR}"deploy_rsa"
 
@@ -57,17 +56,3 @@ ssh \
     -i ${DECRYPTED_KEY} \
     ${USER}@${REMOTE} \
     ./${SCRIPT} ${NAME} ${PATH_TO_RUN_SCRIPT} ${RUN_SCRIPT} ${BRANCH} ${CLONE_URL}
-
-echo "Moving ${AUTH_SCRIPT} to remote"
-scp \
-    -o "StrictHostKeyChecking no" \
-    -i ${DECRYPTED_KEY} \
-    ${TRAVIS_DIR}${AUTH_SCRIPT} \
-    ${USER}@${REMOTE}:~/
-
-echo "Executing ${AUTH_SCRIPT} in remote"
-ssh \
-    -o "StrictHostKeyChecking no" \
-    -i ${DECRYPTED_KEY} \
-    ${USER}@${REMOTE} \
-    ./${AUTH_SCRIPT}

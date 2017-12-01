@@ -38,6 +38,10 @@ then
     sudo apt-get install -y python3-pip
 fi
 
+# Deploy auth and restart apache
+cp -r Waldur-Chatbot/auth/auth/ /var/www/auth/
+sudo service apache2 restart
+
 # if dir exists, we assume the repo is already cloned
 if cd ${NAME}
 then
