@@ -9,13 +9,12 @@ app = Flask(__name__)
 # then read conf from there, otherwise from project root
 if 'WALDUR_CONFIG' in os.environ:
     config_path = os.environ['WALDUR_CONFIG']
+    config = ConfigParser()
+    config.read(config_path)
+
+    backend_url = config['backend']['url'] + ':' + config['backend']['port']
 else:
-    config_path = '../configuration.ini'
-
-config = ConfigParser()
-config.read(config_path)
-
-backend_url = config['backend']['url'] + ':' + config['backend']['port']
+    backend_url = 'http://localhost:4567'
 
 
 @app.route("/auth/<user_id>", methods=['GET', 'POST'])
