@@ -38,10 +38,6 @@ then
     sudo apt-get install -y python3-pip
 fi
 
-# Deploy auth and restart apache
-cp -r Waldur-Chatbot/auth/auth/ /var/www/auth/
-sudo service apache2 restart
-
 # if dir exists, we assume the repo is already cloned
 if cd ${NAME}
 then
@@ -52,6 +48,10 @@ else
     git clone -b ${BRANCH} ${CLONE_URL}
     cd ${NAME}
 fi
+
+# Deploy auth and restart apache
+cp -r Waldur-Chatbot/auth/auth/ /var/www/auth/
+sudo service apache2 restart
 
 # install requirements
 sudo python3.6 -m pip install -r requirements.txt --upgrade
