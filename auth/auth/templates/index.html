@@ -1,10 +1,14 @@
 {% extends "base.html" %}
 {% block body %}
-    <form action="/auth/{{ user_id }}" method="post">
-        <label>
-            Token:
-            <input type="text" name="token">
-        </label>
-        <button name="submit" type="submit">Submit</button>
-    </form>
+    <div class ="w3-display-middle">
+        <form action="/auth/{{ user_id }}" class="w3-container w3-card-4 w3-light-grey w3-text-green w3-margin" method="post">
+            <h1 class="w3-center">Enter token here</h1>
+            <div class="w3-row w3-section w3-center">
+                <input type="password" name="token" placeholder="Token">
+            </div>
+            <div class="w3-row w3-section w3-center">
+                <button name="submit" class="w3-button w3-green w3-ripple" type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
 {% endblock %}
