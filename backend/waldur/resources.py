@@ -4,7 +4,7 @@ from chatterbot.conversation import Statement
 from flask_restful import Resource
 
 from .nameparser import extract_names
-from .parsers import query_parser, teach_parser, auth_parser_post, auth_parser_get
+from .parsers import query_parser, teach_parser, auth_parser
 from .logic.requests import Request, text, InputRequest, InvalidTokenError
 from common.utils import obscure
 
@@ -38,7 +38,13 @@ class Query(WaldurResource):
 
         args = query_parser.parse_args()
         self.query = args.query
-        self.token = args.token
+        self.token = None
+
+        if args.Authorization is not None:
+            if args.Authorization.startswith("token "):
+                self.token = args.Authorization[6:]
+            else:
+                self.token = args.Authorization
 
         log.info(f"Query initialized with {{query: '{self.query}', token: '{obscure(self.token)}'}}")
 
@@ -135,25 +141,37 @@ class Authenticate(Resource):
     """
 
     def __init__(self, auth_tokens):
+        """
+        :param auth_tokens: dict of {user_id: token, ...}
+        """
         self.auth_tokens = auth_tokens
 
-    def post(self):
-        args = auth_parser_post.parse_args()
+    def post(self, user_id):
+        """
+        Entry point for POST /auth/<user_id>
+        :param user_id: user_id to tie the token to
+        :param: token from POST body
+        :return: response, code
+        """
+        args = auth_parser.parse_args()
 
-        log.info(f"token {obscure(args.token)} received for {args.user_id}")
+        log.info(f"token {obscure(args.token)} received for {user_id}")
 
-        self.auth_tokens[args.user_id] = args.token
+        self.auth_tokens[user_id] = args.token
 
         return {'message': 'ok'}, 200
 
-    def get(self):
-        args = auth_parser_get.parse_args()
+    def get(self, user_id):
+        """
+        Entry point for GET /auth/<user_id>
+        :param user_id: user_id to get the token for
+        :return: response, code
+        """
+        log.info(f"token asked for {user_id}")
 
-        log.info(f"token asked for {args.user_id}")
-
-        if args.user_id in self.auth_tokens:
-            token = self.auth_tokens[args.user_id]
-            del self.auth_tokens[args.user_id]
+        if user_id in self.auth_tokens:
+            token = self.auth_tokens[user_id]
+            del self.auth_tokens[user_id]
             return {'token': token}, 200
         else:
-            return {'message': f"No token for {args.user_id}"}, 404
+            return {'message': f"No token for {user_id}"}, 404

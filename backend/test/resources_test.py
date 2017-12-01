@@ -71,8 +71,7 @@ class QueryTests(WaldurTests):
     def test_correct_response_on_invalid_token(self, mock):
         response = self.post(
             data={
-                'query': 'qwer',
-                'token': 'asdf'
+                'query': 'qwer'
             }
         )
 
@@ -84,8 +83,7 @@ class QueryTests(WaldurTests):
         response = self.app.post(
             "/",
             data={
-                'query': "irrelevant",
-                'token': "asdqwe123"
+                'query': "irrelevant"
             }
         )
         self.assertEqual(500, response.status_code)
@@ -97,8 +95,7 @@ class QueryTests(WaldurTests):
         response = self.app.post(
             "/",
             data={
-                'query': "hello",
-                'token': "irrelevant token"
+                'query': "hello"
             }
         )
         self.assertEqual(200, response.status_code)

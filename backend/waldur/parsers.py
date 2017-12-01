@@ -9,10 +9,11 @@ query_parser.add_argument(Argument(
     help="This argument is always required in order to get a response from the bot."
 ))
 query_parser.add_argument(Argument(
-    name='token',
+    name='Authorization',
     required=False,
     type=str,
-    help="Waldur API token"
+    location='headers',
+    help="Authorization, currently only Waldur API token is supported."
 ))
 
 # Parser for Teach
@@ -31,22 +32,10 @@ teach_parser.add_argument(Argument(
 ))
 
 # Parser for Authenticate
-user_id = Argument(
-    name='user_id',
-    required=True,
-    type=str,
-    help="User id to tie token to."
-)
-token = Argument(
+auth_parser = RequestParser()
+auth_parser.add_argument(Argument(
     name='token',
     required=True,
     type=str,
     help="Waldur API token"
-)
-
-auth_parser_post = RequestParser()
-auth_parser_post.add_argument(token)
-auth_parser_post.add_argument(user_id)
-
-auth_parser_get = RequestParser()
-auth_parser_get.add_argument(user_id)
+))

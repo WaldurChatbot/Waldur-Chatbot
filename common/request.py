@@ -54,12 +54,12 @@ class BackendConnection(object):
                 message=message,
                 token=self.get_token(user_id)
             )
-
         except InvalidTokenError:
             log.info("Needed token to query Waldur, asking user for token.")
 
             # No need for invalid token, so we discard it.
             if user_id in self.tokens:
+                log.info(f"Discarding invalid token: {self.tokens[user_id]}")
                 del self.tokens[user_id]
 
             response = [
@@ -80,7 +80,7 @@ class BackendConnection(object):
         self.add_token(user_id, token)
         return [{'type': 'text', 'data': self.RECEIVED_TOKEN_MESSAGE}]
 
-    def _request(self, method, url, data=None):
+    def _request(self, method, url, token=None, data=None):
         request = Request(
             method,
             url,
@@ -89,10 +89,15 @@ class BackendConnection(object):
 
         prepped = request.prepare()
         prepped.headers['Content-Type'] = 'application/json'
-        log.info(f"Sending request: {request.data}")
-        response = self.session.send(prepped)
 
+        if token is not None:
+            prepped.headers['Authorization'] = 'token ' + token.strip()
+
+        log.info(f"Sending request: {data}")
+
+        response = self.session.send(prepped)
         response_json = response.json()
+
         log.info(f"Received response: {response_json}")
 
         return response_json, response.status_code
@@ -103,9 +108,9 @@ class BackendConnection(object):
             'POST',
             self.url,
             data={
-                'query': message,
-                'token': token
-            }
+                'query': message
+            },
+            token=token
         )
 
         if status == 200:
@@ -132,10 +137,10 @@ class BackendConnection(object):
             raise Exception(response[0]['message'])
 
     def _authenticate(self, user_id):
-        log.debug(f"authenticate: user_id={user_id}")
+        log.info(f"authenticate: user_id={user_id}")
         response, status = self._request(
             'GET',
-            self.url + f"/authenticate/?user_id={user_id}"
+            self.url + f"/auth/{user_id}"
         )
 
         if status == 200:

@@ -79,7 +79,7 @@ def init_api(chatbot):
 
     @api.app.before_request
     def log_request():
-        log.info("IN:  {} data={}".format(request, request.get_data()))
+        log.info("IN:  {}".format(request))
 
     @api.app.after_request
     def log_response(response):
@@ -111,7 +111,7 @@ def init_api(chatbot):
     )
     api.add_resource(
         Authenticate,
-        '/authenticate/',
+        '/auth/<user_id>',
         resource_class_kwargs={
             'auth_tokens': auth_tokens
         }
