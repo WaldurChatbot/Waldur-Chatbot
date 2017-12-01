@@ -10,7 +10,8 @@ Current iteration: 3rd iteration
 2. Clone or download the project.  
         `git clone https://github.com/WaldurChatbot/Waldur-Chatbot.git`  
         `https://github.com/m2rtk/Waldur-Chatbot/archive/master.zip`
-3. Use pip to install necessary requirements.  
+3. Use pip to install necessary requirements in project's module root.  
+Example:
         `pip install -r requirements.txt`
 4. [Continue here](../../wiki/Setting-up-local-project)
 
