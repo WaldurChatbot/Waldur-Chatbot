@@ -1,14 +1,15 @@
 
 get_projects = "REQUEST~get_projects"
+get_organisations = "REQUEST~get_organisations"
+get_team_of_organisation = "REQUEST~get_team_of_organisation"
 get_services = "REQUEST~get_services"
 get_services_by_organisation = "REQUEST~get_services_by_organisation"
 get_services_by_project_and_organisation = "REQUEST~get_services_by_project_and_organisation"
 get_vms = "REQUEST~get_vms"
-get_organisations = "REQUEST~get_organisations"
+get_vms_by_organisation = "REQUEST~get_vms_by_organisation"
+get_vms_by_project_and_organisation = "REQUEST~get_vms_by_project_and_organisation"
 get_private_clouds = "REQUEST~get_private_clouds"
 get_private_clouds_by_organisation = "REQUEST~get_private_clouds_by_organisation"
-get_vms_by_organisation = "REQUEST~get_vms_by_organisation"
-get_team_of_organisation = "REQUEST~get_team_of_organisation"
 get_audit_log_by_organisation = "REQUEST~get_audit_log_by_organisation"
 get_audit_log_by_project_and_organisation = "REQUEST~get_audit_log_by_project_and_organisation"
 get_total_costs = "REQUEST~get_totalcosts"
@@ -78,6 +79,14 @@ waldur_list_corpus = [
     [
         'my vms in',
         get_vms_by_organisation
+    ],
+    [
+        'my vms in project of organisation',
+        get_vms_by_project_and_organisation
+    ],
+    [
+        'my virtual machines in project of organisation',
+        get_vms_by_project_and_organisation
     ],
     [
         'my team members of organisation',

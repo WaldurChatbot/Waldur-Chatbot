@@ -487,7 +487,7 @@ class GetServicesByOrganisationRequest(SingleRequest):
         }
 
 class GetServicesByProjectAndOrganisationRequest(SingleRequest):
-    ID = 13
+    ID = 14
     NAME = 'get_services_by_project_and_organisation'
 
     def __init__(self):
@@ -615,6 +615,83 @@ class GetVmsByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
+class GetVmsByProjectAndOrganisationRequest(SingleRequest):
+    ID = 15
+    NAME = 'get_vms_by_project_and_organisation'
+
+    def __init__(self):
+        super(GetVmsByProjectAndOrganisationRequest, self).__init__(
+            method='GET',
+            endpoint='openstacktenant-instances',
+            parameters={}
+        )
+
+    def process(self):
+
+        firstreq = GetOrganisationsAndIdsRequest()
+        firstreq.token = self.token
+
+        organisations_with_uuid = firstreq.process()
+        organisations = [x for x in organisations_with_uuid]
+
+        extracted_names = extract_names(self.original)
+        project_name = extracted_names[:1]
+        organisation_name = extracted_names[1:]
+
+        if len(extracted_names) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's nor project's name in your request! " \
+                                 "Please write it out in capital case!"
+        elif len(organisation_name) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                                 "Please write it out in capital case!"
+        else:
+            most_similar_organisation = getSimilarNames(organisation_name, organisations)
+            if most_similar_organisation == "":
+                response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
+                                     + organisation_name[0] + "\". Please check that an " \
+                                                                    "organisation with that name exists."
+            else:
+
+
+                secondreq = GetProjectsAndIdsByOrganisationRequest()
+                secondreq.token = self.token
+                secondreq.parameters["customer"] = organisations_with_uuid[most_similar_organisation]
+                projects_with_uuid = secondreq.process()
+                projects = [x for x in projects_with_uuid]
+
+                most_similar_project = getSimilarNames(project_name, projects)
+
+                if most_similar_project == "":
+                    response_statement = "Sorry, I wasn't able to find a project with the name \"" \
+                                         + project_name[0] + "\". Please check that a " \
+                                                                  "project with that name exists."
+
+                else:
+
+                    self.parameters["project"] = projects_with_uuid[most_similar_project]
+                    response = self.send()
+
+                    vm_names = {vm['name']: (["None"] if len(vm['external_ips']) == 0 else vm['external_ips']) for vm in
+                                response}
+
+                    if len(vm_names) > 1:
+                        response_statement = "You have " + str(
+                            len(vm_names)) + " virtual machines in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+                        response_statement += "Here are their names and public IPs: "
+                        response_statement += "; ".join(
+                            [vm + ": " + (", ".join(vm_names[vm])) for vm in vm_names.keys()]) + ". "
+                    elif len(vm_names) == 1:
+                        response_statement = "You have 1 virtual machine in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+                        response_statement += "The virtual machine is " + str(list(vm_names.keys())[0])
+                        response_statement += " and it's public IP: " + str(
+                            ", ".join(list(vm_names.values())[0])) + ". "
+                    else:
+                        response_statement = "You don't have any virtual machines in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
 
 class GetTeamOfOrganisationRequest(SingleRequest):
     ID = 10

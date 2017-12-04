@@ -65,3 +65,7 @@ conversations:
   - REQUEST~get_services_by_project_and_organisation
 - - Please give me my services in project of organisation
   - REQUEST~get_services_by_project_and_organisation
+- - Please give me my virtual machines in project of organisation
+  - REQUEST~get_vms_by_project_and_organisation
+- - What vms do i have in project of organisation
+  - REQUEST~get_vms_by_project_and_organisation
