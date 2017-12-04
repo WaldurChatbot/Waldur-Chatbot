@@ -1,4 +1,5 @@
 import itertools
+import dateutil.parser
 from collections import OrderedDict
 from logging import getLogger
 
@@ -686,6 +687,62 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
+class GetAuditLogByOrganisationRequest(SingleRequest):
+    ID = 12
+    NAME = 'get_audit_log_by_organisation'
+
+    def __init__(self):
+        super(GetAuditLogByOrganisationRequest, self).__init__(
+            method='GET',
+            endpoint='events',
+            parameters={}
+        )
+
+    def process(self):
+
+        firstreq = GetOrganisationsAndIdsRequest()
+        firstreq.token = self.token
+
+        organisations_with_uuid = firstreq.process()
+        organisations = [x for x in organisations_with_uuid]
+
+        extracted_organisations = extract_names(self.original)
+
+        if len(extracted_organisations) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                                 "Please write it out in capital case!"
+        else:
+            most_similar = getSimilarNames(extracted_organisations, organisations)
+            if most_similar == "":
+                response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
+                                     + extracted_organisations[0] + "\". Please check that an " \
+                                                                    "organisation with that name exists."
+            else:
+                self.parameters["scope"] = "https://api.etais.ee/api/customers/" + str(organisations_with_uuid[most_similar]) + "/"
+                self.parameters["page_size"] = 10 # This param represents the last n events that will be displayed
+                response = self.send()
+
+                log_entries = []
+                for entry in response:
+                    date = dateutil.parser.parse(entry["@timestamp"]).astimezone().strftime('%Y-%m-%d %H:%M')
+                    message = entry["message"]
+                    user = (entry["user_full_name"] if "user_full_name" in entry else "")
+                    eventtype = entry["event_type"]
+                    log_entries.append("\n"+ date + "\nEvent: " + eventtype + "\n" + message + ("\nUser: " + user if "user_full_name" in entry else ""))
+
+                if len(log_entries) > 1:
+                    response_statement = "Here are the last " + str(len(log_entries)) + " audit log entries in " + most_similar + ": "
+                    response_statement += "\n".join(log_entries)
+                elif len(log_entries) == 1:
+                    response_statement = "You have 1 audit log entry in " + most_similar + ": "
+                    response_statement += log_entries[0] + "."
+                else:
+                    response_statement = "Audit log in " + most_similar + " is empty. "
+
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
 
 class GetTotalCostGraphRequest(SingleRequest):
     ID = 5
