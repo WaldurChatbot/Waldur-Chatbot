@@ -25,12 +25,8 @@ def mocked_query_get_services_2_names(method, data, endpoint):
 def create_get_services_response(*names):
     return [
         {
-            'services': [
-                {
-                    'name': name
-                } for name in names
-            ]
-        }
+            'name': name
+        } for name in names
     ]
 
 
