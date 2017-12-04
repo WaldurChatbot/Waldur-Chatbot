@@ -69,3 +69,7 @@ conversations:
   - REQUEST~get_vms_by_project_and_organisation
 - - What vms do i have in project of organisation
   - REQUEST~get_vms_by_project_and_organisation
+- - Please give me my private clouds in project of organisation
+  - REQUEST~get_private_clouds_by_project_and_organisation
+- - What private clouds do I have in project of organisation
+  - REQUEST~get_private_clouds_by_project_and_organisation

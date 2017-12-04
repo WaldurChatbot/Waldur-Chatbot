@@ -838,6 +838,80 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
+class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
+    ID = 16
+    NAME = 'get_private_clouds_by_project_and_organisation'
+
+    def __init__(self):
+        super(GetPrivateCloudsByProjectAndOrganisationRequest, self).__init__(
+            method='GET',
+            endpoint='openstack-tenants',
+            parameters={}
+        )
+
+    def process(self):
+
+        firstreq = GetOrganisationsAndIdsRequest()
+        firstreq.token = self.token
+
+        organisations_with_uuid = firstreq.process()
+        organisations = [x for x in organisations_with_uuid]
+
+        extracted_names = extract_names(self.original)
+        project_name = extracted_names[:1]
+        organisation_name = extracted_names[1:]
+
+        if len(extracted_names) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's nor project's name in your request! " \
+                                 "Please write it out in capital case!"
+        elif len(organisation_name) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                                 "Please write it out in capital case!"
+        else:
+            most_similar_organisation = getSimilarNames(organisation_name, organisations)
+            if most_similar_organisation == "":
+                response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
+                                     + organisation_name[0] + "\". Please check that an " \
+                                                                    "organisation with that name exists."
+            else:
+
+
+                secondreq = GetProjectsAndIdsByOrganisationRequest()
+                secondreq.token = self.token
+                secondreq.parameters["customer"] = organisations_with_uuid[most_similar_organisation]
+                projects_with_uuid = secondreq.process()
+                projects = [x for x in projects_with_uuid]
+
+                most_similar_project = getSimilarNames(project_name, projects)
+
+                if most_similar_project == "":
+                    response_statement = "Sorry, I wasn't able to find a project with the name \"" \
+                                         + project_name[0] + "\". Please check that a " \
+                                                                  "project with that name exists."
+
+                else:
+
+                    self.parameters["project"] = projects_with_uuid[most_similar_project]
+                    response = self.send()
+
+                    clouds = [cloud["name"] for cloud in response]
+
+                    if len(clouds) > 1:
+                        response_statement = "You have " + str(
+                            len(clouds)) + " private clouds in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+                        response_statement += "Here are their names: "
+                        response_statement += ", ".join(clouds) + ". "
+                    elif len(clouds) == 1:
+                        response_statement = "You have 1 private cloud in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+                        response_statement += "The cloud is " + clouds[0] + "."
+                    else:
+                        response_statement = "You don't have any private clouds in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
+
 class GetAuditLogByOrganisationRequest(SingleRequest):
     ID = 12
     NAME = 'get_audit_log_by_organisation'
