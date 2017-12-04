@@ -25,6 +25,8 @@ conversations:
   - REQUEST~get_organisations
 - - Graphtest
   - REQUEST~get_totalcosts
+- - What kind of providers is my organisation allowed to use
+  - REQUEST~get_services_by_organisation
 - - Please give me my services in organisation
   - REQUEST~get_services_by_organisation
 - - Please give me my virtual machines in organisation
@@ -51,3 +53,15 @@ conversations:
   - REQUEST~get_audit_log_by_organisation
 - - What's in the audit log of organisation
   - REQUEST~get_audit_log_by_organisation
+- - What happened in project of organisation
+  - REQUEST~get_audit_log_by_project_and_organisation
+- - Please give me my log entries in project of organisation
+  - REQUEST~get_audit_log_by_project_and_organisation
+- - What happened in project organisation
+  - REQUEST~get_audit_log_by_project_and_organisation
+- - Please give me my log entries in project organisation
+  - REQUEST~get_audit_log_by_project_and_organisation
+- - What kind of providers is my project of organisation allowed to use
+  - REQUEST~get_services_by_project_and_organisation
+- - Please give me my services in project of organisation
+  - REQUEST~get_services_by_project_and_organisation

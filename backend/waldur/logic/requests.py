@@ -290,17 +290,17 @@ class GetServicesRequest(SingleRequest):
     def __init__(self):
         super(GetServicesRequest, self).__init__(
             method='GET',
-            endpoint='projects',
+            endpoint='services',
         )
 
     def process(self):
         response = self.send()
 
-        services = set([service['name'] for services in response for service in services["services"]])
+        services = set([service['name'] for service in response])
 
         if len(services) >= 1:
             response_statement = \
-                "Your organisation is using {n} services. " \
+                "You have a total of {n} services in use. " \
                 "They are {services}." \
                 .format(
                     n=len(services),
@@ -308,7 +308,7 @@ class GetServicesRequest(SingleRequest):
                 )
         elif len(services) == 1:
             response_statement = \
-                "Your organization is using 1 service. " \
+                "You have a total of 1 service in use. " \
                 "This service is {service}." \
                 .format(
                     service=services[0]
@@ -441,7 +441,7 @@ class GetServicesByOrganisationRequest(SingleRequest):
     def __init__(self):
         super(GetServicesByOrganisationRequest, self).__init__(
             method='GET',
-            endpoint='projects',
+            endpoint='services',
             parameters={}
         )
 
@@ -469,7 +469,7 @@ class GetServicesByOrganisationRequest(SingleRequest):
                 self.parameters["customer"] = organisations_with_uuid[most_similar]
                 response = self.send()
 
-                service_names = set([service['name'] for services in response for service in services["services"]])
+                service_names = set([service['name'] for service in response])
 
                 if len(service_names) > 1:
                     response_statement = "You have " + str(
@@ -480,6 +480,80 @@ class GetServicesByOrganisationRequest(SingleRequest):
                     response_statement += "The service is " + str(service_names[0])
                 else:
                     response_statement = "You don't have any services in use in " + most_similar + ". "
+
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
+
+class GetServicesByProjectAndOrganisationRequest(SingleRequest):
+    ID = 13
+    NAME = 'get_services_by_project_and_organisation'
+
+    def __init__(self):
+        super(GetServicesByProjectAndOrganisationRequest, self).__init__(
+            method='GET',
+            endpoint='projects',
+            parameters={}
+        )
+
+    def process(self):
+
+        firstreq = GetOrganisationsAndIdsRequest()
+        firstreq.token = self.token
+
+        organisations_with_uuid = firstreq.process()
+        organisations = [x for x in organisations_with_uuid]
+
+        extracted_names = extract_names(self.original)
+        project_name = extracted_names[:1]
+        organisation_name = extracted_names[1:]
+
+        if len(extracted_names) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's nor project's name in your request! " \
+                                 "Please write it out in capital case!"
+        elif len(organisation_name) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                                 "Please write it out in capital case!"
+        else:
+            most_similar_organisation = getSimilarNames(organisation_name, organisations)
+            if most_similar_organisation == "":
+                response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
+                                     + organisation_name[0] + "\". Please check that an " \
+                                                                    "organisation with that name exists."
+            else:
+
+
+                secondreq = GetProjectsAndIdsByOrganisationRequest()
+                secondreq.token = self.token
+                secondreq.parameters["customer"] = organisations_with_uuid[most_similar_organisation]
+                projects_with_uuid = secondreq.process()
+                projects = [x for x in projects_with_uuid]
+
+                most_similar_project = getSimilarNames(project_name, projects)
+
+                if most_similar_project == "":
+                    response_statement = "Sorry, I wasn't able to find a project with the name \"" \
+                                         + project_name[0] + "\". Please check that a " \
+                                                                  "project with that name exists."
+
+                else:
+
+                    self.endpoint += "/" + str(projects_with_uuid[most_similar_project]) + "/"
+
+                    response = self.send()
+
+                    service_names = set([service['name'] for service in response["services"]])
+
+                    if len(service_names) > 1:
+                        response_statement = "You have " + str(
+                            len(service_names)) + " services in use in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+                        response_statement += "They are " + (", ".join(service_names)) + ". "
+                    elif len(service_names) == 1:
+                        response_statement = "You have 1 service in use in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+                        response_statement += "The service is " + str(service_names[0])
+                    else:
+                        response_statement = "You don't have any services in use in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
 
         return {
             'data': response_statement,
@@ -744,6 +818,85 @@ class GetAuditLogByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
+class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
+    ID = 13
+    NAME = 'get_audit_log_by_project_and_organisation'
+
+    def __init__(self):
+        super(GetAuditLogByProjectAndOrganisationRequest, self).__init__(
+            method='GET',
+            endpoint='events',
+            parameters={}
+        )
+
+    def process(self):
+
+        firstreq = GetOrganisationsAndIdsRequest()
+        firstreq.token = self.token
+
+        organisations_with_uuid = firstreq.process()
+        organisations = [x for x in organisations_with_uuid]
+
+        extracted_names = extract_names(self.original)
+        project_name = extracted_names[:1]
+        organisation_name = extracted_names[1:]
+
+        if len(extracted_names) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's nor project's name in your request! " \
+                                 "Please write it out in capital case!"
+        elif len(organisation_name) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                                 "Please write it out in capital case!"
+        else:
+            most_similar_organisation = getSimilarNames(organisation_name, organisations)
+            if most_similar_organisation == "":
+                response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
+                                     + organisation_name[0] + "\". Please check that an " \
+                                                                    "organisation with that name exists."
+            else:
+
+
+                secondreq = GetProjectsAndIdsByOrganisationRequest()
+                secondreq.token = self.token
+                secondreq.parameters["customer"] = organisations_with_uuid[most_similar_organisation]
+                projects_with_uuid = secondreq.process()
+                projects = [x for x in projects_with_uuid]
+
+                most_similar_project = getSimilarNames(project_name, projects)
+
+                if most_similar_project == "":
+                    response_statement = "Sorry, I wasn't able to find a project with the name \"" \
+                                         + project_name[0] + "\". Please check that a " \
+                                                                  "project with that name exists."
+
+                else:
+
+                    self.parameters["scope"] = "https://api.etais.ee/api/projects/" + str(projects_with_uuid[most_similar_project]) + "/"
+                    self.parameters["page_size"] = 10 # This param represents the last n events that will be displayed
+                    response = self.send()
+
+                    log_entries = []
+                    for entry in response:
+                        date = dateutil.parser.parse(entry["@timestamp"]).astimezone().strftime('%Y-%m-%d %H:%M')
+                        message = entry["message"]
+                        user = (entry["user_full_name"] if "user_full_name" in entry else "")
+                        eventtype = entry["event_type"]
+                        log_entries.append("\n"+ date + "\nEvent: " + eventtype + "\n" + message + ("\nUser: " + user if "user_full_name" in entry else ""))
+
+                    if len(log_entries) > 1:
+                        response_statement = "Here are the last " + str(len(log_entries)) + " audit log entries in project " + most_similar_project + " of organisation " + most_similar_organisation + ": "
+                        response_statement += "\n".join(log_entries)
+                    elif len(log_entries) == 1:
+                        response_statement = "You have 1 audit log entry in project " + most_similar_project + " of organisation " + most_similar_organisation + ": "
+                        response_statement += log_entries[0] + "."
+                    else:
+                        response_statement = "Audit log in project " + most_similar_project + " of organisation " + most_similar_organisation + " is empty. "
+
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
+
 class GetTotalCostGraphRequest(SingleRequest):
     ID = 5
     NAME = 'get_totalcosts'
@@ -883,6 +1036,20 @@ class GetOrganisationsAndIdsRequest(SingleRequest):
 
         return {organisation['name']: organisation["uuid"] for organisation in response}
 
+class GetProjectsAndIdsByOrganisationRequest(SingleRequest):
+    NAME = 'util_get_projects_by_organisation'
+
+    def __init__(self):
+        super(GetProjectsAndIdsByOrganisationRequest, self).__init__(
+            method='GET',
+            endpoint='projects',
+            parameters={}
+        )
+
+    def process(self):
+        response = self.send()
+
+        return {project['name']: project["uuid"] for project in response}
 
 def all_subclasses(cls=Request):
     return cls.__subclasses__() + [g for s in cls.__subclasses__() for g in all_subclasses(s)]
