@@ -14,4 +14,4 @@ Current iteration: 3rd iteration
 Example:
         `pip install -r requirements.txt`
 4. [Continue here](../../wiki/Setting-up-local-project)
-
+5. Run chatbot from file "run.py" in the backend module.
