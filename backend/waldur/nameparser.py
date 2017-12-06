@@ -41,7 +41,8 @@ def extract_names(sentences):
         names = []
         sentences = preprocess(sentences)
         for tagged_sentence in sentences:
-            chunkGram = r"""Chunk: {<NNP>+<CC>?<NNP>*}""" # NNP - proper noun, CC - coordinating conjunction
+            # NNP - proper noun, CC - coordinating conjunction
+            chunkGram = r"""Chunk: {<NNP>+<CC>?<NNP>*}"""
             chunkParser = nltk.RegexpParser(chunkGram)
             chunked = chunkParser.parse(tagged_sentence)
             for chunk in chunked:
