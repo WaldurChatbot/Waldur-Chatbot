@@ -96,7 +96,6 @@ class Request(object):
     def to_string(self):  # todo do we need this?
         return "REQUEST" + sep + type(self).NAME
 
-
     @staticmethod
     def from_string(string):
         """
@@ -282,45 +281,46 @@ class InputRequest(Request):
         else:
             raise Exception("Should be at the next question at this point")
 
-
-class GetServicesRequest(SingleRequest):
-    ID = 1
-    NAME = 'get_services'
+class GetOrganisationsRequest(SingleRequest):
+    ID = 4
+    NAME = 'get_organisations'
 
     def __init__(self):
-        super(GetServicesRequest, self).__init__(
+        super(GetOrganisationsRequest, self).__init__(
             method='GET',
-            endpoint='services',
+            endpoint='customers',
+            parameters={
+                "page_size" : 100
+            }
         )
 
     def process(self):
         response = self.send()
 
-        services = set([service['name'] for service in response])
+        organisations = [organisation['name'] for organisation in response]
 
-        if len(services) >= 1:
+        if len(organisations) > 1:
             response_statement = \
-                "You have a total of {n} services in use. " \
-                "They are {services}." \
-                .format(
-                    n=len(services),
-                    services=", ".join(services)
+                "You are part of {n} organisations. " \
+                "They are:\n    {organisations}" \
+                    .format(
+                    n=len(organisations),
+                    organisations="\n    ".join(organisations)
                 )
-        elif len(services) == 1:
+        elif len(organisations) == 1:
             response_statement = \
-                "You have a total of 1 service in use. " \
-                "This service is {service}." \
-                .format(
-                    service=services[0]
+                "You are part of 1 organisation. " \
+                "The organisation is {organisation}" \
+                    .format(
+                    organisation=organisations[0]
                 )
         else:
-            response_statement = "Your organisation isn't using any services."
+            response_statement = "You you aren't part of any organisation."
 
         return {
             'data': response_statement,
             'type': 'text'
         }
-
 
 class GetProjectsRequest(SingleRequest):
     ID = 2
@@ -330,6 +330,9 @@ class GetProjectsRequest(SingleRequest):
         super(GetProjectsRequest, self).__init__(
             method='GET',
             endpoint='customers',
+            parameters={
+                "page_size" : 100
+            }
         )
 
     def process(self):
@@ -357,82 +360,46 @@ class GetProjectsRequest(SingleRequest):
             'type': 'text'
         }
 
-
-class GetVmsRequest(SingleRequest):
-    ID = 3
-    NAME = 'get_vms'
+class GetServicesRequest(SingleRequest):
+    ID = 1
+    NAME = 'get_services'
 
     def __init__(self):
-        super(GetVmsRequest, self).__init__(
+        super(GetServicesRequest, self).__init__(
             method='GET',
-            endpoint='openstacktenant-instances',
+            endpoint='services',
+            parameters={
+                "page_size" : 100
+            }
         )
 
     def process(self):
         response = self.send()
 
-        len_all = 0
-        statement = ""
-        organisations = itertools.groupby(response, lambda vm: vm['customer_name'])
-        for organisation, vms in organisations:
-            names = {vm['name'] + ": " + ("None" if len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in vms}
-            len_all += len(names)
-            if len(names) > 0:
-                statement += "\nOrganisation '" + organisation + "':\n    " + "\n    ".join(names)
+        services = set([service['name'] for service in response])
 
-        if len_all > 0:
-            if len_all == 1:
-                response_statement = "You have 1 virtual machine in total."
-            else:
-                response_statement = "You have " + str(len_all) + " virtual machines in total."
-            response_statement += statement
+        if len(services) >= 1:
+            response_statement = \
+                "You have access to {n} service providers. " \
+                "They are:\n    {services}" \
+                    .format(
+                    n=len(services),
+                    services="\n    ".join(services)
+                )
+        elif len(services) == 1:
+            response_statement = \
+                "You have access to 1 service provider. " \
+                "This service is {service}." \
+                    .format(
+                    service=services[0]
+                )
         else:
-            response_statement = "You don't have any virtual machines."
+            response_statement = "You dont have access to any service providers."
 
         return {
             'data': response_statement,
             'type': 'text'
         }
-
-
-class GetOrganisationsRequest(SingleRequest):
-    ID = 4
-    NAME = 'get_organisations'
-
-    def __init__(self):
-        super(GetOrganisationsRequest, self).__init__(
-            method='GET',
-            endpoint='customers'
-        )
-
-    def process(self):
-        response = self.send()
-
-        organisations = [organisation['name'] for organisation in response]
-
-        if len(organisations) > 1:
-            response_statement = \
-                "You are part of {n} organisations. " \
-                "They are {organisations}" \
-                .format(
-                    n=len(organisations),
-                    organisations=", ".join(organisations)
-                )
-        elif len(organisations) == 1:
-            response_statement = \
-                "You are part of 1 organisation. " \
-                "The organisation is {organisation}" \
-                .format(
-                    organisation=organisations[0]
-                )
-        else:
-            response_statement = "You you aren't part of any organisation."
-
-        return {
-            'data': response_statement,
-            'type': 'text'
-        }
-
 
 class GetServicesByOrganisationRequest(SingleRequest):
     ID = 6
@@ -442,7 +409,9 @@ class GetServicesByOrganisationRequest(SingleRequest):
         super(GetServicesByOrganisationRequest, self).__init__(
             method='GET',
             endpoint='services',
-            parameters={}
+            parameters={
+                "page_size" : 100
+            }
         )
 
     def process(self):
@@ -472,19 +441,29 @@ class GetServicesByOrganisationRequest(SingleRequest):
                 service_names = set([service['name'] for service in response])
 
                 if len(service_names) > 1:
-                    response_statement = "You have " + str(
-                        len(service_names)) + " services in use in " + most_similar + ". "
-                    response_statement += "They are " + (", ".join(service_names)) + ". "
+                    response_statement = \
+                        "You have access to {n} service providers in {similar}.\n" \
+                        "They are:\n    {services}" \
+                            .format(
+                            n=len(service_names),
+                            similar=most_similar,
+                            services="\n    ".join(service_names)
+                        )
                 elif len(service_names) == 1:
-                    response_statement = "You have 1 service in use in " + most_similar + ". "
-                    response_statement += "The service is " + str(service_names[0])
+                    response_statement = \
+                        "You have access to 1 service provider in {similar}.\n" \
+                        "This service is {service}." \
+                            .format(
+                            similar=most_similar,
+                            service=service_names[0]
+                        )
                 else:
-                    response_statement = "You don't have any services in use in " + most_similar + ". "
-
+                    response_statement = "You don't have access to any service providers in " + most_similar + ". "
         return {
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetServicesByProjectAndOrganisationRequest(SingleRequest):
     ID = 14
@@ -494,7 +473,9 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
         super(GetServicesByProjectAndOrganisationRequest, self).__init__(
             method='GET',
             endpoint='projects',
-            parameters={}
+            parameters={
+                "page_size" : 100
+            }
         )
 
     def process(self):
@@ -520,9 +501,8 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
             if most_similar_organisation == "":
                 response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
                                      + organisation_name[0] + "\". Please check that an " \
-                                                                    "organisation with that name exists."
+                                                              "organisation with that name exists."
             else:
-
 
                 secondreq = GetProjectsAndIdsByOrganisationRequest()
                 secondreq.token = self.token
@@ -535,7 +515,7 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
                 if most_similar_project == "":
                     response_statement = "Sorry, I wasn't able to find a project with the name \"" \
                                          + project_name[0] + "\". Please check that a " \
-                                                                  "project with that name exists."
+                                                             "project with that name exists."
 
                 else:
 
@@ -546,19 +526,72 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
                     service_names = set([service['name'] for service in response["services"]])
 
                     if len(service_names) > 1:
-                        response_statement = "You have " + str(
-                            len(service_names)) + " services in use in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
-                        response_statement += "They are " + (", ".join(service_names)) + ". "
+                        response_statement = \
+                            "You have access to {n} service providers in project {similar_project} of organisation {similar_organisation}.\n" \
+                            "They are:\n    {services}" \
+                                .format(
+                                n=len(service_names),
+                                similar_project=most_similar_project,
+                                similar_organisation=most_similar_organisation,
+                                services="\n    ".join(service_names)
+                            )
                     elif len(service_names) == 1:
-                        response_statement = "You have 1 service in use in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
-                        response_statement += "The service is " + str(service_names[0])
+                        response_statement = \
+                            "You have access to 1 service provider in project {similar_project} of organisation {similar_organisation}.\n" \
+                            "This service is {service}." \
+                                .format(
+                                similar_project=most_similar_project,
+                                similar_organisation=most_similar_organisation,
+                                service=service_names[0]
+                            )
                     else:
-                        response_statement = "You don't have any services in use in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+                        response_statement = "You don't have access to any service providers in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
+
+class GetVmsRequest(SingleRequest):
+    ID = 3
+    NAME = 'get_vms'
+
+    def __init__(self):
+        super(GetVmsRequest, self).__init__(
+            method='GET',
+            endpoint='openstacktenant-instances',
+            parameters={
+                "page_size" : 100
+            }
+        )
+
+    def process(self):
+        response = self.send()
+
+        len_all = 0
+        statement = ""
+        organisations = itertools.groupby(response, lambda vm: vm['customer_name'])
+        for organisation, vms in organisations:
+            names = {
+                vm['name'] + ": " + ("-" if len(vm['internal_ips']) == 0 else ", ".join(vm['internal_ips'])) + " / " +
+                ("-" if len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in vms}
+            len_all += len(names)
+            if len(names) > 0:
+                statement += "\nOrganisation '" + organisation + "':\n    " + "\n    ".join(names)
+
+        if len_all > 0:
+            if len_all == 1:
+                response_statement = "You have 1 virtual machine in total."
+            else:
+                response_statement = "You have " + str(len_all) + " virtual machines in total."
+            response_statement += statement
+        else:
+            response_statement = "You don't have any virtual machines."
 
         return {
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetVmsByOrganisationRequest(SingleRequest):
     ID = 8
@@ -568,7 +601,9 @@ class GetVmsByOrganisationRequest(SingleRequest):
         super(GetVmsByOrganisationRequest, self).__init__(
             method='GET',
             endpoint='openstacktenant-instances',
-            parameters={}
+            parameters={
+                "page_size" : 100
+            }
         )
 
     def process(self):
@@ -595,18 +630,19 @@ class GetVmsByOrganisationRequest(SingleRequest):
                 self.parameters["customer"] = organisations_with_uuid[most_similar]
                 response = self.send()
 
-                vm_names = {vm['name']: (["None"] if len(vm['external_ips']) == 0 else vm['external_ips']) for vm in
-                            response}
+                vm_names = {
+                    vm['name'] + ": " + (
+                    "-" if len(vm['internal_ips']) == 0 else ", ".join(vm['internal_ips'])) + " / " +
+                    ("-" if len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in response}
 
                 if len(vm_names) > 1:
-                    response_statement = "You have " + str(len(vm_names)) + " virtual machines in " + most_similar + ". "
-                    response_statement += "Here are their names and public IPs: "
-                    response_statement += "; ".join(
-                        [vm + ": " + (", ".join(vm_names[vm])) for vm in vm_names.keys()]) + ". "
+                    response_statement = "You have " + str(
+                        len(vm_names)) + " virtual machines in " + most_similar + ":\n    "
+                    response_statement += "\n    ".join(vm_names)
                 elif len(vm_names) == 1:
-                    response_statement = "You have 1 virtual machine in " + most_similar + ". "
-                    response_statement += "The virtual machine is " + str(list(vm_names.keys())[0])
-                    response_statement += " and it's public IP: " + str(", ".join(list(vm_names.values())[0])) + ". "
+                    response_statement = "You have 1 virtual machine in " + most_similar + ".\n"
+                    response_statement += "The virtual machine is:\n    "
+                    response_statement += vm_names.pop()
                 else:
                     response_statement = "You don't have any virtual machines in " + most_similar + ". "
 
@@ -614,6 +650,7 @@ class GetVmsByOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetVmsByProjectAndOrganisationRequest(SingleRequest):
     ID = 15
@@ -623,7 +660,9 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
         super(GetVmsByProjectAndOrganisationRequest, self).__init__(
             method='GET',
             endpoint='openstacktenant-instances',
-            parameters={}
+            parameters={
+                "page_size" : 100
+            }
         )
 
     def process(self):
@@ -649,9 +688,8 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
             if most_similar_organisation == "":
                 response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
                                      + organisation_name[0] + "\". Please check that an " \
-                                                                    "organisation with that name exists."
+                                                              "organisation with that name exists."
             else:
-
 
                 secondreq = GetProjectsAndIdsByOrganisationRequest()
                 secondreq.token = self.token
@@ -664,27 +702,27 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
                 if most_similar_project == "":
                     response_statement = "Sorry, I wasn't able to find a project with the name \"" \
                                          + project_name[0] + "\". Please check that a " \
-                                                                  "project with that name exists."
+                                                             "project with that name exists."
 
                 else:
 
                     self.parameters["project"] = projects_with_uuid[most_similar_project]
                     response = self.send()
 
-                    vm_names = {vm['name']: (["None"] if len(vm['external_ips']) == 0 else vm['external_ips']) for vm in
-                                response}
+                    vm_names = {
+                        vm['name'] + ": " + (
+                            "-" if len(vm['internal_ips']) == 0 else ", ".join(vm['internal_ips'])) + " / " +
+                        ("-" if len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in response}
 
                     if len(vm_names) > 1:
                         response_statement = "You have " + str(
-                            len(vm_names)) + " virtual machines in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
-                        response_statement += "Here are their names and public IPs: "
-                        response_statement += "; ".join(
-                            [vm + ": " + (", ".join(vm_names[vm])) for vm in vm_names.keys()]) + ". "
+                            len(
+                                vm_names)) + " virtual machines in project " + most_similar_project + " of organisation " + most_similar_organisation + ":\n    "
+                        response_statement += "\n    ".join(vm_names)
                     elif len(vm_names) == 1:
-                        response_statement = "You have 1 virtual machine in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
-                        response_statement += "The virtual machine is " + str(list(vm_names.keys())[0])
-                        response_statement += " and it's public IP: " + str(
-                            ", ".join(list(vm_names.values())[0])) + ". "
+                        response_statement = "You have 1 virtual machine in project " + most_similar_project + " of organisation " + most_similar_organisation + ":\n"
+                        response_statement += "The virtual machine is:\n    "
+                        response_statement += vm_names.pop()
                     else:
                         response_statement = "You don't have any virtual machines in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
 
@@ -692,61 +730,6 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
-
-class GetTeamOfOrganisationRequest(SingleRequest):
-    ID = 10
-    NAME = 'get_team_of_organisation'
-
-    def __init__(self):
-        super(GetTeamOfOrganisationRequest, self).__init__(
-            method='GET',
-            endpoint='customers'
-        )
-
-    def process(self):
-
-        firstreq = GetOrganisationsAndIdsRequest()
-        firstreq.token = self.token
-
-        organisations_with_uuid = firstreq.process()
-        organisations = [x for x in organisations_with_uuid]
-
-        extracted_organisations = extract_names(self.original)
-
-        if len(extracted_organisations) == 0:
-            response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
-                                 "Please write it out in capital case!"
-        else:
-            most_similar = getSimilarNames(extracted_organisations, organisations)
-            if most_similar == "":
-                response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
-                                     + extracted_organisations[0] + "\". Please check that an " \
-                                                                    "organisation with that name exists."
-            else:
-
-                self.endpoint += "/" + organisations_with_uuid[most_similar]
-                response = self.send()
-
-                owners = [owner['full_name'] for owner in response["owners"]]
-                supportusers = [supportuser['full_name'] for supportuser in response["support_users"]]
-
-                response_statement = "The following people are team members of " + most_similar + ": "
-                if len(owners) > 1:
-                    response_statement += "\nOwners: " + (", ".join(owners)) + "."
-                elif len(owners) == 1:
-                    response_statement += "\nThe owner: " + str(owners[0]) + "."
-                if len(supportusers) > 1:
-                    response_statement = "\nSupport: " + (", ".join(owners)) + ". "
-                elif len(supportusers) == 1:
-                    response_statement += "\nThe support: " + str(supportusers[0]) + ". "
-                if len(owners) + len(supportusers) == 0:
-                    response_statement = "The organisation " + most_similar + " doesn't have any team members. "
-
-        return {
-            'data': response_statement,
-            'type': 'text'
-        }
-
 
 class GetPrivateCloudsRequest(SingleRequest):
     ID = 9
@@ -756,6 +739,9 @@ class GetPrivateCloudsRequest(SingleRequest):
         super(GetPrivateCloudsRequest, self).__init__(
             method='GET',
             endpoint='openstack-tenants',
+            parameters={
+                "page_size" : 100
+            }
         )
 
     def process(self):
@@ -765,17 +751,17 @@ class GetPrivateCloudsRequest(SingleRequest):
 
         if len(clouds) >= 1:
             response_statement = \
-                "You have {n} private clouds. " \
-                "They are {clouds}." \
-                .format(
+                "You have {n} private clouds.\n" \
+                "They are:\n    {clouds}" \
+                    .format(
                     n=len(clouds),
-                    clouds=", ".join(clouds)
+                    clouds="\n    ".join(clouds)
                 )
         elif len(clouds) == 1:
             response_statement = \
                 "You have 1 private cloud. " \
                 "It's name is {cloud}." \
-                .format(
+                    .format(
                     cloud=clouds[0]
                 )
         else:
@@ -786,6 +772,7 @@ class GetPrivateCloudsRequest(SingleRequest):
             'type': 'text'
         }
 
+
 class GetPrivateCloudsByOrganisationRequest(SingleRequest):
     ID = 11
     NAME = 'get_private_clouds_by_organisation'
@@ -794,7 +781,9 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
         super(GetPrivateCloudsByOrganisationRequest, self).__init__(
             method='GET',
             endpoint='openstack-tenants',
-            parameters={}
+            parameters={
+                "page_size" : 100
+            }
         )
 
     def process(self):
@@ -824,12 +813,22 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
                 clouds = [cloud["name"] for cloud in response]
 
                 if len(clouds) > 1:
-                    response_statement = "You have " + str(len(clouds)) + " private clouds in " + most_similar + ". "
-                    response_statement += "Here are their names: "
-                    response_statement += ", ".join(clouds) + ". "
+                    response_statement = \
+                        "You have {n} private clouds in {similar}.\n" \
+                        "They are:\n    {clouds}" \
+                            .format(
+                            n=len(clouds),
+                            similar=most_similar,
+                            clouds="\n    ".join(clouds)
+                        )
                 elif len(clouds) == 1:
-                    response_statement = "You have 1 private cloud in " + most_similar + ". "
-                    response_statement += "The cloud is " + clouds[0] + "."
+                    response_statement = \
+                        "You have 1 private cloud in {similar}.\n" \
+                        "It's name is {cloud}." \
+                            .format(
+                            similar=most_similar,
+                            cloud=clouds[0]
+                        )
                 else:
                     response_statement = "You don't have any private clouds in " + most_similar + ". "
 
@@ -837,6 +836,7 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
     ID = 16
@@ -846,7 +846,9 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
         super(GetPrivateCloudsByProjectAndOrganisationRequest, self).__init__(
             method='GET',
             endpoint='openstack-tenants',
-            parameters={}
+            parameters={
+                "page_size" : 100
+            }
         )
 
     def process(self):
@@ -872,9 +874,8 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
             if most_similar_organisation == "":
                 response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
                                      + organisation_name[0] + "\". Please check that an " \
-                                                                    "organisation with that name exists."
+                                                              "organisation with that name exists."
             else:
-
 
                 secondreq = GetProjectsAndIdsByOrganisationRequest()
                 secondreq.token = self.token
@@ -887,7 +888,7 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
                 if most_similar_project == "":
                     response_statement = "Sorry, I wasn't able to find a project with the name \"" \
                                          + project_name[0] + "\". Please check that a " \
-                                                                  "project with that name exists."
+                                                             "project with that name exists."
 
                 else:
 
@@ -897,13 +898,24 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
                     clouds = [cloud["name"] for cloud in response]
 
                     if len(clouds) > 1:
-                        response_statement = "You have " + str(
-                            len(clouds)) + " private clouds in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
-                        response_statement += "Here are their names: "
-                        response_statement += ", ".join(clouds) + ". "
+                        response_statement = \
+                            "You have {n} private clouds in project {similar_project} of organisation {similar_organisation}.\n" \
+                            "They are:\n    {clouds}" \
+                                .format(
+                                n=len(clouds),
+                                similar_project=most_similar_project,
+                                similar_organisation=most_similar_organisation,
+                                clouds="\n    ".join(clouds)
+                            )
                     elif len(clouds) == 1:
-                        response_statement = "You have 1 private cloud in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
-                        response_statement += "The cloud is " + clouds[0] + "."
+                        response_statement = \
+                            "You have 1 private cloud in project {similar_project} of organisation {similar_organisation}.\n" \
+                            "It's name is {cloud}." \
+                                .format(
+                                similar_project=most_similar_project,
+                                similar_organisation=most_similar_organisation,
+                                cloud=clouds[0]
+                            )
                     else:
                         response_statement = "You don't have any private clouds in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
 
@@ -911,6 +923,7 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetAuditLogByOrganisationRequest(SingleRequest):
     ID = 12
@@ -920,7 +933,9 @@ class GetAuditLogByOrganisationRequest(SingleRequest):
         super(GetAuditLogByOrganisationRequest, self).__init__(
             method='GET',
             endpoint='events',
-            parameters={}
+            parameters={
+                "page_size" : 100
+            }
         )
 
     def process(self):
@@ -943,8 +958,9 @@ class GetAuditLogByOrganisationRequest(SingleRequest):
                                      + extracted_organisations[0] + "\". Please check that an " \
                                                                     "organisation with that name exists."
             else:
-                self.parameters["scope"] = "https://api.etais.ee/api/customers/" + str(organisations_with_uuid[most_similar]) + "/"
-                self.parameters["page_size"] = 10 # This param represents the last n events that will be displayed
+                self.parameters["scope"] = "https://api.etais.ee/api/customers/" + str(
+                    organisations_with_uuid[most_similar]) + "/"
+                self.parameters["page_size"] = 10  # This param represents the last n events that will be displayed
                 response = self.send()
 
                 log_entries = []
@@ -953,10 +969,12 @@ class GetAuditLogByOrganisationRequest(SingleRequest):
                     message = entry["message"]
                     user = (entry["user_full_name"] if "user_full_name" in entry else "")
                     eventtype = entry["event_type"]
-                    log_entries.append("\n"+ date + "\nEvent: " + eventtype + "\n" + message + ("\nUser: " + user if "user_full_name" in entry else ""))
+                    log_entries.append("\n" + date + "\nEvent: " + eventtype + "\n" + message + (
+                        "\nUser: " + user if "user_full_name" in entry else ""))
 
                 if len(log_entries) > 1:
-                    response_statement = "Here are the last " + str(len(log_entries)) + " audit log entries in " + most_similar + ": "
+                    response_statement = "Here are the last " + str(
+                        len(log_entries)) + " audit log entries in " + most_similar + ": "
                     response_statement += "\n".join(log_entries)
                 elif len(log_entries) == 1:
                     response_statement = "You have 1 audit log entry in " + most_similar + ": "
@@ -969,6 +987,7 @@ class GetAuditLogByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
+
 class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
     ID = 13
     NAME = 'get_audit_log_by_project_and_organisation'
@@ -977,7 +996,9 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
         super(GetAuditLogByProjectAndOrganisationRequest, self).__init__(
             method='GET',
             endpoint='events',
-            parameters={}
+            parameters={
+                "page_size" : 100
+            }
         )
 
     def process(self):
@@ -1003,9 +1024,8 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
             if most_similar_organisation == "":
                 response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
                                      + organisation_name[0] + "\". Please check that an " \
-                                                                    "organisation with that name exists."
+                                                              "organisation with that name exists."
             else:
-
 
                 secondreq = GetProjectsAndIdsByOrganisationRequest()
                 secondreq.token = self.token
@@ -1018,12 +1038,13 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
                 if most_similar_project == "":
                     response_statement = "Sorry, I wasn't able to find a project with the name \"" \
                                          + project_name[0] + "\". Please check that a " \
-                                                                  "project with that name exists."
+                                                             "project with that name exists."
 
                 else:
 
-                    self.parameters["scope"] = "https://api.etais.ee/api/projects/" + str(projects_with_uuid[most_similar_project]) + "/"
-                    self.parameters["page_size"] = 10 # This param represents the last n events that will be displayed
+                    self.parameters["scope"] = "https://api.etais.ee/api/projects/" + str(
+                        projects_with_uuid[most_similar_project]) + "/"
+                    self.parameters["page_size"] = 10  # This param represents the last n events that will be displayed
                     response = self.send()
 
                     log_entries = []
@@ -1032,16 +1053,81 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
                         message = entry["message"]
                         user = (entry["user_full_name"] if "user_full_name" in entry else "")
                         eventtype = entry["event_type"]
-                        log_entries.append("\n"+ date + "\nEvent: " + eventtype + "\n" + message + ("\nUser: " + user if "user_full_name" in entry else ""))
+                        log_entries.append("\n" + date + "\nEvent: " + eventtype + "\n" + message + (
+                            "\nUser: " + user if "user_full_name" in entry else ""))
 
                     if len(log_entries) > 1:
-                        response_statement = "Here are the last " + str(len(log_entries)) + " audit log entries in project " + most_similar_project + " of organisation " + most_similar_organisation + ": "
+                        response_statement = "Here are the last " + str(len(
+                            log_entries)) + " audit log entries in project " + most_similar_project + " of organisation " + most_similar_organisation + ": "
                         response_statement += "\n".join(log_entries)
                     elif len(log_entries) == 1:
                         response_statement = "You have 1 audit log entry in project " + most_similar_project + " of organisation " + most_similar_organisation + ": "
                         response_statement += log_entries[0] + "."
                     else:
                         response_statement = "Audit log in project " + most_similar_project + " of organisation " + most_similar_organisation + " is empty. "
+
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
+
+class GetTeamOfOrganisationRequest(SingleRequest):
+    ID = 10
+    NAME = 'get_team_of_organisation'
+
+    def __init__(self):
+        super(GetTeamOfOrganisationRequest, self).__init__(
+            method='GET',
+            endpoint='customers',
+            parameters={
+                "page_size" : 100
+            }
+        )
+
+    def process(self):
+
+        firstreq = GetOrganisationsAndIdsRequest()
+        firstreq.token = self.token
+
+        organisations_with_uuid = firstreq.process()
+        organisations = [x for x in organisations_with_uuid]
+
+        extracted_organisations = extract_names(self.original)
+
+        if len(extracted_organisations) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                                 "Please write it out in capital case!"
+        else:
+            most_similar = getSimilarNames(extracted_organisations, organisations)
+            if most_similar == "":
+                response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
+                                     + extracted_organisations[0] + "\". Please check that an " \
+                                                                    "organisation with that name exists."
+            else:
+
+                self.endpoint += "/" + organisations_with_uuid[most_similar] + "/users/"
+                response = self.send()
+
+                print(response)
+                owners = [owner['full_name'] for owner in response if owner["role"] == "owner" and owner['full_name'] != ""]
+                supportusers = [supportuser['full_name'] for supportuser in response if supportuser["role"] == "support_user" and supportuser['full_name'] != ""]
+                others = [other['full_name'] for other in response if other["role"] == None and other['full_name'] != ""]
+
+                response_statement = "The following people are team members of " + most_similar + ": "
+                if len(owners) > 1:
+                    response_statement += "\nOwners: " + (", ".join(owners)) + "."
+                elif len(owners) == 1:
+                    response_statement += "\nThe owner: " + str(owners[0]) + "."
+                if len(supportusers) > 1:
+                    response_statement = "\nSupport: " + (", ".join(owners)) + ". "
+                elif len(supportusers) == 1:
+                    response_statement += "\nThe support: " + str(supportusers[0]) + ". "
+                elif len(others) > 1:
+                    response_statement += "\nOthers: " + (", ".join(owners)) + "."
+                elif len(others) == 1:
+                    response_statement += "\nOther: " + str(others[0]) + "."
+                if len(owners) + len(supportusers) == 0:
+                    response_statement = "The organisation " + most_similar + " doesn't have any team members. "
 
         return {
             'data': response_statement,
@@ -1187,6 +1273,7 @@ class GetOrganisationsAndIdsRequest(SingleRequest):
 
         return {organisation['name']: organisation["uuid"] for organisation in response}
 
+
 class GetProjectsAndIdsByOrganisationRequest(SingleRequest):
     NAME = 'util_get_projects_by_organisation'
 
@@ -1201,6 +1288,7 @@ class GetProjectsAndIdsByOrganisationRequest(SingleRequest):
         response = self.send()
 
         return {project['name']: project["uuid"] for project in response}
+
 
 def all_subclasses(cls=Request):
     return cls.__subclasses__() + [g for s in cls.__subclasses__() for g in all_subclasses(s)]
