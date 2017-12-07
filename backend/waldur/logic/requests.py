@@ -281,6 +281,7 @@ class InputRequest(Request):
         else:
             raise Exception("Should be at the next question at this point")
 
+
 class GetOrganisationsRequest(SingleRequest):
     ID = 4
     NAME = 'get_organisations'
@@ -290,7 +291,7 @@ class GetOrganisationsRequest(SingleRequest):
             method='GET',
             endpoint='customers',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -303,7 +304,7 @@ class GetOrganisationsRequest(SingleRequest):
             response_statement = \
                 "You are part of {n} organisations. " \
                 "They are:\n    {organisations}" \
-                    .format(
+                .format(
                     n=len(organisations),
                     organisations="\n    ".join(organisations)
                 )
@@ -311,7 +312,7 @@ class GetOrganisationsRequest(SingleRequest):
             response_statement = \
                 "You are part of 1 organisation. " \
                 "The organisation is {organisation}" \
-                    .format(
+                .format(
                     organisation=organisations[0]
                 )
         else:
@@ -322,6 +323,7 @@ class GetOrganisationsRequest(SingleRequest):
             'type': 'text'
         }
 
+
 class GetProjectsRequest(SingleRequest):
     ID = 2
     NAME = 'get_projects'
@@ -331,7 +333,7 @@ class GetProjectsRequest(SingleRequest):
             method='GET',
             endpoint='customers',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -360,6 +362,7 @@ class GetProjectsRequest(SingleRequest):
             'type': 'text'
         }
 
+
 class GetServicesRequest(SingleRequest):
     ID = 1
     NAME = 'get_services'
@@ -369,7 +372,7 @@ class GetServicesRequest(SingleRequest):
             method='GET',
             endpoint='services',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -382,7 +385,7 @@ class GetServicesRequest(SingleRequest):
             response_statement = \
                 "You have access to {n} service providers. " \
                 "They are:\n    {services}" \
-                    .format(
+                .format(
                     n=len(services),
                     services="\n    ".join(services)
                 )
@@ -390,7 +393,7 @@ class GetServicesRequest(SingleRequest):
             response_statement = \
                 "You have access to 1 service provider. " \
                 "This service is {service}." \
-                    .format(
+                .format(
                     service=services[0]
                 )
         else:
@@ -401,6 +404,7 @@ class GetServicesRequest(SingleRequest):
             'type': 'text'
         }
 
+
 class GetServicesByOrganisationRequest(SingleRequest):
     ID = 6
     NAME = 'get_services_by_organisation'
@@ -410,7 +414,7 @@ class GetServicesByOrganisationRequest(SingleRequest):
             method='GET',
             endpoint='services',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -444,7 +448,7 @@ class GetServicesByOrganisationRequest(SingleRequest):
                     response_statement = \
                         "You have access to {n} service providers in {similar}.\n" \
                         "They are:\n    {services}" \
-                            .format(
+                        .format(
                             n=len(service_names),
                             similar=most_similar,
                             services="\n    ".join(service_names)
@@ -453,7 +457,7 @@ class GetServicesByOrganisationRequest(SingleRequest):
                     response_statement = \
                         "You have access to 1 service provider in {similar}.\n" \
                         "This service is {service}." \
-                            .format(
+                        .format(
                             similar=most_similar,
                             service=service_names[0]
                         )
@@ -474,7 +478,7 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
             method='GET',
             endpoint='projects',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -527,9 +531,9 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
 
                     if len(service_names) > 1:
                         response_statement = \
-                            "You have access to {n} service providers in project {similar_project} of organisation {similar_organisation}.\n" \
-                            "They are:\n    {services}" \
-                                .format(
+                            "You have access to {n} service providers in project {similar_project} of organisation " \
+                            "{similar_organisation}.\nThey are:\n    {services}" \
+                            .format(
                                 n=len(service_names),
                                 similar_project=most_similar_project,
                                 similar_organisation=most_similar_organisation,
@@ -537,19 +541,22 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
                             )
                     elif len(service_names) == 1:
                         response_statement = \
-                            "You have access to 1 service provider in project {similar_project} of organisation {similar_organisation}.\n" \
-                            "This service is {service}." \
-                                .format(
+                            "You have access to 1 service provider in project {similar_project} of organisation " \
+                            "{similar_organisation}.\nThis service is {service}." \
+                            .format(
                                 similar_project=most_similar_project,
                                 similar_organisation=most_similar_organisation,
                                 service=service_names[0]
                             )
                     else:
-                        response_statement = "You don't have access to any service providers in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+                        response_statement = "You don't have access to any service providers in project " + \
+                                             most_similar_project + " of organisation " + most_similar_organisation \
+                                             + ". "
         return {
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetVmsRequest(SingleRequest):
     ID = 3
@@ -560,7 +567,7 @@ class GetVmsRequest(SingleRequest):
             method='GET',
             endpoint='openstacktenant-instances',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -602,7 +609,7 @@ class GetVmsByOrganisationRequest(SingleRequest):
             method='GET',
             endpoint='openstacktenant-instances',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -632,7 +639,7 @@ class GetVmsByOrganisationRequest(SingleRequest):
 
                 vm_names = {
                     vm['name'] + ": " + (
-                    "-" if len(vm['internal_ips']) == 0 else ", ".join(vm['internal_ips'])) + " / " +
+                        "-" if len(vm['internal_ips']) == 0 else ", ".join(vm['internal_ips'])) + " / " +
                     ("-" if len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in response}
 
                 if len(vm_names) > 1:
@@ -661,7 +668,7 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
             method='GET',
             endpoint='openstacktenant-instances',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -717,19 +724,23 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
                     if len(vm_names) > 1:
                         response_statement = "You have " + str(
                             len(
-                                vm_names)) + " virtual machines in project " + most_similar_project + " of organisation " + most_similar_organisation + ":\n    "
+                                vm_names)) + " virtual machines in project " + most_similar_project + \
+                                             " of organisation " + most_similar_organisation + ":\n    "
                         response_statement += "\n    ".join(vm_names)
                     elif len(vm_names) == 1:
-                        response_statement = "You have 1 virtual machine in project " + most_similar_project + " of organisation " + most_similar_organisation + ":\n"
+                        response_statement = "You have 1 virtual machine in project " + most_similar_project + \
+                                             " of organisation " + most_similar_organisation + ":\n"
                         response_statement += "The virtual machine is:\n    "
                         response_statement += vm_names.pop()
                     else:
-                        response_statement = "You don't have any virtual machines in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+                        response_statement = "You don't have any virtual machines in project " + most_similar_project\
+                                             + " of organisation " + most_similar_organisation + ". "
 
         return {
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetPrivateCloudsRequest(SingleRequest):
     ID = 9
@@ -740,7 +751,7 @@ class GetPrivateCloudsRequest(SingleRequest):
             method='GET',
             endpoint='openstack-tenants',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -753,7 +764,7 @@ class GetPrivateCloudsRequest(SingleRequest):
             response_statement = \
                 "You have {n} private clouds.\n" \
                 "They are:\n    {clouds}" \
-                    .format(
+                .format(
                     n=len(clouds),
                     clouds="\n    ".join(clouds)
                 )
@@ -761,7 +772,7 @@ class GetPrivateCloudsRequest(SingleRequest):
             response_statement = \
                 "You have 1 private cloud. " \
                 "It's name is {cloud}." \
-                    .format(
+                .format(
                     cloud=clouds[0]
                 )
         else:
@@ -782,7 +793,7 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
             method='GET',
             endpoint='openstack-tenants',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -816,7 +827,7 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
                     response_statement = \
                         "You have {n} private clouds in {similar}.\n" \
                         "They are:\n    {clouds}" \
-                            .format(
+                        .format(
                             n=len(clouds),
                             similar=most_similar,
                             clouds="\n    ".join(clouds)
@@ -825,7 +836,7 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
                     response_statement = \
                         "You have 1 private cloud in {similar}.\n" \
                         "It's name is {cloud}." \
-                            .format(
+                        .format(
                             similar=most_similar,
                             cloud=clouds[0]
                         )
@@ -847,7 +858,7 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
             method='GET',
             endpoint='openstack-tenants',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -899,9 +910,9 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
 
                     if len(clouds) > 1:
                         response_statement = \
-                            "You have {n} private clouds in project {similar_project} of organisation {similar_organisation}.\n" \
-                            "They are:\n    {clouds}" \
-                                .format(
+                            "You have {n} private clouds in project {similar_project} of organisation " \
+                            "{similar_organisation}.\nThey are:\n    {clouds}" \
+                            .format(
                                 n=len(clouds),
                                 similar_project=most_similar_project,
                                 similar_organisation=most_similar_organisation,
@@ -909,15 +920,16 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
                             )
                     elif len(clouds) == 1:
                         response_statement = \
-                            "You have 1 private cloud in project {similar_project} of organisation {similar_organisation}.\n" \
-                            "It's name is {cloud}." \
-                                .format(
+                            "You have 1 private cloud in project {similar_project} of organisation " \
+                            "{similar_organisation}.\nIt's name is {cloud}." \
+                            .format(
                                 similar_project=most_similar_project,
                                 similar_organisation=most_similar_organisation,
                                 cloud=clouds[0]
                             )
                     else:
-                        response_statement = "You don't have any private clouds in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+                        response_statement = "You don't have any private clouds in project " + most_similar_project + \
+                                             " of organisation " + most_similar_organisation + ". "
 
         return {
             'data': response_statement,
@@ -934,7 +946,7 @@ class GetAuditLogByOrganisationRequest(SingleRequest):
             method='GET',
             endpoint='events',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -997,7 +1009,7 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
             method='GET',
             endpoint='events',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -1058,18 +1070,22 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
 
                     if len(log_entries) > 1:
                         response_statement = "Here are the last " + str(len(
-                            log_entries)) + " audit log entries in project " + most_similar_project + " of organisation " + most_similar_organisation + ": "
+                            log_entries)) + " audit log entries in project " + most_similar_project + \
+                                            " of organisation " + most_similar_organisation + ": "
                         response_statement += "\n".join(log_entries)
                     elif len(log_entries) == 1:
-                        response_statement = "You have 1 audit log entry in project " + most_similar_project + " of organisation " + most_similar_organisation + ": "
+                        response_statement = "You have 1 audit log entry in project " + most_similar_project + \
+                                             " of organisation " + most_similar_organisation + ": "
                         response_statement += log_entries[0] + "."
                     else:
-                        response_statement = "Audit log in project " + most_similar_project + " of organisation " + most_similar_organisation + " is empty. "
+                        response_statement = "Audit log in project " + most_similar_project + " of organisation " + \
+                                             most_similar_organisation + " is empty. "
 
         return {
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetTeamOfOrganisationRequest(SingleRequest):
     ID = 10
@@ -1080,7 +1096,7 @@ class GetTeamOfOrganisationRequest(SingleRequest):
             method='GET',
             endpoint='customers',
             parameters={
-                "page_size" : 100
+                "page_size": 100
             }
         )
 
@@ -1109,9 +1125,12 @@ class GetTeamOfOrganisationRequest(SingleRequest):
                 response = self.send()
 
                 print(response)
-                owners = [owner['full_name'] for owner in response if owner["role"] == "owner" and owner['full_name'] != ""]
-                supportusers = [supportuser['full_name'] for supportuser in response if supportuser["role"] == "support_user" and supportuser['full_name'] != ""]
-                others = [other['full_name'] for other in response if other["role"] == None and other['full_name'] != ""]
+                owners = [owner['full_name'] for owner in response if owner["role"] == "owner" and
+                          owner['full_name'] != ""]
+                supportusers = [supportuser['full_name'] for supportuser in response if
+                                supportuser["role"] == "support_user" and supportuser['full_name'] != ""]
+                others = [other['full_name'] for other in response if other["role"] is None and
+                          other['full_name'] != ""]
 
                 response_statement = "The following people are team members of " + most_similar + ": "
                 if len(owners) > 1:
@@ -1133,6 +1152,7 @@ class GetTeamOfOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetTotalCostGraphRequest(SingleRequest):
     ID = 5
