@@ -447,7 +447,7 @@ def create_get_org_ids_response(*pairs):
     ]
 
 
-class TestGetOrganisationsAndIdsRequests(TestCase):
+class TestGetOrganisationsAndIdsRequests(RequestTestCase):
     def setUp(self):
         self.get_org_ids = GetOrganisationsAndIdsRequest()
         self.get_org_ids.set_token("asd")
@@ -465,6 +465,68 @@ class TestGetOrganisationsAndIdsRequests(TestCase):
         self.assertIn('id1', response['test1'])
         self.assertIn('test2', response)
         self.assertIn('id2', response['test2'])
+
+
+def mocked_query_get_clouds_by_org_no_org(method, data, endpoint):
+    return create_get_clouds_by_org_response()
+
+
+def mocked_query_get_clouds_by_org(method, data, endpoint):
+    return create_get_clouds_by_org_response(("Waldur Maie", "id1"))
+
+
+def create_get_clouds_by_org_response(*pairs):
+    return [
+        {
+            'name': name,
+            'uuid': uuid
+        } for name, uuid in pairs
+    ]
+
+
+class TestGetPrivateCloudsByOrganisationRequests(RequestTestCase):
+    def setUp(self):
+        self.get_cloud_by_org = GetPrivateCloudsByOrganisationRequest()
+        self.get_cloud_by_org.set_token("asd")
+        self.get_cloud_by_org.set_original("organisation Waldur Maie")
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_clouds_by_org_no_org)
+    def test_get_cloud_by_org_0(self, mock):
+        response = self.get_cloud_by_org.process()
+        self.assertIn("\"Waldur Maie\"", response['data'])
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_clouds_by_org_no_org)
+    def test_get_cloud_by_org_1(self, mock):
+        response = self.get_cloud_by_org.process()
+        c_response = "Sorry, I wasn't able to find an organisation with the name \"Waldur Maie\". " \
+                     "Please check that an organisation with that name exists."
+        self.assertEqual(c_response, response['data'])
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_clouds_by_org_no_org)
+    def test_get_cloud_by_org_2(self, mock):
+        self.get_cloud_by_org.set_original("organisation waldur maie")
+        response = self.get_cloud_by_org.process()
+        self.assertNotIn("Waldur", response['data'])
+        self.assertNotIn("Maie", response['data'])
+        self.assertNotIn("maie", response['data'])
+        self.assertNotIn("waldur", response['data'])
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_clouds_by_org_no_org)
+    def test_get_cloud_by_org_3(self, mock):
+        self.get_cloud_by_org.set_original("organisation waldur maie")
+        response = self.get_cloud_by_org.process()
+        c_response = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                     "Please write it out in capital case!"
+        self.assertEqual(c_response, response['data'])
+
+    # Bad test
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_clouds_by_org)
+    def test_get_cloud_by_org_4(self, mock):
+        response = self.get_cloud_by_org.process()
+        # TODO: Think of a good solution on how to test 2 processes at once. Maybe adding subprocess method?
+        self.assertIn("You have 1 private cloud in Waldur Maie.", response['data'])
+        c_response = "You have 1 private cloud in Waldur Maie.\nIt's name is Waldur Maie."
+        self.assertEqual(c_response, response['data'])
 
 
 def returns_true(*args):
