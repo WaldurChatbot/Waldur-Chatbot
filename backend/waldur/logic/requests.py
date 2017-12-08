@@ -56,7 +56,7 @@ class Request(object):
         self.original = query
         return self
 
-    def request(self, method, endpoint, parameters):
+    def request(self, method, endpoint, parameters, data=None):
         """
         Method to query Waldur API.
         :return: response from Waldur API
@@ -74,7 +74,8 @@ class Request(object):
         response = waldur.query(
             method=method,
             endpoint=endpoint,
-            data=parameters
+            parameters=parameters,
+            data=data
         )
 
         return response
@@ -95,7 +96,6 @@ class Request(object):
 
     def to_string(self):  # todo do we need this?
         return "REQUEST" + sep + type(self).NAME
-
 
     @staticmethod
     def from_string(string):
@@ -119,7 +119,8 @@ class SingleRequest(Request):
     def __init__(self,
                  method=None,
                  endpoint=None,
-                 parameters=None
+                 parameters=None,
+                 data=None
                  ):
         super(SingleRequest, self).__init__()
 
@@ -132,15 +133,20 @@ class SingleRequest(Request):
         if parameters is None:
             parameters = {}
 
+        if data is None:
+            data = {}
+
         self.endpoint = endpoint
         self.method = method
         self.parameters = parameters
+        self.data = data
 
     def send(self):
         return super(SingleRequest, self).request(
             method=self.method,
             endpoint=self.endpoint,
-            parameters=self.parameters
+            parameters=self.parameters,
+            data=self.data
         )
 
     def process(self):
@@ -148,26 +154,61 @@ class SingleRequest(Request):
 
 
 class QA(object):
-    def __init__(self, question, possible_answers, *args):
-        self.question = question.format(possible_answers, args)
+    def __init__(self, question, possible_answers=None, check_answer=None, formatter=None):
+        """
+        :param question: Question to ask user.
+        :param possible_answers: callable that returns some sort of possible answers
+                                 must take at least 2 parameters, token and dict of QA objects.
+        :param check_answer: callable to use when checking if selected answer is good, takes 2 parameters:
+                             selected answer and possible_answers output
+        :param formatter: function that formats the possible_answers output to str
+        """
+        self.question = question
         self.possible_answers = possible_answers
-        self.waiting_for_answer = True
+        self.check_answer = check_answer
+        self.formatter = formatter
 
+        self.found_possible_answers = None
         self.answer = None
 
-    def check_answer(self, i):
-        # check if answer is good
-        if i in self.possible_answers:
-            self.answer = i
-            self.waiting_for_answer = False
-            return True
+    def get_possible_answers(self, token, questions):
+        if not callable(self.possible_answers):
+            val = self.possible_answers
+            self.possible_answers = lambda x, y: val
 
+        self.found_possible_answers = self.possible_answers(token, questions)
+        return self.found_possible_answers
+
+    def get_formatted_possible_answers(self):
+        if not callable(self.formatter):
+            val = self.formatter
+            self.formatter = lambda x: val
+
+        return self.formatter(self.found_possible_answers)
+
+    def check(self, item):
+        if not callable(self.check_answer):
+            self.check_answer = lambda x, y: x
+
+        answer = self.check_answer(item, self.found_possible_answers)
+        if answer is not None:
+            self.answer = answer
+            return True
         return False
 
+    def is_waiting(self):
+        return self.answer is None
+
     def get_answer(self):
-        if self.answer is None:
+        if self.is_waiting():
             raise Exception("Answer should not be None at this point")
         return self.answer
+
+    def __str__(self):
+        return f"QA{{Q:'{self.question}', A:'{self.answer}'}}"
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class InputRequest(Request):
@@ -189,6 +230,8 @@ class InputRequest(Request):
         self.parameters = dict()
         self.input = None
         self.current = None
+
+        # Start with questioning
         self._next_question()
 
     def set_input(self, data):
@@ -234,21 +277,9 @@ class InputRequest(Request):
         """
         self.waiting_for_input = False
         if done:
-            self._evaluate()
             return type(self).process(self)
         else:
             return self.bad_end_msg
-
-    def _evaluate(self):
-        """
-        Replaces QA objects in questions dict with answers from QA objects.
-        Ex. {'os': QA_OBJECT} -> {'os': 'debian'}
-        """
-        for q in self.questions:
-            self.parameters[q] = self.questions[q].get_answer()
-
-        if self.parameters is None:
-            raise Exception("parameters should not be None at this point")
 
     def process(self):
         # bot needs token to know who to query
@@ -270,15 +301,19 @@ class InputRequest(Request):
 
         question = self.questions[self.current]
 
-        if question.waiting_for_answer:
+        if question.is_waiting():
             if i is not None:
-                if question.check_answer(i):
+                if question.check(i):
+                    self.parameters[self.current] = self.questions[self.current].get_answer()
                     self._next_question()
                     return self.handle_question()
                 else:
                     return self._end(False)
             else:
-                return question.question
+                question.get_possible_answers(self.token, self.parameters)
+                print(question.question)
+                print(question.get_formatted_possible_answers())
+                return question.question + " " + question.get_formatted_possible_answers()
         else:
             raise Exception("Should be at the next question at this point")
 
@@ -302,7 +337,7 @@ class GetServicesRequest(SingleRequest):
             response_statement = \
                 "You have a total of {n} services in use. " \
                 "They are {services}." \
-                .format(
+                    .format(
                     n=len(services),
                     services=", ".join(services)
                 )
@@ -310,7 +345,7 @@ class GetServicesRequest(SingleRequest):
             response_statement = \
                 "You have a total of 1 service in use. " \
                 "This service is {service}." \
-                .format(
+                    .format(
                     service=services[0]
                 )
         else:
@@ -375,7 +410,8 @@ class GetVmsRequest(SingleRequest):
         statement = ""
         organisations = itertools.groupby(response, lambda vm: vm['customer_name'])
         for organisation, vms in organisations:
-            names = {vm['name'] + ": " + ("None" if len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in vms}
+            names = {vm['name'] + ": " + ("None" if len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for
+                     vm in vms}
             len_all += len(names)
             if len(names) > 0:
                 statement += "\nOrganisation '" + organisation + "':\n    " + "\n    ".join(names)
@@ -414,7 +450,7 @@ class GetOrganisationsRequest(SingleRequest):
             response_statement = \
                 "You are part of {n} organisations. " \
                 "They are {organisations}" \
-                .format(
+                    .format(
                     n=len(organisations),
                     organisations=", ".join(organisations)
                 )
@@ -422,7 +458,7 @@ class GetOrganisationsRequest(SingleRequest):
             response_statement = \
                 "You are part of 1 organisation. " \
                 "The organisation is {organisation}" \
-                .format(
+                    .format(
                     organisation=organisations[0]
                 )
         else:
@@ -486,6 +522,7 @@ class GetServicesByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
+
 class GetServicesByProjectAndOrganisationRequest(SingleRequest):
     ID = 14
     NAME = 'get_services_by_project_and_organisation'
@@ -520,9 +557,8 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
             if most_similar_organisation == "":
                 response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
                                      + organisation_name[0] + "\". Please check that an " \
-                                                                    "organisation with that name exists."
+                                                              "organisation with that name exists."
             else:
-
 
                 secondreq = GetProjectsAndIdsByOrganisationRequest()
                 secondreq.token = self.token
@@ -535,7 +571,7 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
                 if most_similar_project == "":
                     response_statement = "Sorry, I wasn't able to find a project with the name \"" \
                                          + project_name[0] + "\". Please check that a " \
-                                                                  "project with that name exists."
+                                                             "project with that name exists."
 
                 else:
 
@@ -547,7 +583,8 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
 
                     if len(service_names) > 1:
                         response_statement = "You have " + str(
-                            len(service_names)) + " services in use in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+                            len(
+                                service_names)) + " services in use in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
                         response_statement += "They are " + (", ".join(service_names)) + ". "
                     elif len(service_names) == 1:
                         response_statement = "You have 1 service in use in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
@@ -559,6 +596,7 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetVmsByOrganisationRequest(SingleRequest):
     ID = 8
@@ -599,7 +637,8 @@ class GetVmsByOrganisationRequest(SingleRequest):
                             response}
 
                 if len(vm_names) > 1:
-                    response_statement = "You have " + str(len(vm_names)) + " virtual machines in " + most_similar + ". "
+                    response_statement = "You have " + str(
+                        len(vm_names)) + " virtual machines in " + most_similar + ". "
                     response_statement += "Here are their names and public IPs: "
                     response_statement += "; ".join(
                         [vm + ": " + (", ".join(vm_names[vm])) for vm in vm_names.keys()]) + ". "
@@ -614,6 +653,7 @@ class GetVmsByOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetVmsByProjectAndOrganisationRequest(SingleRequest):
     ID = 15
@@ -649,9 +689,8 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
             if most_similar_organisation == "":
                 response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
                                      + organisation_name[0] + "\". Please check that an " \
-                                                                    "organisation with that name exists."
+                                                              "organisation with that name exists."
             else:
-
 
                 secondreq = GetProjectsAndIdsByOrganisationRequest()
                 secondreq.token = self.token
@@ -664,7 +703,7 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
                 if most_similar_project == "":
                     response_statement = "Sorry, I wasn't able to find a project with the name \"" \
                                          + project_name[0] + "\". Please check that a " \
-                                                                  "project with that name exists."
+                                                             "project with that name exists."
 
                 else:
 
@@ -676,7 +715,8 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
 
                     if len(vm_names) > 1:
                         response_statement = "You have " + str(
-                            len(vm_names)) + " virtual machines in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+                            len(
+                                vm_names)) + " virtual machines in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
                         response_statement += "Here are their names and public IPs: "
                         response_statement += "; ".join(
                             [vm + ": " + (", ".join(vm_names[vm])) for vm in vm_names.keys()]) + ". "
@@ -692,6 +732,7 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetTeamOfOrganisationRequest(SingleRequest):
     ID = 10
@@ -767,7 +808,7 @@ class GetPrivateCloudsRequest(SingleRequest):
             response_statement = \
                 "You have {n} private clouds. " \
                 "They are {clouds}." \
-                .format(
+                    .format(
                     n=len(clouds),
                     clouds=", ".join(clouds)
                 )
@@ -775,7 +816,7 @@ class GetPrivateCloudsRequest(SingleRequest):
             response_statement = \
                 "You have 1 private cloud. " \
                 "It's name is {cloud}." \
-                .format(
+                    .format(
                     cloud=clouds[0]
                 )
         else:
@@ -785,6 +826,7 @@ class GetPrivateCloudsRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetPrivateCloudsByOrganisationRequest(SingleRequest):
     ID = 11
@@ -838,6 +880,7 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
+
 class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
     ID = 16
     NAME = 'get_private_clouds_by_project_and_organisation'
@@ -872,9 +915,8 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
             if most_similar_organisation == "":
                 response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
                                      + organisation_name[0] + "\". Please check that an " \
-                                                                    "organisation with that name exists."
+                                                              "organisation with that name exists."
             else:
-
 
                 secondreq = GetProjectsAndIdsByOrganisationRequest()
                 secondreq.token = self.token
@@ -887,7 +929,7 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
                 if most_similar_project == "":
                     response_statement = "Sorry, I wasn't able to find a project with the name \"" \
                                          + project_name[0] + "\". Please check that a " \
-                                                                  "project with that name exists."
+                                                             "project with that name exists."
 
                 else:
 
@@ -898,7 +940,8 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
 
                     if len(clouds) > 1:
                         response_statement = "You have " + str(
-                            len(clouds)) + " private clouds in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
+                            len(
+                                clouds)) + " private clouds in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
                         response_statement += "Here are their names: "
                         response_statement += ", ".join(clouds) + ". "
                     elif len(clouds) == 1:
@@ -911,6 +954,7 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetAuditLogByOrganisationRequest(SingleRequest):
     ID = 12
@@ -943,8 +987,9 @@ class GetAuditLogByOrganisationRequest(SingleRequest):
                                      + extracted_organisations[0] + "\". Please check that an " \
                                                                     "organisation with that name exists."
             else:
-                self.parameters["scope"] = "https://api.etais.ee/api/customers/" + str(organisations_with_uuid[most_similar]) + "/"
-                self.parameters["page_size"] = 10 # This param represents the last n events that will be displayed
+                self.parameters["scope"] = "https://api.etais.ee/api/customers/" + str(
+                    organisations_with_uuid[most_similar]) + "/"
+                self.parameters["page_size"] = 10  # This param represents the last n events that will be displayed
                 response = self.send()
 
                 log_entries = []
@@ -953,10 +998,12 @@ class GetAuditLogByOrganisationRequest(SingleRequest):
                     message = entry["message"]
                     user = (entry["user_full_name"] if "user_full_name" in entry else "")
                     eventtype = entry["event_type"]
-                    log_entries.append("\n"+ date + "\nEvent: " + eventtype + "\n" + message + ("\nUser: " + user if "user_full_name" in entry else ""))
+                    log_entries.append("\n" + date + "\nEvent: " + eventtype + "\n" + message + (
+                        "\nUser: " + user if "user_full_name" in entry else ""))
 
                 if len(log_entries) > 1:
-                    response_statement = "Here are the last " + str(len(log_entries)) + " audit log entries in " + most_similar + ": "
+                    response_statement = "Here are the last " + str(
+                        len(log_entries)) + " audit log entries in " + most_similar + ": "
                     response_statement += "\n".join(log_entries)
                 elif len(log_entries) == 1:
                     response_statement = "You have 1 audit log entry in " + most_similar + ": "
@@ -968,6 +1015,7 @@ class GetAuditLogByOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
     ID = 13
@@ -1003,9 +1051,8 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
             if most_similar_organisation == "":
                 response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
                                      + organisation_name[0] + "\". Please check that an " \
-                                                                    "organisation with that name exists."
+                                                              "organisation with that name exists."
             else:
-
 
                 secondreq = GetProjectsAndIdsByOrganisationRequest()
                 secondreq.token = self.token
@@ -1018,12 +1065,13 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
                 if most_similar_project == "":
                     response_statement = "Sorry, I wasn't able to find a project with the name \"" \
                                          + project_name[0] + "\". Please check that a " \
-                                                                  "project with that name exists."
+                                                             "project with that name exists."
 
                 else:
 
-                    self.parameters["scope"] = "https://api.etais.ee/api/projects/" + str(projects_with_uuid[most_similar_project]) + "/"
-                    self.parameters["page_size"] = 10 # This param represents the last n events that will be displayed
+                    self.parameters["scope"] = "https://api.etais.ee/api/projects/" + str(
+                        projects_with_uuid[most_similar_project]) + "/"
+                    self.parameters["page_size"] = 10  # This param represents the last n events that will be displayed
                     response = self.send()
 
                     log_entries = []
@@ -1032,10 +1080,12 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
                         message = entry["message"]
                         user = (entry["user_full_name"] if "user_full_name" in entry else "")
                         eventtype = entry["event_type"]
-                        log_entries.append("\n"+ date + "\nEvent: " + eventtype + "\n" + message + ("\nUser: " + user if "user_full_name" in entry else ""))
+                        log_entries.append("\n" + date + "\nEvent: " + eventtype + "\n" + message + (
+                            "\nUser: " + user if "user_full_name" in entry else ""))
 
                     if len(log_entries) > 1:
-                        response_statement = "Here are the last " + str(len(log_entries)) + " audit log entries in project " + most_similar_project + " of organisation " + most_similar_organisation + ": "
+                        response_statement = "Here are the last " + str(len(
+                            log_entries)) + " audit log entries in project " + most_similar_project + " of organisation " + most_similar_organisation + ": "
                         response_statement += "\n".join(log_entries)
                     elif len(log_entries) == 1:
                         response_statement = "You have 1 audit log entry in project " + most_similar_project + " of organisation " + most_similar_organisation + ": "
@@ -1047,6 +1097,7 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetTotalCostGraphRequest(SingleRequest):
     ID = 5
@@ -1112,35 +1163,159 @@ class CreateVMRequest(InputRequest):
     ID = 7
     NAME = 'create_vm'
 
-    POSSIBLE_OS = ['centos7', 'debian']  # todo query waldur for possible os'es
-
-    CONFIRM = 'Do you wanna create a VM? {}'
-    ASK_OS = 'Which os to use? {}'
-    ASK_IP = 'Add public ip? {}'
-    EXIT = 'Not creating VM'
-
     def __init__(self):
         super(CreateVMRequest, self).__init__(
             [
                 (
                     'continue',
-                    QA(self.CONFIRM, ['y'])
+                    QA('Do you wanna create a VM?',
+                       possible_answers=None,
+                       check_answer=(lambda x, y: x.startswith("y")),
+                       formatter="y/n"
+                       )
                 ),
                 (
-                    'os',
-                    QA(self.ASK_OS, self.POSSIBLE_OS)
+                    'name',
+                    QA('Input name for vm.',
+                       possible_answers=None,
+                       check_answer=(lambda x, y: x),
+                       formatter=""
+                       )
                 ),
+                (
+                    'service_project_link',
+                    QA('For which project?',
+                       possible_answers=possible_projects,
+                       check_answer=(lambda x, y: y[x] if x in y else None),
+                       formatter=(lambda x: str(list(x)))
+                       )
+                ),
+                (
+                    'flavor',
+                    QA('Which flavor to use?',
+                       possible_answers=possible_flavors,
+                       check_answer=(lambda x, y: y[x] if x in y else None),
+                       formatter=(lambda x: str(list(x)))
+                       )
+                ),
+                (
+                    'image',
+                    QA('Which image to use?',
+                       possible_answers=possible_os,
+                       check_answer=(lambda x, y: y[x] if x in y else None),
+                       formatter=(lambda x: str(list(x)))
+                       )
+                ),
+                (
+                    'system_volume_size',
+                    QA('System volume size in MB?',
+                       possible_answers=possible_system_volume_size,
+                       check_answer=(lambda x, y: x if int(x) >= y else None),
+                       formatter=(lambda x: f"Must be more than {x}")
+                       )
+                ),
+                (
+                    'data_volume_size',
+                    QA('Data volume size in MB?',
+                       possible_answers=10240,
+                       check_answer=(lambda x, y: x if int(x) >= y else None),
+                       formatter=(lambda x: f"Must be more than {x}")
+                       )
+                ),
+                (
+                    'internal_ips_set',
+                    QA('Which network to use?',
+                       possible_answers=possible_networks,
+                       check_answer=(lambda x, y: y[x] if x in y else None),
+                       formatter=(lambda x: str(list(x)))
+                       )
+                ),
+                (
+                    'floating_ips',
+                    QA('Add public ip?',
+                       possible_answers=None,
+                       check_answer=(lambda x, y: x.startswith("y")),
+                       formatter="y/n"
+                       )
+                ),
+                (
+                    'security_groups',
+                    QA('Which security groups to use (comma separated)?',
+                       possible_answers=possible_security_groups,
+                       check_answer=(lambda x, y: [y[g.strip()] for g in x.strip(",").split(",") if g.strip() in y]),
+                       formatter=(lambda x: str(list(x))))
+                ),
+                (
+                    'ssh_public_key',
+                    QA('Which key to use?',
+                       possible_answers=possible_keys,
+                       check_answer=(lambda x, y: y[x] if x in y else None),
+                       formatter=(lambda x: str(list(x)))
+                       )
+                )
             ],
-            bad_end_msg=self.EXIT
+            bad_end_msg="Not creating vm."
         )
 
     def process(self):
         question = super(CreateVMRequest, self).process()
 
+        log.debug(self.parameters)
+
         if question is not None:
             return text(question)
 
-        return text("This is the part where the vm is created, todo")
+        # BELOW IS VM CREATION
+
+        try:
+            response = CreateVM(
+                image=self.parameters['image']['value'],
+                internal_ips_set=[{'subnet': self.parameters['internal_ips_set']['value']}],
+                floating_ips=[{'subnet': self.parameters['internal_ips_set']['value']}],
+                flavor=self.parameters['flavor']['value'],
+                service_project_link=self.parameters['service_project_link']['value'],
+                ssh_public_key=self.parameters['ssh_public_key']['value'],
+                name=self.parameters['name'],
+                security_groups=[{
+                    'url': sg['value']
+                } for sg in self.parameters['security_groups']],
+                system_volume_size=int(self.parameters['system_volume_size']),
+                data_volume_size=int(self.parameters['data_volume_size'])
+            ).set_token(self.token).process()
+            log.info(response)
+            return text(response['state'])
+        except Exception as e:
+            log.exception(e)
+            return text("Couldn't create vm")
+
+
+def possible_projects(token, parameters):
+    return GetPossibleProjects().set_token(token).process()
+
+
+def possible_flavors(token, parameters):
+    return GetPossibleFlavors(parameters['service_project_link']['settings_uuid']).set_token(token).process()
+
+
+def possible_os(token, parameters):
+    return GetPossibleOSes(parameters['service_project_link']['settings_uuid']).set_token(token).process()
+
+
+def possible_system_volume_size(token, parameters):
+    return GetSystemVolumeSize(parameters['image']['value'].strip("/").split("/")[-1]).set_token(
+        token).process()
+
+
+def possible_networks(token, parameters):
+    return GetPossibleNetworks(parameters['service_project_link']['settings_uuid']).set_token(token).process()
+
+
+def possible_security_groups(token, parameters):
+    return GetSecurityGroups(parameters['service_project_link']['settings_uuid']).set_token(token).process()
+
+
+def possible_keys(token, parameters):
+    return GetPossibleKeys().set_token(token).process()
 
 
 class GetHelpRequest(SingleRequest):
@@ -1149,7 +1324,7 @@ class GetHelpRequest(SingleRequest):
 
     def __init__(self):
         super(GetHelpRequest, self).__init__(
-            endpoint='git gud'
+            endpoint='please stop lollygagging'
         )
 
     def process(self):
@@ -1173,6 +1348,139 @@ class GetHelpRequest(SingleRequest):
 
 # --------------------- REQUESTS FOR INTERNAL USE ---------------------
 
+
+class GetPossibleOSes(SingleRequest):
+    def __init__(self, settings_uuid):
+        super().__init__(
+            'GET',
+            'openstacktenant-images',
+            parameters={
+                'settings_uuid': settings_uuid
+            }
+        )
+
+    def process(self):
+        return {image['name']: {'value': image['url']} for image in self.send()}
+
+
+class GetPossibleFlavors(SingleRequest):
+    def __init__(self, settings_uuid):
+        super().__init__(
+            'GET',
+            'openstacktenant-flavors',
+            parameters={
+                'settings_uuid': settings_uuid
+            }
+        )
+
+    def process(self):
+        return {flavor['name']: {'value': flavor['url']} for flavor in self.send()}
+
+
+class GetPossibleKeys(SingleRequest):
+    def __init__(self):
+        super().__init__(
+            'GET',
+            'keys'
+        )
+
+    def process(self):
+        return {key['name']: {'value': key['url']} for key in self.send()}
+
+
+class GetPossibleNetworks(SingleRequest):
+    def __init__(self, settings_uuid):
+        super().__init__(
+            'GET',
+            'openstacktenant-subnets',
+            parameters={
+                'settings_uuid': settings_uuid
+            }
+        )
+
+    def process(self):
+        return {network['name']: {'value': network['url']} for network in self.send()}
+
+
+class GetSecurityGroups(SingleRequest):
+    def __init__(self, settings_uuid):
+        super().__init__(
+            'GET',
+            'openstacktenant-security-groups',
+            parameters={
+                'settings_uuid': settings_uuid
+            }
+        )
+
+    def process(self):
+        return {group['name']: {'value': group['url']} for group in self.send()}
+
+
+class GetPossibleProjects(SingleRequest):
+    def __init__(self):
+        super().__init__(
+            'GET',
+            'openstacktenant-service-project-link'
+        )
+
+    def process(self):
+        return {
+            project['project_name']: {
+                'value': project['url'],
+                'settings_uuid': GetSetting(project['service_uuid']).set_token(self.token).process()
+            } for project in self.send()
+        }
+
+
+class GetSetting(SingleRequest):
+    def __init__(self, service_uuid):
+        super().__init__(
+            'GET',
+            'openstacktenant/{}/'.format(service_uuid)
+        )
+
+    def process(self):
+        return self.send()['settings_uuid']
+
+
+class GetSystemVolumeSize(SingleRequest):
+    def __init__(self, image):
+        super().__init__(
+            'GET',
+            'openstacktenant-images/{}/'.format(image)
+        )
+
+    def process(self):
+        return self.send()['min_disk']
+
+
+class CreateVM(SingleRequest):
+    def __init__(self, data_volume_size, flavor, floating_ips, image, internal_ips_set, name, security_groups,
+                 service_project_link, ssh_public_key, system_volume_size):
+        super().__init__(
+            'POST',
+            'openstacktenant-instances',
+            parameters=[],
+            data=dict(
+                data_volume_size=data_volume_size,
+                flavor=flavor,
+                floating_ips=floating_ips,
+                image=image,
+                internal_ips_set=internal_ips_set,
+                name=name,
+                security_groups=security_groups,
+                service_project_link=service_project_link,
+                ssh_public_key=ssh_public_key,
+                system_volume_size=system_volume_size
+            )
+        )
+
+    def process(self):
+        response = self.send()
+        log.debug(response)
+        return response
+
+
 class GetOrganisationsAndIdsRequest(SingleRequest):
     NAME = 'util_get_organisations'
 
@@ -1186,6 +1494,7 @@ class GetOrganisationsAndIdsRequest(SingleRequest):
         response = self.send()
 
         return {organisation['name']: organisation["uuid"] for organisation in response}
+
 
 class GetProjectsAndIdsByOrganisationRequest(SingleRequest):
     NAME = 'util_get_projects_by_organisation'
@@ -1201,6 +1510,7 @@ class GetProjectsAndIdsByOrganisationRequest(SingleRequest):
         response = self.send()
 
         return {project['name']: project["uuid"] for project in response}
+
 
 def all_subclasses(cls=Request):
     return cls.__subclasses__() + [g for s in cls.__subclasses__() for g in all_subclasses(s)]
