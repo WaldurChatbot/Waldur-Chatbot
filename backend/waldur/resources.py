@@ -77,7 +77,7 @@ class Query(WaldurResource):
         # Todo: Make it look better
         names_excluded = self.query
         for x in extract_names(self.query):
-            names_excluded = names_excluded.replace(x,"").strip()
+            names_excluded = names_excluded.replace(x, "").strip()
         
         bot_response = str(self.chatbot.get_response(names_excluded))
         log.debug(f"Bot response: '{bot_response}'")

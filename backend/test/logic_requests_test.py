@@ -174,69 +174,92 @@ class TestGetProjectsRequests(RequestTestCase):
         self.assert_correct_response_format(response)
         self.assertEqual("You don't have any projects.", response['data'])
 
-"""
-def mocked_query_get_vms_0_names(method, data, endpoint):
+
+def mocked_query_get_vms_0_names(method, data, endpoint, parameters):
     return create_get_vms_response()
 
 
-def mocked_query_get_vms_1_name(method, data, endpoint):
-    return create_get_vms_response(("test1", ["1.1", "1.0"]))
+def mocked_query_get_vms_1_name(method, data, endpoint, parameters):
+    return create_get_vms_response(("test1", "name1", ["1.1", "1.0"], ["1.2"]))
 
 
-def mocked_query_get_vms_2_names(method, data, endpoint):
-    return create_get_vms_response(("test1", ["1.1"]), ("test2", ["1.2"]))
+def mocked_query_get_vms_2_names(method, data, endpoint, parameters):
+    return create_get_vms_response(("test1", "name1", ["1.1"], ["1.2"]), ("test2", "name2", ["2.1"], ["2.2"]))
 
 
-def mocked_query_get_vms_no_ip(method, data, endpoint):
-    return create_get_vms_response(("test1", []))
+def mocked_query_get_vms_no_ip(method, data, endpoint, parameters):
+    return create_get_vms_response(("test1", "name1", [], []))
 
 
-def mocked_query_use_case_12_regular_get_vms(method, data, endpoint):
+def mocked_query_use_case_12_regular_get_vms(method, data, endpoint, parameters):
     vm_1 = "WaldurChatbot Develop"
+    cn_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_1_ip_1 = "193.40.11.164"
+    vm_1_int_ip = "127.0.0.1"
     vm_2 = "WaldurChatbot Production"
+    #cn_2 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_2_ip_1 = "193.40.11.175"
-    return create_get_vms_response((vm_1, {vm_1_ip_1}), (vm_2, {vm_2_ip_1}))
+    vm_2_int_ip = "localhost"
+    return create_get_vms_response((vm_1, cn_1, [vm_1_ip_1], [vm_1_int_ip]), (vm_2, cn_1, [vm_2_ip_1], [vm_2_int_ip]))
 
 
-def mocked_query_use_case_12_alt_b_get_vms(method, data, endpoint):
+def mocked_query_use_case_12_alt_b_get_vms(method, data, endpoint, parameters):
     vm_1 = "WaldurChatbot Develop"
+    cn_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_1_ip_1 = "193.40.11.164"
-    return create_get_vms_response((vm_1, {vm_1_ip_1}))
+    vm_1_int_ip = "127.0.0.1"
+    return create_get_vms_response((vm_1, cn_1, [vm_1_ip_1], [vm_1_int_ip]))
 
 
-def mocked_query_use_case_12_alt_c_get_vms(method, data, endpoint):
+def mocked_query_use_case_12_alt_c_get_vms(method, data, endpoint, parameters):
     return create_get_vms_response()
 
 
-def mocked_query_use_case_12_regular_two_ips_get_vms(method, data, endpoint):
+def mocked_query_use_case_12_regular_two_ips_get_vms(method, data, endpoint, parameters):
     vm_1 = "WaldurChatbot Develop"
+    cn_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_1_ip_1 = "193.40.11.164"
-    vm_1_ip_2 = "localhost"
+    vm_1_int_ip = "127.0.0.1"
+    #cn_2 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_2 = "WaldurChatbot Production"
     vm_2_ip_1 = "193.40.11.175"
-    return create_get_vms_response((vm_1, [vm_1_ip_1, vm_1_ip_2]), (vm_2, {vm_2_ip_1}))
+    vm_2_int_ip = "localhost"
+    return create_get_vms_response((vm_1, cn_1, [vm_1_ip_1], [vm_1_int_ip]), (vm_2, cn_1, [vm_2_ip_1], [vm_2_int_ip]))
 
 
-def mocked_query_use_case_12_alt_b_two_ips_get_vms(method, data, endpoint):
+def mocked_query_use_case_12_alt_b_two_ips_get_vms(method, data, endpoint, parameters):
     vm_1 = "WaldurChatbot Develop"
+    cn_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_1_ip_1 = "193.40.11.164"
     vm_1_ip_2 = "localhost"
-    return create_get_vms_response((vm_1, [vm_1_ip_1, vm_1_ip_2]))
+    vm_1_int_ip = "127.0.0.1"
+    return create_get_vms_response((vm_1, cn_1, [vm_1_ip_1, vm_1_ip_2], [vm_1_int_ip]))
 
 
-def mocked_query_use_case_12_alt_b_no_ip_get_vms(method, data, endpoint):
+def mocked_query_use_case_12_alt_b_no_ip_get_vms(method, data, endpoint, parameters):
     vm_1 = "WaldurChatbot Develop"
+    cn_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_1_ip_1 = "None"
-    return create_get_vms_response((vm_1, [vm_1_ip_1]))
+    vm_1_int_ip = "localhost"
+    return create_get_vms_response((vm_1, cn_1, [vm_1_ip_1], [vm_1_int_ip]))
+
+
+def mocked_query_use_case_12_alt_b_no_int_ip_get_vms(method, data, endpoint, parameters):
+    vm_1 = "WaldurChatbot Develop"
+    cn_1 = "Waldur Chatbot testbed (LTAT.05.005)"
+    vm_1_ip_1 = "localhost"
+    vm_1_int_ip = "None"
+    return create_get_vms_response((vm_1, cn_1, [vm_1_ip_1], [vm_1_int_ip]))
 
 
 def create_get_vms_response(*pairs):
     return [
         {
             'name': name,
-            'external_ips': external_ips
-        } for name, external_ips in pairs
+            'customer_name': customer_name,
+            'external_ips': external_ips,
+            'internal_ips': internal_ips
+        } for name, customer_name, external_ips, internal_ips in pairs
     ]
 
 
@@ -255,36 +278,45 @@ class TestGetVmsRequests(RequestTestCase):
         response = self.get_vms.process()
         self.assert_correct_response_format(response)
         self.assertIn("test1", response['data'])
+        self.assertIn("name1", response['data'])
         self.assertIn("1.1", response['data'])
         self.assertIn("1.0", response['data'])
+        self.assertIn("1.2", response['data'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_vms_2_names)
     def test_get_vms_2(self, mock):
         response = self.get_vms.process()
         self.assert_correct_response_format(response)
         self.assertIn("test1", response['data'])
+        self.assertIn("name1", response['data'])
         self.assertIn("1.1", response['data'])
-        self.assertIn("test2", response['data'])
         self.assertIn("1.2", response['data'])
+        self.assertIn("test2", response['data'])
+        self.assertIn("name2", response['data'])
+        self.assertIn("2.1", response['data'])
+        self.assertIn("2.2", response['data'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_use_case_12_regular_get_vms)
     def test_get_vms_3(self, mock):
         response = self.get_vms.process()
         self.assert_correct_response_format(response)
-        self.assertIn("You have 2 virtual machines. Here are their names and public IPs: ", response['data'])
-        correct_response = "You have 2 virtual machines. Here are their names and public IPs: WaldurChatbot Develop: "
-        correct_response += "193.40.11.164; WaldurChatbot Production: 193.40.11.175."
-        c_response2 = "You have 2 virtual machines. Here are their names and public IPs: WaldurChatbot Production: "
-        c_response2 += "193.40.11.175; WaldurChatbot Develop: 193.40.11.164."
-        self.assertTrue(correct_response == response['data'] or c_response2 == response['data'])
+        self.assertIn("You have 2 virtual machines in total.\nOrganisation 'Waldur Chatbot testbed (LTAT.05.005)':\n",
+                      response['data'])
+        c_response = "You have 2 virtual machines in total.\nOrganisation 'Waldur Chatbot testbed (LTAT.05.005)':" \
+                     "\n    WaldurChatbot Production: localhost / 193.40.11.175" \
+                     "\n    WaldurChatbot Develop: 127.0.0.1 / 193.40.11.164"
+        c_response2 = "You have 2 virtual machines in total.\nOrganisation 'Waldur Chatbot testbed (LTAT.05.005)':" \
+                      "\n    WaldurChatbot Develop: 127.0.0.1 / 193.40.11.164" \
+                      "\n    WaldurChatbot Production: localhost / 193.40.11.175"
+        self.assertTrue(c_response == response['data'] or c_response2 == response['data'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_use_case_12_alt_b_get_vms)
     def test_get_vms_4(self, mock):
         response = self.get_vms.process()
         self.assert_correct_response_format(response)
-        correct_response = "You have 1 virtual machine. The virtual machine is WaldurChatbot Develop and it's public IP"
-        correct_response += "(s): 193.40.11.164."
-        self.assertEqual(correct_response, response['data'])
+        c_response = "You have 1 virtual machine in total.\nOrganisation 'Waldur Chatbot testbed (LTAT.05.005)':" \
+                     "\n    WaldurChatbot Develop: 127.0.0.1 / 193.40.11.164"
+        self.assertEqual(c_response, response['data'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_use_case_12_alt_c_get_vms)
     def test_get_vms5(self, mock):
@@ -296,19 +328,22 @@ class TestGetVmsRequests(RequestTestCase):
     def test_get_vms_6(self, mock):
         response = self.get_vms.process()
         self.assert_correct_response_format(response)
-        self.assertIn("You have 2 virtual machines. Here are their names and public IPs: ", response['data'])
-        correct_response = "You have 2 virtual machines. Here are their names and public IPs: WaldurChatbot Develop: "
-        correct_response += "193.40.11.164, localhost; WaldurChatbot Production: 193.40.11.175."
-        c_response2 = "You have 2 virtual machines. Here are their names and public IPs: WaldurChatbot Production: "
-        c_response2 += "193.40.11.175; WaldurChatbot Develop: 193.40.11.164, localhost."
-        self.assertTrue(correct_response == response['data'] or c_response2 == response['data'])
+        self.assertIn("You have 2 virtual machines in total.\nOrganisation 'Waldur Chatbot testbed (LTAT.05.005)':\n"
+                      , response['data'])
+        c_response = "You have 2 virtual machines in total.\nOrganisation 'Waldur Chatbot testbed (LTAT.05.005)':" \
+                     "\n    WaldurChatbot Develop: 127.0.0.1 / 193.40.11.164" \
+                     "\n    WaldurChatbot Production: localhost / 193.40.11.175"
+        c_response2 = "You have 2 virtual machines in total.\nOrganisation 'Waldur Chatbot testbed (LTAT.05.005)':" \
+                      "\n    WaldurChatbot Production: localhost / 193.40.11.175\n    " \
+                      "WaldurChatbot Develop: 127.0.0.1 / 193.40.11.164"
+        self.assertTrue(c_response == response['data'] or c_response2 == response['data'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_use_case_12_alt_b_two_ips_get_vms)
     def test_get_vms_7(self, mock):
         response = self.get_vms.process()
         self.assert_correct_response_format(response)
-        correct_response = "You have 1 virtual machine. The virtual machine is WaldurChatbot Develop and it's public IP"
-        correct_response += "(s): 193.40.11.164, localhost."
+        correct_response = "You have 1 virtual machine in total.\nOrganisation 'Waldur Chatbot testbed (LTAT.05.005)':"
+        correct_response += "\n    WaldurChatbot Develop: 127.0.0.1 / 193.40.11.164, localhost"
         self.assertEqual(correct_response, response['data'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_vms_no_ip)
@@ -316,16 +351,25 @@ class TestGetVmsRequests(RequestTestCase):
         response = self.get_vms.process()
         self.assert_correct_response_format(response)
         self.assertIn("test1", response['data'])
-        self.assertIn("None", response['data'])
+        self.assertIn("name1", response['data'])
+        self.assertIn("- / -", response['data'])
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_use_case_12_alt_b_no_ip_get_vms)
     def test_get_vms_9(self, mock):
         response = self.get_vms.process()
         self.assert_correct_response_format(response)
-        correct_response = "You have 1 virtual machine. The virtual machine is WaldurChatbot Develop and it's public IP"
-        correct_response += "(s): None."
+        correct_response = "You have 1 virtual machine in total.\nOrganisation 'Waldur Chatbot testbed (LTAT.05.005)':"
+        correct_response += "\n    WaldurChatbot Develop: localhost / None"
         self.assertEqual(correct_response, response['data'])
-"""
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_use_case_12_alt_b_no_int_ip_get_vms)
+    def test_get_vms_10(self, mock):
+        response = self.get_vms.process()
+        self.assert_correct_response_format(response)
+        correct_response = "You have 1 virtual machine in total.\nOrganisation 'Waldur Chatbot testbed (LTAT.05.005)':"
+        correct_response += "\n    WaldurChatbot Develop: None / localhost"
+        self.assertEqual(correct_response, response['data'])
+
 
 def mocked_query_get_organisations_0_names(method, data, endpoint, parameters):
     return create_get_organisations_response()
@@ -403,7 +447,7 @@ def create_get_org_ids_response(*pairs):
     ]
 
 
-class TestGetOrganisationsAndIdsRequests(TestCase):
+class TestGetOrganisationsAndIdsRequests(RequestTestCase):
     def setUp(self):
         self.get_org_ids = GetOrganisationsAndIdsRequest()
         self.get_org_ids.set_token("asd")
@@ -421,6 +465,68 @@ class TestGetOrganisationsAndIdsRequests(TestCase):
         self.assertIn('id1', response['test1'])
         self.assertIn('test2', response)
         self.assertIn('id2', response['test2'])
+
+
+def mocked_query_get_clouds_by_org_no_org(method, data, endpoint, parameters):
+    return create_get_clouds_by_org_response()
+
+
+def mocked_query_get_clouds_by_org(method, data, endpoint, parameters):
+    return create_get_clouds_by_org_response(("Waldur Maie", "id1"))
+
+
+def create_get_clouds_by_org_response(*pairs):
+    return [
+        {
+            'name': name,
+            'uuid': uuid
+        } for name, uuid in pairs
+    ]
+
+
+class TestGetPrivateCloudsByOrganisationRequests(RequestTestCase):
+    def setUp(self):
+        self.get_cloud_by_org = GetPrivateCloudsByOrganisationRequest()
+        self.get_cloud_by_org.set_token("asd")
+        self.get_cloud_by_org.set_original("organisation Waldur Maie")
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_clouds_by_org_no_org)
+    def test_get_cloud_by_org_0(self, mock):
+        response = self.get_cloud_by_org.process()
+        self.assertIn("\"Waldur Maie\"", response['data'])
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_clouds_by_org_no_org)
+    def test_get_cloud_by_org_1(self, mock):
+        response = self.get_cloud_by_org.process()
+        c_response = "Sorry, I wasn't able to find an organisation with the name \"Waldur Maie\". " \
+                     "Please check that an organisation with that name exists."
+        self.assertEqual(c_response, response['data'])
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_clouds_by_org_no_org)
+    def test_get_cloud_by_org_2(self, mock):
+        self.get_cloud_by_org.set_original("organisation waldur maie")
+        response = self.get_cloud_by_org.process()
+        self.assertNotIn("Waldur", response['data'])
+        self.assertNotIn("Maie", response['data'])
+        self.assertNotIn("maie", response['data'])
+        self.assertNotIn("waldur", response['data'])
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_clouds_by_org_no_org)
+    def test_get_cloud_by_org_3(self, mock):
+        self.get_cloud_by_org.set_original("organisation waldur maie")
+        response = self.get_cloud_by_org.process()
+        c_response = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                     "Please write it out in capital case!"
+        self.assertEqual(c_response, response['data'])
+
+    # Bad test
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_clouds_by_org)
+    def test_get_cloud_by_org_4(self, mock):
+        response = self.get_cloud_by_org.process()
+        # TODO: Think of a good solution on how to test 2 processes at once. Maybe adding subprocess method?
+        self.assertIn("You have 1 private cloud in Waldur Maie.", response['data'])
+        c_response = "You have 1 private cloud in Waldur Maie.\nIt's name is Waldur Maie."
+        self.assertEqual(c_response, response['data'])
 
 
 if __name__ == '__main__':

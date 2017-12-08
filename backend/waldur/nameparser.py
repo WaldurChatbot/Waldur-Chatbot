@@ -76,7 +76,6 @@ def getSimilarNames(extracted_names, list_of_names):
                 if 0.5 < similarity > best[1]:
                     best = [name, similarity]
         log.info("Found most similar name \"" + str(best[0]) + "\" with confidence " + str(best[1]))
-        print(best)
         return best[0]
     except Exception as e:
         log.error("An exception occurred while finding similar names: " + str(e))

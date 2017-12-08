@@ -126,4 +126,3 @@ for s in ["please", "please give", "give",
         ])
 
 waldur_list_corpus.extend(buffer)
-
