@@ -31,7 +31,7 @@ if __name__ == '__main__':
         api = init_api(chatbot)
         app = api.app
 
-        port = config['backend']['port']
+        port = int(config['backend']['port'])
         log.info("Launching WaldurChatbot API on port {}".format(port))
         app.run(port=port)
     except Exception as e:
