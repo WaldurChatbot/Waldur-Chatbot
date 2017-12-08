@@ -157,11 +157,15 @@ class QA(object):
     def __init__(self, question, possible_answers=None, check_answer=None, formatter=None):
         """
         :param question: Question to ask user.
-        :param possible_answers: callable that returns some sort of possible answers
-                                 must take at least 2 parameters, token and dict of QA objects.
-        :param check_answer: callable to use when checking if selected answer is good, takes 2 parameters:
-                             selected answer and possible_answers output
-        :param formatter: function that formats the possible_answers output to str
+        :param possible_answers: function that corresponds to
+                                 def function(token: str, parameters: dict) -> possible_answers
+                                 returned possible_answers may be anything, it will be passed to check_answer
+        :param check_answer: callable to use when checking if selected answer is good. Corresponds to
+                             def function(answer: str, possible_answers) -> answer
+                             returned answer will be added to InputRequest parameters as answer to question
+        :param formatter: callable that formats the possible_answers output to str
+                          def function(item) -> str
+                          returned value will be appended to the question that will be sent to user
         """
         self.question = question
         self.possible_answers = possible_answers
@@ -311,8 +315,6 @@ class InputRequest(Request):
                     return self._end(False)
             else:
                 question.get_possible_answers(self.token, self.parameters)
-                print(question.question)
-                print(question.get_formatted_possible_answers())
                 return question.question + " " + question.get_formatted_possible_answers()
         else:
             raise Exception("Should be at the next question at this point")
@@ -392,44 +394,6 @@ class GetProjectsRequest(SingleRequest):
             response_statement += statement
         else:
             response_statement = "You don't have any projects."
-
-        return {
-            'data': response_statement,
-            'type': 'text'
-        }
-
-
-class GetVmsRequest(SingleRequest):
-    ID = 3
-    NAME = 'get_vms'
-
-    def __init__(self):
-        super(GetVmsRequest, self).__init__(
-            method='GET',
-            endpoint='openstacktenant-instances',
-        )
-
-    def process(self):
-        response = self.send()
-
-        len_all = 0
-        statement = ""
-        organisations = itertools.groupby(response, lambda vm: vm['customer_name'])
-        for organisation, vms in organisations:
-            names = {vm['name'] + ": " + ("None" if len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for
-                     vm in vms}
-            len_all += len(names)
-            if len(names) > 0:
-                statement += "\nOrganisation '" + organisation + "':\n    " + "\n    ".join(names)
-
-        if len_all > 0:
-            if len_all == 1:
-                response_statement = "You have 1 virtual machine in total."
-            else:
-                response_statement = "You have " + str(len_all) + " virtual machines in total."
-            response_statement += statement
-        else:
-            response_statement = "You don't have any virtual machines."
 
         return {
             'data': response_statement,
@@ -808,60 +772,6 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
                     else:
                         response_statement = "You don't have any virtual machines in project " + most_similar_project + " of organisation " + most_similar_organisation + ". "
 
-        return {
-            'data': response_statement,
-            'type': 'text'
-        }
-
-
-class GetTeamOfOrganisationRequest(SingleRequest):
-    ID = 10
-    NAME = 'get_team_of_organisation'
-
-    def __init__(self):
-        super(GetTeamOfOrganisationRequest, self).__init__(
-            method='GET',
-            endpoint='customers'
-        )
-
-    def process(self):
-
-        firstreq = GetOrganisationsAndIdsRequest()
-        firstreq.token = self.token
-
-        organisations_with_uuid = firstreq.process()
-        organisations = [x for x in organisations_with_uuid]
-
-        extracted_organisations = extract_names(self.original)
-
-        if len(extracted_organisations) == 0:
-            response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
-                                 "Please write it out in capital case!"
-        else:
-            most_similar = getSimilarNames(extracted_organisations, organisations)
-            if most_similar == "":
-                response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
-                                     + extracted_organisations[0] + "\". Please check that an " \
-                                                                    "organisation with that name exists."
-            else:
-
-                self.endpoint += "/" + organisations_with_uuid[most_similar]
-                response = self.send()
-
-                owners = [owner['full_name'] for owner in response["owners"]]
-                supportusers = [supportuser['full_name'] for supportuser in response["support_users"]]
-
-                response_statement = "The following people are team members of " + most_similar + ": "
-                if len(owners) > 1:
-                    response_statement += "\nOwners: " + (", ".join(owners)) + "."
-                elif len(owners) == 1:
-                    response_statement += "\nThe owner: " + str(owners[0]) + "."
-                if len(supportusers) > 1:
-                    response_statement = "\nSupport: " + (", ".join(owners)) + ". "
-                elif len(supportusers) == 1:
-                    response_statement += "\nThe support: " + str(supportusers[0]) + ". "
-                if len(owners) + len(supportusers) == 0:
-                    response_statement = "The organisation " + most_similar + " doesn't have any team members. "
         return {
             'data': response_statement,
             'type': 'text'
@@ -1350,7 +1260,6 @@ class CreateVMRequest(InputRequest):
                 (
                     'continue',
                     QA('Do you wanna create a VM?',
-                       possible_answers=None,
                        check_answer=(lambda x, y: True if x.startswith("y") else None),
                        formatter="y/n"
                        )
@@ -1358,7 +1267,6 @@ class CreateVMRequest(InputRequest):
                 (
                     'name',
                     QA('Input name for vm.',
-                       possible_answers=None,
                        check_answer=(lambda x, y: x),
                        formatter=""
                        )
@@ -1414,7 +1322,6 @@ class CreateVMRequest(InputRequest):
                 (
                     'floating_ips',
                     QA('Add public ip?',
-                       possible_answers=None,
                        check_answer=(lambda x, y: x.startswith("y")),
                        formatter="y/n"
                        )
