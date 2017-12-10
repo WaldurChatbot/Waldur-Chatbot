@@ -637,7 +637,7 @@ class GetVmsRequest(SingleRequest):
         for organisation, vms in organisations:
             names = {
                 vm['name'] + ": " + ("-" if len(vm['internal_ips']) == 0 else ", ".join(vm['internal_ips'])) + " / " +
-                ("-" if len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in vms}
+                ("-" if vm['external_ips'] == None or len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in vms}
             len_all += len(names)
             if len(names) > 0:
                 statement += "\nOrganisation '" + organisation + "':\n    " + "\n    ".join(names)
@@ -697,7 +697,7 @@ class GetVmsByOrganisationRequest(SingleRequest):
                 vm_names = {
                     vm['name'] + ": " + (
                         "-" if len(vm['internal_ips']) == 0 else ", ".join(vm['internal_ips'])) + " / " +
-                    ("-" if len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in response}
+                    ("-" if vm['external_ips'] == None or  len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in response}
 
                 if len(vm_names) > 1:
                     response_statement = "You have " + str(len(vm_names)) + \
@@ -776,7 +776,7 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
                     vm_names = {
                         vm['name'] + ": " + (
                             "-" if len(vm['internal_ips']) == 0 else ", ".join(vm['internal_ips'])) + " / " +
-                        ("-" if len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in response}
+                        ("-" if vm['external_ips'] == None or  len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in response}
 
                     if len(vm_names) > 1:
                         response_statement = "You have " + str(

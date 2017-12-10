@@ -1,7 +1,17 @@
 categories:
 - Waldur
 conversations:
+# get_organisations
+- - get_organisations
+  - REQUEST~get_organisations
+- - What organisations am I part of
+  - REQUEST~get_organisations
+- - Please give me my organisations
+  - REQUEST~get_organisations
+
 # get_projects
+- - get_projects
+  - REQUEST~get_projects
 - - Please give me my projects
   - REQUEST~get_projects
 - - My projects pls
@@ -10,12 +20,32 @@ conversations:
   - REQUEST~get_projects
 
 # get_services
+- - get_services
+  - REQUEST~get_services
 - - What services do my organisations use
   - REQUEST~get_services
 - - Please give me my services
   - REQUEST~get_services
 
+# get_services_by_organization
+- - get_services_by_organisation
+  - REQUEST~get_services_by_organisation
+- - What kind of providers is my organisation allowed to use
+  - REQUEST~get_services_by_organisation
+- - Please give me my services in organisation
+  - REQUEST~get_services_by_organisation
+
+# get_services_by_project_and_organisation
+- - get_services_by_project_and_organisation
+  - REQUEST~get_services_by_project_and_organisation
+- - What kind of providers is my project of organisation allowed to use
+  - REQUEST~get_services_by_project_and_organisation
+- - Please give me my services in project of organisation
+  - REQUEST~get_services_by_project_and_organisation
+
 # get_vms
+- - get_vms
+  - REQUEST~get_vms
 - - Please give me my virtual machines
   - REQUEST~get_vms
 - - What virtual machines do I have
@@ -25,51 +55,49 @@ conversations:
 - - Please give me my vms
   - REQUEST~get_vms
 
-# get_organizations
-- - What organisations am I part of
-  - REQUEST~get_organisations
-- - Please give me my organisations
-  - REQUEST~get_organisations
-
-# get_totalcosts
-- - Graphtest
-  - REQUEST~get_totalcosts
-
-# get_services_by_organization
-- - What kind of providers is my organisation allowed to use
-  - REQUEST~get_services_by_organisation
-- - Please give me my services in organisation
-  - REQUEST~get_services_by_organisation
-
 # get_vms_by_organization
+- - get_vms_by_organisation
+  - REQUEST~get_vms_by_organisation
 - - Please give me my virtual machines in organisation
   - REQUEST~get_vms_by_organisation
 - - What vms do i have in organisation
   - REQUEST~get_vms_by_organisation
 
+# get_vms_by_project_and_organisation
+- - get_vms_by_project_and_organisation
+  - REQUEST~get_vms_by_project_and_organisation
+- - Please give me my virtual machines in project of organisation
+  - REQUEST~get_vms_by_project_and_organisation
+- - What vms do i have in project of organisation
+  - REQUEST~get_vms_by_project_and_organisation
+
 # get_private_clouds
+- - get_private_clouds
+  - REQUEST~get_private_clouds
 - - Please give me my private clouds
   - REQUEST~get_private_clouds
 - - Please give me my clouds
   - REQUEST~get_private_clouds
 
-# get_team_of_organisation
-- - Who is working in my organisation
-  - REQUEST~get_team_of_organisation
-- - Please give me the team members of organisation
-  - REQUEST~get_team_of_organisation
-
-# get_help
-- - help me
-  - REQUEST~get_help
-
 # get_private_clouds_by_organisation
+- - get_private_clouds_by_organisation
+  - REQUEST~get_private_clouds_by_organisation
 - - Please give me my private clouds of organisation
   - REQUEST~get_private_clouds_by_organisation
 - - What private clouds do I have in organisation
   - REQUEST~get_private_clouds_by_organisation
 
+# get_private_clouds_by_project_and_organisation
+- - get_private_clouds_by_project_and_organisation
+  - REQUEST~get_private_clouds_by_project_and_organisation
+- - Please give me my private clouds in project of organisation
+  - REQUEST~get_private_clouds_by_project_and_organisation
+- - What private clouds do I have in project of organisation
+  - REQUEST~get_private_clouds_by_project_and_organisation
+
 # get_audit_log_by_organisation
+- - get_audit_log_by_organisation
+  - REQUEST~get_audit_log_by_organisation
 - - What happened in organisation
   - REQUEST~get_audit_log_by_organisation
 - - Please give me my log entries in organisation
@@ -78,6 +106,8 @@ conversations:
   - REQUEST~get_audit_log_by_organisation
 
 # get_audit_log_by_project_and_organisation
+- - get_audit_log_by_project_and_organisation
+  - REQUEST~get_audit_log_by_project_and_organisation
 - - What happened in project of organisation
   - REQUEST~get_audit_log_by_project_and_organisation
 - - Please give me my log entries in project of organisation
@@ -87,54 +117,37 @@ conversations:
 - - Please give me my log entries in project organisation
   - REQUEST~get_audit_log_by_project_and_organisation
 
-# get_services_by_project_and_organisation
-- - What kind of providers is my project of organisation allowed to use
-  - REQUEST~get_services_by_project_and_organisation
-- - Please give me my services in project of organisation
-  - REQUEST~get_services_by_project_and_organisation
-
-# get_vms_by_project_and_organisation
-- - Please give me my virtual machines in project of organisation
-  - REQUEST~get_vms_by_project_and_organisation
-- - What vms do i have in project of organisation
-  - REQUEST~get_vms_by_project_and_organisation
-
-# get_private_clouds_by_project_and_organisation
-- - Please give me my private clouds in project of organisation
-  - REQUEST~get_private_clouds_by_project_and_organisation
-- - What private clouds do I have in project of organisation
-  - REQUEST~get_private_clouds_by_project_and_organisation
-
-# All requests by their name.
-- - get_services
-  - REQUEST~get_services
-- - get_projects
-  - REQUEST~get_projects
-- - get_vms
-  - REQUEST~get_vms
-- - get_organisations
-  - REQUEST~get_organisations
-- - get_services_by_organisation
-  - REQUEST~get_services_by_organisation
-- - get_services_by_project_and_organisation
-  - REQUEST~get_services_by_project_and_organisation
-- - get_vms_by_organisation
-  - REQUEST~get_vms_by_organisation
-- - get_vms_by_project_and_organisation
-  - REQUEST~get_vms_by_project_and_organisation
+# get_team_of_organisation
 - - get_team_of_organisation
   - REQUEST~get_team_of_organisation
-- - get_private_clouds
-  - REQUEST~get_private_clouds
-- - get_private_clouds_by_organisation
-  - REQUEST~get_private_clouds_by_organisation
-- - get_private_clouds_by_project_and_organisation
-  - REQUEST~get_private_clouds_by_project_and_organisation
-- - get_audit_log_by_organisation
-  - REQUEST~get_audit_log_by_organisation
-- - get_audit_log_by_project_and_organisation
-  - REQUEST~get_audit_log_by_project_and_organisation
-- - create_vpc
-  - REQUEST~create_vpc
+- - Who is working in my organisation
+  - REQUEST~get_team_of_organisation
+- - Please give me the team members of organisation
+  - REQUEST~get_team_of_organisation
+
+# get_totalcosts
+- - Graphtest
+  - REQUEST~get_totalcosts
+
+# get_help
+- - help me
+  - REQUEST~get_help
+
+# create_vm
 - - create_vm
   - REQUEST~create_vm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
