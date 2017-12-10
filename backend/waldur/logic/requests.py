@@ -632,7 +632,8 @@ class GetVmsRequest(SingleRequest):
 
         len_all = 0
         statement = ""
-        organisations = itertools.groupby(response, lambda vm: vm['customer_name'])
+        organisations = sorted(response, key=lambda k: k['customer_name'])
+        organisations = itertools.groupby(organisations, lambda vm: vm['customer_name'])
         for organisation, vms in organisations:
             names = {
                 vm['name'] + ": " + ("-" if len(vm['internal_ips']) == 0 else ", ".join(vm['internal_ips'])) + " / " +
@@ -814,21 +815,23 @@ class GetPrivateCloudsRequest(SingleRequest):
 
         clouds = [cloud['name'] for cloud in response]
 
-        if len(clouds) >= 1:
-            response_statement = \
-                "You have {n} private clouds.\n" \
-                "They are:\n    {clouds}" \
-                .format(
-                    n=len(clouds),
-                    clouds="\n    ".join(clouds)
-                )
-        elif len(clouds) == 1:
-            response_statement = \
-                "You have 1 private cloud. " \
-                "It's name is {cloud}." \
-                    .format(
-                    cloud=clouds[0]
-                )
+        len_all = 0
+        statement = ""
+        organisations = sorted(response, key=lambda k: k['customer_name'])
+        organisations = itertools.groupby(organisations, lambda pc: pc['customer_name'])
+        for organisation, pcs in organisations:
+            names = [pc['name'] for pc in pcs]
+            len_all += len(names)
+            if len(names) > 0:
+                statement += "\nOrganisation '" + organisation + "':\n    " + "\n    ".join(names)
+
+        if len_all > 0:
+            if len_all == 1:
+                response_statement = "You have 1 private cloud."
+            else:
+                response_statement = \
+                    "You have {n} private clouds in total.".format(n=len_all)
+            response_statement += statement
         else:
             response_statement = "You don't have any private clouds."
 
