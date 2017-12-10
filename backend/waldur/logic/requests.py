@@ -874,36 +874,39 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
                                      + extracted_organisations[0] + "\". Please check that an " \
                                                                     "organisation with that name exists."
             else:
-
                 self.parameters["customer"] = organisations_with_uuid[most_similar]
                 response = self.send()
-
-                clouds = [cloud["name"] for cloud in response]
-
-                if len(clouds) > 1:
-                    response_statement = \
-                        "You have {n} private clouds in {similar}.\n" \
-                        "They are:\n    {clouds}" \
-                        .format(
-                            n=len(clouds),
-                            similar=most_similar,
-                            clouds="\n    ".join(clouds)
-                        )
-                elif len(clouds) == 1:
-                    response_statement = \
-                        "You have 1 private cloud in {similar}.\n" \
-                        "It's name is {cloud}." \
-                        .format(
-                            similar=most_similar,
-                            cloud=clouds[0]
-                        )
-                else:
-                    response_statement = "You don't have any private clouds in " + most_similar + ". "
+                response_statement = self.subprocess(response, most_similar)
 
         return {
             'data': response_statement,
             'type': 'text'
         }
+
+    def subprocess(self, response, most_similar):
+        clouds = [cloud["name"] for cloud in response]
+
+        if len(clouds) > 1:
+            response_statement = \
+                "You have {n} private clouds in {similar}.\n" \
+                "They are:\n    {clouds}" \
+                    .format(
+                    n=len(clouds),
+                    similar=most_similar,
+                    clouds="\n    ".join(clouds)
+                )
+        elif len(clouds) == 1:
+            response_statement = \
+                "You have 1 private cloud in {similar}.\n" \
+                "It's name is {cloud}." \
+                    .format(
+                    similar=most_similar,
+                    cloud=clouds[0]
+                )
+        else:
+            response_statement = "You don't have any private clouds in " + most_similar + "."
+
+        return response_statement
 
 
 class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
@@ -1136,7 +1139,7 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
                         response_statement += log_entries[0] + "."
                     else:
                         response_statement = "Audit log in project " + most_similar_project + " of organisation " + \
-                                             most_similar_organisation + " is empty. "
+                                             most_similar_organisation + " is empty."
 
         return {
             'data': response_statement,
