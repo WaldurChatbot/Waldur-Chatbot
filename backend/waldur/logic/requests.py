@@ -263,7 +263,7 @@ class InputRequest(Request):
         self.input = data
         return self
 
-    def get_input(self):
+    def _get_input(self):
         """
         Method to get input, input is set back to None after call
         :return: string input
@@ -307,16 +307,16 @@ class InputRequest(Request):
         # bot needs token to know who to query
         self.check_token()
         if self.waiting_for_input:
-            return self.handle_question()
+            return self._handle_question()
 
         return None
 
-    def handle_question(self):
+    def _handle_question(self):
         """
         Handles current question, if waiting for answer -> asks, else continues to next question
         :return: message to client
         """
-        i = self.get_input()
+        i = self._get_input()
 
         if self.current is None:
             return self._end(True)
@@ -328,7 +328,7 @@ class InputRequest(Request):
                 if question.check(i):
                     self.parameters[self.current] = self.questions[self.current].get_answer()
                     self._next_question()
-                    return self.handle_question()
+                    return self._handle_question()
                 else:
                     return self._end(False)
             else:
@@ -1311,7 +1311,7 @@ class CreateVMRequest(InputRequest):
                 (
                     'image',
                     QA('Which image to use?',
-                       possible_answers=possible_os,
+                       possible_answers=possible_image,
                        check_answer=(lambda x, y: y[x] if x in y else None),
                        formatter=(lambda x: str(list(x)))
                        )
@@ -1376,14 +1376,19 @@ class CreateVMRequest(InputRequest):
 
         # BELOW IS VM CREATION
 
+        if self.parameters['floating_ips']:
+            floating_ips = [{'subnet': self.parameters['internal_ips_set']}]
+        else:
+            floating_ips = []
+
         try:
             response = CreateVM(
-                image=self.parameters['image']['value'],
-                internal_ips_set=[{'subnet': self.parameters['internal_ips_set']['value']}],
-                floating_ips=[{'subnet': self.parameters['internal_ips_set']['value']}],
-                flavor=self.parameters['flavor']['value'],
+                image=self.parameters['image'],
+                internal_ips_set=[{'subnet': self.parameters['internal_ips_set']}],
+                floating_ips=floating_ips,
+                flavor=self.parameters['flavor'],
                 service_project_link=self.parameters['service_project_link']['value'],
-                ssh_public_key=self.parameters['ssh_public_key']['value'],
+                ssh_public_key=self.parameters['ssh_public_key'],
                 name=self.parameters['name'],
                 security_groups=[{
                     'url': sg['value']
@@ -1406,13 +1411,12 @@ def possible_flavors(token, parameters):
     return GetPossibleFlavors(parameters['service_project_link']['settings_uuid']).set_token(token).process()
 
 
-def possible_os(token, parameters):
-    return GetPossibleOSes(parameters['service_project_link']['settings_uuid']).set_token(token).process()
+def possible_image(token, parameters):
+    return GetPossibleImages(parameters['service_project_link']['settings_uuid']).set_token(token).process()
 
 
 def possible_system_volume_size(token, parameters):
-    return GetSystemVolumeSize(parameters['image']['value'].strip("/").split("/")[-1]).set_token(
-        token).process()
+    return GetSystemVolumeSize(parameters['image'].strip("/").split("/")[-1]).set_token(token).process()
 
 
 def possible_networks(token, parameters):
@@ -1458,7 +1462,7 @@ class GetHelpRequest(SingleRequest):
 # --------------------- REQUESTS FOR INTERNAL USE ---------------------
 
 
-class GetPossibleOSes(SingleRequest):
+class GetPossibleImages(SingleRequest):
     def __init__(self, settings_uuid):
         super().__init__(
             'GET',
@@ -1469,7 +1473,7 @@ class GetPossibleOSes(SingleRequest):
         )
 
     def process(self):
-        return {image['name']: {'value': image['url']} for image in self.send()}
+        return {image['name']: image['url'] for image in self.send()}
 
 
 class GetPossibleFlavors(SingleRequest):
@@ -1483,7 +1487,7 @@ class GetPossibleFlavors(SingleRequest):
         )
 
     def process(self):
-        return {flavor['name']: {'value': flavor['url']} for flavor in self.send()}
+        return {flavor['name']: flavor['url'] for flavor in self.send()}
 
 
 class GetPossibleKeys(SingleRequest):
@@ -1494,7 +1498,7 @@ class GetPossibleKeys(SingleRequest):
         )
 
     def process(self):
-        return {key['name']: {'value': key['url']} for key in self.send()}
+        return {key['name']: key['url'] for key in self.send()}
 
 
 class GetPossibleNetworks(SingleRequest):
@@ -1508,7 +1512,7 @@ class GetPossibleNetworks(SingleRequest):
         )
 
     def process(self):
-        return {network['name']: {'value': network['url']} for network in self.send()}
+        return {network['name']: network['url'] for network in self.send()}
 
 
 class GetSecurityGroups(SingleRequest):

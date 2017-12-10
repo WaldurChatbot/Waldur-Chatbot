@@ -197,7 +197,7 @@ def mocked_query_use_case_12_regular_get_vms(method, data, endpoint, parameters)
     vm_1_ip_1 = "193.40.11.164"
     vm_1_int_ip = "127.0.0.1"
     vm_2 = "WaldurChatbot Production"
-    #cn_2 = "Waldur Chatbot testbed (LTAT.05.005)"
+    # cn_2 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_2_ip_1 = "193.40.11.175"
     vm_2_int_ip = "localhost"
     return create_get_vms_response((vm_1, cn_1, [vm_1_ip_1], [vm_1_int_ip]), (vm_2, cn_1, [vm_2_ip_1], [vm_2_int_ip]))
@@ -220,7 +220,7 @@ def mocked_query_use_case_12_regular_two_ips_get_vms(method, data, endpoint, par
     cn_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_1_ip_1 = "193.40.11.164"
     vm_1_int_ip = "127.0.0.1"
-    #cn_2 = "Waldur Chatbot testbed (LTAT.05.005)"
+    # cn_2 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_2 = "WaldurChatbot Production"
     vm_2_ip_1 = "193.40.11.175"
     vm_2_int_ip = "localhost"
@@ -530,7 +530,6 @@ class TestGetPrivateCloudsByOrganisationRequests(RequestTestCase):
 
 
 class QATests(TestCase):
-
     def test_simple(self):
         qa = QA("Sup?")
         self.assertTrue(qa.check("Answer"))
@@ -570,6 +569,37 @@ class QATests(TestCase):
         self.assertTrue(qa.check("y"))
         self.assertEqual("y", qa.get_answer())
         self.assertIn("y/n", qa.get_formatted_possible_answers())
+
+
+class CreateVMTests(RequestTestCase):
+    def setUp(self):
+        self.cvm = CreateVMRequest()
+
+    def test_needs_token(self):
+        with self.assertRaises(InvalidTokenError):
+            self.cvm.process()
+
+    def question_1(self):
+        self.cvm.set_token("token")
+        self.assert_correct_response_format(self.cvm.process())
+        self.cvm.set_input("yes")
+        self.assert_correct_response_format(self.cvm.process())
+        self.assertEqual(True, self.cvm.parameters['continue'])
+
+    def test(self):
+        self.question_1()
+
+        self.cvm.set_input("whatever")
+
+        with mock.patch(
+                'backend.waldur.logic.requests.possible_projects',
+                side_effect=lambda token, parameters: {'value': 'test_url', 'settings_uuid': 'asdf'}
+        ):
+            #self.assert_correct_response_format(self.cvm.process())
+            pass
+
+        #self.assertEqual("whatever", self.cvm.parameters['name'])
+
 
 if __name__ == '__main__':
     main()
