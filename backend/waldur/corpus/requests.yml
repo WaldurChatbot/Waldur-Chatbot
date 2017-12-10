@@ -135,6 +135,6 @@ conversations:
 - - get_audit_log_by_project_and_organisation
   - REQUEST~get_audit_log_by_project_and_organisation
 - - create_vpc
-  - REQUEST~create-vpc
+  - REQUEST~create_vpc
 - - create_vm
-  - REQUEST~create-vm
+  - REQUEST~create_vm
