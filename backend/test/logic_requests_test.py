@@ -10,15 +10,15 @@ class RequestTestCase(TestCase):
         self.assertEqual(response_type, response['type'])
 
 
-def mocked_query_get_services_0_names(method, data, endpoint):
+def mocked_query_get_services_0_names(method, data, endpoint, parameters):
     return create_get_services_response()
 
 
-def mocked_query_get_services_1_name(method, data, endpoint):
+def mocked_query_get_services_1_name(method, data, endpoint, parameters):
     return create_get_services_response("test1")
 
 
-def mocked_query_get_services_2_names(method, data, endpoint):
+def mocked_query_get_services_2_names(method, data, endpoint, parameters):
     return create_get_services_response("test1", "test2")
 
 
@@ -54,27 +54,27 @@ class TestGetServicesRequests(RequestTestCase):
         self.assertIn("test2", response['data'])
 
 
-def mocked_query_get_projects_0_names(method, data, endpoint):
+def mocked_query_get_projects_0_names(method, data, endpoint, parameters):
     return create_get_projects_response()
 
 
-def mocked_query_get_projects_1_name(method, data, endpoint):
+def mocked_query_get_projects_1_name(method, data, endpoint, parameters):
     return create_get_projects_response(("org1", {"test1"}))
 
 
-def mocked_query_get_projects_2_names(method, data, endpoint):
+def mocked_query_get_projects_2_names(method, data, endpoint, parameters):
     return create_get_projects_response(("org2", {"test1", "test2"}))
 
 
-def mocked_query_get_projects_2_organisations(method, data, endpoint):
+def mocked_query_get_projects_2_organisations(method, data, endpoint, parameters):
     return create_get_projects_response(("org1", {"test1", "test2"}), ("org2", {"test3"}))
 
 
-def mocked_query_get_projects_2_organisations_1_empty(method, data, endpoint):
+def mocked_query_get_projects_2_organisations_1_empty(method, data, endpoint, parameters):
     return create_get_projects_response(("org1", {"test1", "test2"}), ("org2", {}))
 
 
-def mocked_query_use_case_3_regular_get_projects(method, data, endpoint):
+def mocked_query_use_case_3_regular_get_projects(method, data, endpoint, parameters):
     o_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     o_1_p_1 = "Waldur Chatbot testbed"
     o_1_p_2 = "2nd project"
@@ -83,14 +83,14 @@ def mocked_query_use_case_3_regular_get_projects(method, data, endpoint):
     return create_get_projects_response((o_1, (o_1_p_1, o_1_p_2)), (o_2, {o_2_p_1}))
 
 
-def mocked_query_use_case_3_alt_a_get_projects(method, data, endpoint):
+def mocked_query_use_case_3_alt_a_get_projects(method, data, endpoint, parameters):
     o_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     o_1_p_1 = "Waldur Chatbot testbed"
     o_2 = "Waldur Maie"
     return create_get_projects_response((o_1, {o_1_p_1}), (o_2, {}))
 
 
-def mocked_query_use_case_3_alt_b_get_projects(method, data, endpoint):
+def mocked_query_use_case_3_alt_b_get_projects(method, data, endpoint, parameters):
     o_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     return create_get_projects_response((o_1, {}))
 
@@ -175,23 +175,23 @@ class TestGetProjectsRequests(RequestTestCase):
         self.assertEqual("You don't have any projects.", response['data'])
 
 
-def mocked_query_get_vms_0_names(method, data, endpoint):
+def mocked_query_get_vms_0_names(method, data, endpoint, parameters):
     return create_get_vms_response()
 
 
-def mocked_query_get_vms_1_name(method, data, endpoint):
+def mocked_query_get_vms_1_name(method, data, endpoint, parameters):
     return create_get_vms_response(("test1", "name1", ["1.1", "1.0"], ["1.2"]))
 
 
-def mocked_query_get_vms_2_names(method, data, endpoint):
+def mocked_query_get_vms_2_names(method, data, endpoint, parameters):
     return create_get_vms_response(("test1", "name1", ["1.1"], ["1.2"]), ("test2", "name2", ["2.1"], ["2.2"]))
 
 
-def mocked_query_get_vms_no_ip(method, data, endpoint):
+def mocked_query_get_vms_no_ip(method, data, endpoint, parameters):
     return create_get_vms_response(("test1", "name1", [], []))
 
 
-def mocked_query_use_case_12_regular_get_vms(method, data, endpoint):
+def mocked_query_use_case_12_regular_get_vms(method, data, endpoint, parameters):
     vm_1 = "WaldurChatbot Develop"
     cn_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_1_ip_1 = "193.40.11.164"
@@ -203,7 +203,7 @@ def mocked_query_use_case_12_regular_get_vms(method, data, endpoint):
     return create_get_vms_response((vm_1, cn_1, [vm_1_ip_1], [vm_1_int_ip]), (vm_2, cn_1, [vm_2_ip_1], [vm_2_int_ip]))
 
 
-def mocked_query_use_case_12_alt_b_get_vms(method, data, endpoint):
+def mocked_query_use_case_12_alt_b_get_vms(method, data, endpoint, parameters):
     vm_1 = "WaldurChatbot Develop"
     cn_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_1_ip_1 = "193.40.11.164"
@@ -211,11 +211,11 @@ def mocked_query_use_case_12_alt_b_get_vms(method, data, endpoint):
     return create_get_vms_response((vm_1, cn_1, [vm_1_ip_1], [vm_1_int_ip]))
 
 
-def mocked_query_use_case_12_alt_c_get_vms(method, data, endpoint):
+def mocked_query_use_case_12_alt_c_get_vms(method, data, endpoint, parameters):
     return create_get_vms_response()
 
 
-def mocked_query_use_case_12_regular_two_ips_get_vms(method, data, endpoint):
+def mocked_query_use_case_12_regular_two_ips_get_vms(method, data, endpoint, parameters):
     vm_1 = "WaldurChatbot Develop"
     cn_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_1_ip_1 = "193.40.11.164"
@@ -227,7 +227,7 @@ def mocked_query_use_case_12_regular_two_ips_get_vms(method, data, endpoint):
     return create_get_vms_response((vm_1, cn_1, [vm_1_ip_1], [vm_1_int_ip]), (vm_2, cn_1, [vm_2_ip_1], [vm_2_int_ip]))
 
 
-def mocked_query_use_case_12_alt_b_two_ips_get_vms(method, data, endpoint):
+def mocked_query_use_case_12_alt_b_two_ips_get_vms(method, data, endpoint, parameters):
     vm_1 = "WaldurChatbot Develop"
     cn_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_1_ip_1 = "193.40.11.164"
@@ -236,7 +236,7 @@ def mocked_query_use_case_12_alt_b_two_ips_get_vms(method, data, endpoint):
     return create_get_vms_response((vm_1, cn_1, [vm_1_ip_1, vm_1_ip_2], [vm_1_int_ip]))
 
 
-def mocked_query_use_case_12_alt_b_no_ip_get_vms(method, data, endpoint):
+def mocked_query_use_case_12_alt_b_no_ip_get_vms(method, data, endpoint, parameters):
     vm_1 = "WaldurChatbot Develop"
     cn_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_1_ip_1 = "None"
@@ -244,7 +244,7 @@ def mocked_query_use_case_12_alt_b_no_ip_get_vms(method, data, endpoint):
     return create_get_vms_response((vm_1, cn_1, [vm_1_ip_1], [vm_1_int_ip]))
 
 
-def mocked_query_use_case_12_alt_b_no_int_ip_get_vms(method, data, endpoint):
+def mocked_query_use_case_12_alt_b_no_int_ip_get_vms(method, data, endpoint, parameters):
     vm_1 = "WaldurChatbot Develop"
     cn_1 = "Waldur Chatbot testbed (LTAT.05.005)"
     vm_1_ip_1 = "localhost"
@@ -371,15 +371,15 @@ class TestGetVmsRequests(RequestTestCase):
         self.assertEqual(correct_response, response['data'])
 
 
-def mocked_query_get_organisations_0_names(method, data, endpoint):
+def mocked_query_get_organisations_0_names(method, data, endpoint, parameters):
     return create_get_organisations_response()
 
 
-def mocked_query_get_organisations_1_name(method, data, endpoint):
+def mocked_query_get_organisations_1_name(method, data, endpoint, parameters):
     return create_get_organisations_response("test1")
 
 
-def mocked_query_get_organisations_2_names(method, data, endpoint):
+def mocked_query_get_organisations_2_names(method, data, endpoint, parameters):
     return create_get_organisations_response("test1", "test2")
 
 
@@ -415,7 +415,7 @@ class TestGetOrganisationsRequests(RequestTestCase):
         self.assertIn("test2", response['data'])
 
 
-def mocked_query_get_total_cost_graph_empty(method, data, endpoint):
+def mocked_query_get_total_cost_graph_empty(method, data, endpoint, parameters):
     return []
 
 
@@ -430,11 +430,11 @@ class TestGetTotalCostGraphRequest(RequestTestCase):
         self.assert_correct_response_format(response, "graph")
 
 
-def mocked_query_get_org_ids_1_name(method, data, endpoint):
+def mocked_query_get_org_ids_1_name(method, data, endpoint, parameters):
     return create_get_org_ids_response(("test1", "id1"))
 
 
-def mocked_query_get_org_ids_2_names(method, data, endpoint):
+def mocked_query_get_org_ids_2_names(method, data, endpoint, parameters):
     return create_get_org_ids_response(("test1", "id1"), ("test2", "id2"))
 
 
@@ -467,11 +467,11 @@ class TestGetOrganisationsAndIdsRequests(RequestTestCase):
         self.assertIn('id2', response['test2'])
 
 
-def mocked_query_get_clouds_by_org_no_org(method, data, endpoint):
+def mocked_query_get_clouds_by_org_no_org(method, data, endpoint, parameters):
     return create_get_clouds_by_org_response()
 
 
-def mocked_query_get_clouds_by_org(method, data, endpoint):
+def mocked_query_get_clouds_by_org(method, data, endpoint, parameters):
     return create_get_clouds_by_org_response(("Waldur Maie", "id1"))
 
 
@@ -529,89 +529,47 @@ class TestGetPrivateCloudsByOrganisationRequests(RequestTestCase):
         self.assertEqual(c_response, response['data'])
 
 
-def returns_true(*args):
-    return True
+class QATests(TestCase):
 
+    def test_simple(self):
+        qa = QA("Sup?")
+        self.assertTrue(qa.check("Answer"))
+        self.assertEqual("Answer", qa.get_answer())
 
-class TestInputRequestSingleQuestion(TestCase):
-    QUESTION = "What's up?"
-    ANSWERS = ['y', 'yes']
-    BAD_END_MSG = "how dare you"
+    def test_with_provided_answers(self):
+        qa = QA("asd?", possible_answers=['y', 'n'])
+        # Will return true, because no check_answer is supplied to QA
+        self.assertTrue(qa.check("Answer"))
+        self.assertEqual("Answer", qa.get_answer())
 
-    def setUp(self):
-        self.ir = InputRequest([
-            ('test', QA(self.QUESTION, self.ANSWERS))
-        ], bad_end_msg=self.BAD_END_MSG)
+    def test_with_check_item(self):
+        qa = QA("asd?", check_answer=lambda x, y: x if x == 'y' else None)
+        self.assertFalse(qa.check("yes"))
+        self.assertFalse(qa.check("asdfadfsf"))
+        self.assertFalse(qa.check("Answer"))
+        self.assertTrue(qa.check("y"))
+        self.assertEqual("y", qa.get_answer())
 
-    def test_set_get_input(self):
-        self.ir.set_input("y")
-        self.assertEqual("y", self.ir.input)
-        self.assertEqual("y", self.ir.get_input())
-        self.assertEqual(None, self.ir.input)
-        self.assertEqual(None, self.ir.get_input())
+    def test_with_provided_answers_and_check_item(self):
+        qa = QA("asd?", possible_answers=['y', 'yes'], check_answer=lambda x, y: x if x in y else None)
+        # Tie possible_answers to qa.found_possible_answers
+        qa.get_possible_answers()
+        self.assertFalse(qa.check("no"))
+        self.assertTrue(qa.check("y"))
+        self.assertTrue(qa.check("yes"))
+        self.assertEqual("yes", qa.get_answer())
 
-    def test_handle_question_no_input(self):
-        res = self.ir.handle_question()
-        self.assertEqual(res, self.QUESTION)
+    def test_with_formatter(self):
+        qa = QA("asd?",
+                possible_answers=['y'],
+                check_answer=lambda x, y: x if x in y else None,
+                formatter=lambda x: "y/n")
 
-    @mock.patch('backend.waldur.logic.requests.InputRequest.process', side_effect=returns_true)
-    def test_handle_question_correct_input(self, mock):
-        self.ir.set_input("y")
-        # should reach process method, because we have no more questions after this one
-        reached_process = self.ir.handle_question()
-        self.assertTrue(reached_process)
-
-        self.assertIn('test', self.ir.questions)
-        # _evaluate must have been called, questions dict values should now have answers instead of questions
-        self.assertEqual(self.ir.parameters['test'], 'y')
-
-    def test_handle_question_incorrect_input(self):
-        self.ir.set_input("n")
-        res = self.ir.handle_question()
-        self.assertEqual(res, self.BAD_END_MSG)
-
-
-class TestInputRequestMultipleQuestion(TestCase):
-    I1 = "t1"
-    Q1 = "q1"
-    A1 = ['1']
-
-    I2 = "t2"
-    Q2 = "q2"
-    A2 = ['2']
-
-    I3 = "t3"
-    Q3 = "q3"
-    A3 = ['3']
-
-    def setUp(self):
-        self.ir = InputRequest([
-            (self.I1, QA(self.Q1, self.A1)),
-            (self.I2, QA(self.Q2, self.A2)),
-            (self.I3, QA(self.Q3, self.A3)),
-        ])
-
-    @mock.patch('backend.waldur.logic.requests.InputRequest.process', side_effect=returns_true)
-    def test_handle_all_questions(self, mock):
-        question1 = self.ir.handle_question()
-        self.assertEqual(question1, self.Q1)
-
-        self.ir.set_input('1')
-        question2 = self.ir.handle_question()
-        self.assertEqual(question2, self.Q2)
-
-        self.ir.set_input('2')
-        question3 = self.ir.handle_question()
-        self.assertEqual(question3, self.Q3)
-
-        self.ir.set_input('3')
-        reached_process = self.ir.handle_question()
-        self.assertTrue(reached_process)
-
-        self.assertEqual(self.ir.parameters[self.I1], '1')
-        self.assertEqual(self.ir.parameters[self.I2], '2')
-        self.assertEqual(self.ir.parameters[self.I3], '3')
-
+        qa.get_possible_answers()
+        self.assertFalse(qa.check("no"))
+        self.assertTrue(qa.check("y"))
+        self.assertEqual("y", qa.get_answer())
+        self.assertIn("y/n", qa.get_formatted_possible_answers())
 
 if __name__ == '__main__':
     main()

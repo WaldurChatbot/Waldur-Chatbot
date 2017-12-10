@@ -166,14 +166,18 @@ class WaldurConnection(object):
         self.token = token.strip()
         self.session = Session()
 
-    def query(self, method, data, endpoint):
+    def query(self, method, parameters, endpoint, data=None):
         if endpoint[-1] != '/':
             endpoint += '/'
+
+        if data is None:
+            data = []
 
         request = Request(
             method=method,
             url=self.api_url + endpoint,
-            params=data
+            params=parameters,
+            data=json.dumps(data)
         )
 
         prepped = request.prepare()
@@ -183,9 +187,9 @@ class WaldurConnection(object):
 
         response_json = response.json()
 
-        if response.status_code == 200:
+        if response.status_code in range(200, 300):
             return response_json
         elif response.status_code == 401:
             raise InvalidTokenError()
         else:
-            raise Exception(response_json['detail'])
+            raise Exception(response_json)
