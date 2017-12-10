@@ -8,23 +8,35 @@ conversations:
   - REQUEST~get_organisations
 - - Please give me my organisations
   - REQUEST~get_organisations
+- - What organisations do I have
+  - REQUEST~get_organisations
+- - List my organizations
+  - REQUEST~get_organisations
 
 # get_projects
 - - get_projects
   - REQUEST~get_projects
 - - Please give me my projects
   - REQUEST~get_projects
-- - My projects pls
+- - What projects do I have
   - REQUEST~get_projects
-- - give projects
+- - Which projects am I part of
   - REQUEST~get_projects
+- - What are my projects
+  - REQUEST~get_services
+- - List my projects
+  - REQUEST~get_services
 
 # get_services
 - - get_services
   - REQUEST~get_services
-- - What services do my organisations use
+- - What services can I use
   - REQUEST~get_services
 - - Please give me my services
+  - REQUEST~get_services
+- - What providers do I have acces to
+  - REQUEST~get_services
+- - Please give me my service providers
   - REQUEST~get_services
 
 # get_services_by_organization
@@ -34,6 +46,12 @@ conversations:
   - REQUEST~get_services_by_organisation
 - - Please give me my services in organisation
   - REQUEST~get_services_by_organisation
+- - What services does my organisation use
+  - REQUEST~get_services_by_organisation
+- - What providers can my organisation access
+  - REQUEST~get_services_by_organisation
+- - List providers in organiation
+  - REQUEST~get_services_by_organisation
 
 # get_services_by_project_and_organisation
 - - get_services_by_project_and_organisation
@@ -42,6 +60,12 @@ conversations:
   - REQUEST~get_services_by_project_and_organisation
 - - Please give me my services in project of organisation
   - REQUEST~get_services_by_project_and_organisation
+- - What services does my project of organisation use
+  - REQUEST~get_services_by_organisation
+- - What providers can my project of organisation access
+  - REQUEST~get_services_by_organisation
+- - List providers in project in organization
+  - REQUEST~get_services_by_organisation
 
 # get_vms
 - - get_vms
@@ -54,13 +78,21 @@ conversations:
   - REQUEST~get_vms
 - - Please give me my vms
   - REQUEST~get_vms
+- - List virtual machines
+  - REQUEST~get_vms
 
 # get_vms_by_organization
 - - get_vms_by_organisation
   - REQUEST~get_vms_by_organisation
 - - Please give me my virtual machines in organisation
   - REQUEST~get_vms_by_organisation
+- - Please give me my vms in organisation
+  - REQUEST~get_vms_by_organisation
+- - What virtual machines do i have in organisation
+  - REQUEST~get_vms_by_organisation
 - - What vms do i have in organisation
+  - REQUEST~get_vms_by_organisation
+- - List virtual machines in organization
   - REQUEST~get_vms_by_organisation
 
 # get_vms_by_project_and_organisation
@@ -68,7 +100,13 @@ conversations:
   - REQUEST~get_vms_by_project_and_organisation
 - - Please give me my virtual machines in project of organisation
   - REQUEST~get_vms_by_project_and_organisation
+- - Please give me my vms in project of organisation
+  - REQUEST~get_vms_by_project_and_organisation
+- - What virtual machines do i have in project of organisation
+  - REQUEST~get_vms_by_project_and_organisation
 - - What vms do i have in project of organisation
+  - REQUEST~get_vms_by_project_and_organisation
+- - List virtual machines in project in organization
   - REQUEST~get_vms_by_project_and_organisation
 
 # get_private_clouds
@@ -78,13 +116,25 @@ conversations:
   - REQUEST~get_private_clouds
 - - Please give me my clouds
   - REQUEST~get_private_clouds
+- - What clouds do I have
+  - REQUEST~get_private_clouds
+- - What private clouds do I have
+  - REQUEST~get_private_clouds
+- - List private clouds
+  - REQUEST~get_private_clouds
 
 # get_private_clouds_by_organisation
 - - get_private_clouds_by_organisation
   - REQUEST~get_private_clouds_by_organisation
 - - Please give me my private clouds of organisation
   - REQUEST~get_private_clouds_by_organisation
+- - Please give me my clouds of organisation
+  - REQUEST~get_private_clouds_by_organisation
 - - What private clouds do I have in organisation
+  - REQUEST~get_private_clouds_by_organisation
+- - What clouds do I have in organisation
+  - REQUEST~get_private_clouds_by_organisation
+- - List private clouds in organization
   - REQUEST~get_private_clouds_by_organisation
 
 # get_private_clouds_by_project_and_organisation
@@ -92,7 +142,13 @@ conversations:
   - REQUEST~get_private_clouds_by_project_and_organisation
 - - Please give me my private clouds in project of organisation
   - REQUEST~get_private_clouds_by_project_and_organisation
+- - Please give me my clouds in project of organisation
+  - REQUEST~get_private_clouds_by_project_and_organisation
 - - What private clouds do I have in project of organisation
+  - REQUEST~get_private_clouds_by_project_and_organisation
+- - What clouds do I have in project of organisation
+  - REQUEST~get_private_clouds_by_project_and_organisation
+- - List private clouds in project in organization XYZ
   - REQUEST~get_private_clouds_by_project_and_organisation
 
 # get_audit_log_by_organisation
@@ -105,6 +161,16 @@ conversations:
 - - What's in the audit log of organisation
   - REQUEST~get_audit_log_by_organisation
 
+# get_audit_log_by_project
+- - get_audit_log_by_project
+  - REQUEST~get_audit_log_by_project
+- - What happened in project
+  - REQUEST~get_audit_log_by_project
+- - Please give me my log entries in project
+  - REQUEST~get_audit_log_by_project
+- - What's in the audit log of project
+  - REQUEST~get_audit_log_by_project
+
 # get_audit_log_by_project_and_organisation
 - - get_audit_log_by_project_and_organisation
   - REQUEST~get_audit_log_by_project_and_organisation
@@ -112,17 +178,19 @@ conversations:
   - REQUEST~get_audit_log_by_project_and_organisation
 - - Please give me my log entries in project of organisation
   - REQUEST~get_audit_log_by_project_and_organisation
-- - What happened in project organisation
-  - REQUEST~get_audit_log_by_project_and_organisation
-- - Please give me my log entries in project organisation
+- - What's in the audit log in project of organisation
   - REQUEST~get_audit_log_by_project_and_organisation
 
 # get_team_of_organisation
 - - get_team_of_organisation
   - REQUEST~get_team_of_organisation
-- - Who is working in my organisation
+- - Who is working in organisation
   - REQUEST~get_team_of_organisation
 - - Please give me the team members of organisation
+  - REQUEST~get_team_of_organisation
+- - Please give me the team of organisation
+  - REQUEST~get_team_of_organisation
+- - List who is working in my organisation
   - REQUEST~get_team_of_organisation
 
 # get_totalcosts
@@ -132,9 +200,13 @@ conversations:
 # get_help
 - - help me
   - REQUEST~get_help
+- - What can you help me with
+  - REQUEST~get_help
 
 # create_vm
-- - create_vm
+- - Create a virtual machine
+  - REQUEST~create_vm
+- - Create a vm
   - REQUEST~create_vm
 
 

@@ -12,6 +12,7 @@ get_private_clouds = "REQUEST~get_private_clouds"
 get_private_clouds_by_organisation = "REQUEST~get_private_clouds_by_organisation"
 get_private_clouds_by_project_and_organisation = "REQUEST~get_private_clouds_by_project_and_organisation"
 get_audit_log_by_organisation = "REQUEST~get_audit_log_by_organisation"
+get_audit_log_by_project = "REQUEST~get_audit_log_by_project"
 get_audit_log_by_project_and_organisation = "REQUEST~get_audit_log_by_project_and_organisation"
 get_total_costs = "REQUEST~get_totalcosts"
 create_vm = "REQUEST~create_vm"
@@ -102,8 +103,12 @@ waldur_list_corpus = [
         get_team_of_organisation
     ],
     [
-        'my audit log in',
+        'my audit log in organisation',
         get_audit_log_by_organisation
+    ],
+    [
+        'my audit log in project',
+        get_audit_log_by_project
     ],
     [
         'my audit log in project of organisation',
