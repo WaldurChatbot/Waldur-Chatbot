@@ -1058,6 +1058,7 @@ class GetAuditLogByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
+
 class GetAuditLogByProjectRequest(SingleRequest):
     ID = 12
     NAME = 'get_audit_log_by_project'
@@ -1118,6 +1119,7 @@ class GetAuditLogByProjectRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
     ID = 13
@@ -1287,48 +1289,80 @@ class GetTotalCostGraphRequest(SingleRequest):
         )
 
     def process(self):
-        response = self.send()
 
-        data = response
+        firstreq = GetOrganisationsAndIdsRequest()
+        firstreq.token = self.token
 
-        graphdata = {}
+        organisations_with_uuid = firstreq.process()
+        organisations = [x for x in organisations_with_uuid]
 
-        num_to_month = {
-            1: 'Jan',
-            2: 'Feb',
-            3: 'Mar',
-            4: 'Apr',
-            5: 'May',
-            6: 'Jun',
-            7: 'Jul',
-            8: 'Aug',
-            9: 'Sep',
-            10: 'Oct',
-            11: 'Nov',
-            12: 'Dec'
-        }
+        extracted_organisations = extract_names(self.original)
 
-        plotx = []
-        ploty = []
+        response_type = 'text'
 
-        lastmonths = 6
-
-        if len(data) >= lastmonths:
-            maxrange = lastmonths
+        if len(extracted_organisations) == 0:
+            response_statement = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                                 "Please write it out in capital case!"
         else:
-            maxrange = len(data)
+            most_similar = getSimilarNames(extracted_organisations, organisations)
+            if most_similar == "":
+                response_statement = "Sorry, I wasn't able to find an organisation with the name \"" \
+                                     + extracted_organisations[0] + "\". Please check that an " \
+                                                                    "organisation with that name exists."
+            else:
+                response = self.send()
+                data = response
 
-        for i in range(maxrange - 1, -1, -1):
-            plotx.append(num_to_month[data[i]['month']] + " " + str(data[i]['year']))
-            ploty.append(float(data[i]['total']))
+                graphdata = {}
 
-        graphdata['x'] = plotx
-        graphdata['y'] = ploty
-        graphdata['graphID'] = 1
+                num_to_month = {
+                    1: 'Jan',
+                    2: 'Feb',
+                    3: 'Mar',
+                    4: 'Apr',
+                    5: 'May',
+                    6: 'Jun',
+                    7: 'Jul',
+                    8: 'Aug',
+                    9: 'Sep',
+                    10: 'Oct',
+                    11: 'Nov',
+                    12: 'Dec'
+                }
+
+                plotx = []
+                ploty = []
+
+                uuid = organisations_with_uuid[most_similar]
+                customer = 'https://api.etais.ee/api/customers/' + uuid + '/'
+
+                newList = []
+                for i in range((len(data) - 1), -1, -1):
+                    if data[i]['customer'] == customer:
+                        newList.append(data[i])
+
+                data = newList
+                lastmonths = 6
+
+                if len(data) >= lastmonths:
+                    maxrange = lastmonths
+                else:
+                    maxrange = len(data)
+
+                for i in range(len(data)):
+                    plotx.append(num_to_month[data[i]['month']] + " " + str(data[i]['year']))
+                    ploty.append(float(data[i]['total']))
+
+                graphdata['x'] = plotx
+                graphdata['y'] = ploty
+                graphdata['graphID'] = 1
+
+                response_statement = graphdata
+                response_type = 'graph'
 
         return {
-            'data': graphdata,
-            'type': 'graph'
+            'data': response_statement,
+            'type': response_type
         }
 
 
@@ -1669,6 +1703,7 @@ class GetOrganisationsAndIdsRequest(SingleRequest):
 
         return {organisation['name']: organisation["uuid"] for organisation in response}
 
+
 class GetProjectsAndIdsRequest(SingleRequest):
     NAME = 'util_get_organisations'
 
@@ -1682,6 +1717,7 @@ class GetProjectsAndIdsRequest(SingleRequest):
         response = self.send()
 
         return {project['name']: project["uuid"] for project in response}
+
 
 class GetProjectsAndIdsByOrganisationRequest(SingleRequest):
     NAME = 'util_get_projects_by_organisation'
