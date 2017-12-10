@@ -529,5 +529,47 @@ class TestGetPrivateCloudsByOrganisationRequests(RequestTestCase):
         self.assertEqual(c_response, response['data'])
 
 
+class QATests(TestCase):
+
+    def test_simple(self):
+        qa = QA("Sup?")
+        self.assertTrue(qa.check("Answer"))
+        self.assertEqual("Answer", qa.get_answer())
+
+    def test_with_provided_answers(self):
+        qa = QA("asd?", possible_answers=['y', 'n'])
+        # Will return true, because no check_answer is supplied to QA
+        self.assertTrue(qa.check("Answer"))
+        self.assertEqual("Answer", qa.get_answer())
+
+    def test_with_check_item(self):
+        qa = QA("asd?", check_answer=lambda x, y: x if x == 'y' else None)
+        self.assertFalse(qa.check("yes"))
+        self.assertFalse(qa.check("asdfadfsf"))
+        self.assertFalse(qa.check("Answer"))
+        self.assertTrue(qa.check("y"))
+        self.assertEqual("y", qa.get_answer())
+
+    def test_with_provided_answers_and_check_item(self):
+        qa = QA("asd?", possible_answers=['y', 'yes'], check_answer=lambda x, y: x if x in y else None)
+        # Tie possible_answers to qa.found_possible_answers
+        qa.get_possible_answers()
+        self.assertFalse(qa.check("no"))
+        self.assertTrue(qa.check("y"))
+        self.assertTrue(qa.check("yes"))
+        self.assertEqual("yes", qa.get_answer())
+
+    def test_with_formatter(self):
+        qa = QA("asd?",
+                possible_answers=['y'],
+                check_answer=lambda x, y: x if x in y else None,
+                formatter=lambda x: "y/n")
+
+        qa.get_possible_answers()
+        self.assertFalse(qa.check("no"))
+        self.assertTrue(qa.check("y"))
+        self.assertEqual("y", qa.get_answer())
+        self.assertIn("y/n", qa.get_formatted_possible_answers())
+
 if __name__ == '__main__':
     main()

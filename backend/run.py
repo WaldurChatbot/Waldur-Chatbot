@@ -32,7 +32,7 @@ if __name__ == '__main__':
         app = api.app
 
         port = int(config['backend']['port'])
-        log.info("Launching WaldurChatbot API on port {}".format(port))
+        log.info(f"Launching WaldurChatbot API on port {port}")
         app.run(port=port)
     except Exception as e:
         log.critical("Unresumable exception occurred")

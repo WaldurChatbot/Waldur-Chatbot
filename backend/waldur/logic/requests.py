@@ -158,14 +158,19 @@ class QA(object):
         """
         :param question: Question to ask user.
         :param possible_answers: function that corresponds to
-                                 def function(token: str, parameters: dict) -> possible_answers
+                                 def function(token: str, data) -> possible_answers
+                                 data may be anything you want to
                                  returned possible_answers may be anything, it will be passed to check_answer
+                                 this will be called before the user is sent the question
+        :param formatter: callable that formats the possible_answers output to str
+                          def function(possible_answers) -> str
+                          returned value will be appended to the question that will be sent to user
+                          this will be called after possible_answers func
         :param check_answer: callable to use when checking if selected answer is good. Corresponds to
                              def function(answer: str, possible_answers) -> answer
                              returned answer will be added to InputRequest parameters as answer to question
-        :param formatter: callable that formats the possible_answers output to str
-                          def function(item) -> str
-                          returned value will be appended to the question that will be sent to user
+                             if returned answer is None, then question will not be considered as answered
+                             this will be called when user sends answer
         """
         self.question = question
         self.possible_answers = possible_answers
@@ -175,15 +180,23 @@ class QA(object):
         self.found_possible_answers = None
         self.answer = None
 
-    def get_possible_answers(self, token, questions):
+    def get_possible_answers(self, token=None, parameters=None):
+        """
+        :param token: Waldur API token
+        :param parameters: InputRequest.parameters
+        :return: output of possible_answers function. If possible_answers not callable, then value of possible_answers
+        """
         if not callable(self.possible_answers):
             val = self.possible_answers
             self.possible_answers = lambda x, y: val
 
-        self.found_possible_answers = self.possible_answers(token, questions)
+        self.found_possible_answers = self.possible_answers(token, parameters)
         return self.found_possible_answers
 
     def get_formatted_possible_answers(self):
+        """
+        :return: found_possible_answers formatted with formatter. If no formatter supplied, then None
+        """
         if not callable(self.formatter):
             val = self.formatter
             self.formatter = lambda x: val
@@ -191,6 +204,11 @@ class QA(object):
         return self.formatter(self.found_possible_answers)
 
     def check(self, item):
+        """
+        :param item: item to be checked with check_answer. If no check_answer supplied, then check will return True
+                     and answer will be set to item
+        :return: True if good answer, False otherwise
+        """
         if not callable(self.check_answer):
             self.check_answer = lambda x, y: x
 
