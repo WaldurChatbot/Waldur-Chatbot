@@ -415,9 +415,22 @@ class TestGetOrganisationsRequests(RequestTestCase):
         self.assertIn("test2", response['data'])
 
 
-def mocked_query_get_total_cost_graph_empty(method, data, endpoint, parameters):
-    return []
+def mocked_query_get_total_cost_graph_org(method, data, endpoint, parameters):
+    return mocked_query_get_total_cost_graph_response(('123', "Waldur Maie", "Meh"))
 
+
+def mocked_query_get_total_cost_graph_empty(method, data, endpoint, parameters):
+    return mocked_query_get_total_cost_graph_response()
+
+
+def mocked_query_get_total_cost_graph_response(*names):
+    return [
+        {
+            'uuid': uuid,
+            'name': name,
+            'customer': customer
+        } for uuid, name, customer in names
+    ]
 
 class TestGetTotalCostGraphRequest(RequestTestCase):
     def setUp(self):
@@ -426,6 +439,13 @@ class TestGetTotalCostGraphRequest(RequestTestCase):
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_total_cost_graph_empty)
     def test_get_organisations_0(self, mock):
+        self.get_graph.set_original("organisation Waldur Maie")
+        response = self.get_graph.process()
+        self.assert_correct_response_format(response, "text")
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_total_cost_graph_org)
+    def test_get_organisations_1(self, mock):
+        self.get_graph.set_original("organisation Waldur Maie")
         response = self.get_graph.process()
         self.assert_correct_response_format(response, "graph")
 
