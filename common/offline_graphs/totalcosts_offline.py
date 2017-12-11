@@ -1,7 +1,9 @@
 import json
 import collections
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from textwrap import wrap
 
 myinput = """[ 
 {  
@@ -487,13 +489,17 @@ ind = np.arange(N)
 width = 0.35
 fig, ax = plt.subplots()
 
-rects1 = ax.bar(ind, ploty, width, color='#2388d6')
+rects1 = ax.bar(ind, ploty, width, color='#75ad58')
 
 ax.set_xlabel('Months')
 ax.set_ylabel('Total costs')
 ax.set_xticks(ind + width / 2)
 ax.set_xticklabels(plotx)
-ax.set_title('Last ' + str(N) + 'month total costs')
+title = ax.set_title("\n".join(wrap('Last ' + str(N) + 'month total costs but then everytime the title gets longer '
+                                                       'omg like wtf when does it stop OMG HELP well okay'
+                                                       'let me tell you a story all about how'
+                                                       'my life got turned upside down'
+                                                       'so id like to take a moment just sit right there', 60)))
 
 def autolabel(rects, ax):
     # Get y-axis height to calculate label position from.
@@ -509,6 +515,24 @@ def autolabel(rects, ax):
                 ha='center', va='bottom')
 
 autolabel(rects1, ax)
+
+print()
+counter = 1
+for child in ax.get_children():
+    if counter == N:
+        child.set_color('#2388d6')
+        print("HERE:" + str(child))
+    else:
+        print(child)
+    counter += 1
+
+real_invoice = matplotlib.patches.Patch(color='#75ad58', label='Invoice')
+estimate_invoice = matplotlib.patches.Patch(color='#2388d6', label='Estimation')
+plt.legend(handles=[real_invoice, estimate_invoice])
+
+fig.tight_layout()
+title.set_y(1.05)
+fig.subplots_adjust(top=0.8)
 
 #plt.show()
 fig.savefig('foo.png')
