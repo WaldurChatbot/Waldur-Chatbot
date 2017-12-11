@@ -894,7 +894,6 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
         }
 
     def subprocess(self, response, most_similar):
-        print(response)
         clouds = [cloud["name"] for cloud in response]
 
         if len(clouds) > 1:
@@ -1293,7 +1292,7 @@ class GetTeamOfOrganisationRequest(SingleRequest):
 class GetTotalCostGraphRequest(SingleRequest):
     ID = 5
     NAME = 'get_totalcosts'
-    HELP = 'Please tell me the total annual cost in my organisation <organisation name>.'
+    HELP = 'Please tell me the monthly costs in my organisation <organisation name>.'
 
     def __init__(self):
         super(GetTotalCostGraphRequest, self).__init__(

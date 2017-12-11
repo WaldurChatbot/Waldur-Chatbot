@@ -1,9 +1,12 @@
 import json
 import collections
 import matplotlib
+matplotlib.use('Agg')  # requirement of matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from textwrap import wrap
+
+
 
 myinput = """[ 
 {  
