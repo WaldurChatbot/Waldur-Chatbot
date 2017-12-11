@@ -6,11 +6,12 @@ Current iteration: 3rd iteration
 
 ## Project setup  
 
-1. Make sure you have Python 3.5 and pip installed. Other versions of python may work put we are using mainly 3.5
+1. Make sure you have Python 3.6 and pip installed. Other versions of python may work put we are using mainly 3.6
 2. Clone or download the project.  
         `git clone https://github.com/WaldurChatbot/Waldur-Chatbot.git`  
         `https://github.com/m2rtk/Waldur-Chatbot/archive/master.zip`
-3. Use pip to install necessary requirements.  
+3. Use pip to install necessary requirements in project's module root.  
+Example:
         `pip install -r requirements.txt`
 4. [Continue here](../../wiki/Setting-up-local-project)
-
+5. Run chatbot from file "run.py" in the backend module.
