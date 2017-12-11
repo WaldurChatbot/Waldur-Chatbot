@@ -416,7 +416,7 @@ class TestGetOrganisationsRequests(RequestTestCase):
 
 
 def mocked_query_get_total_cost_graph_org(method, data, endpoint, parameters):
-    return mocked_query_get_total_cost_graph_response(('123', "Waldur Maie", "Meh"))
+    return mocked_query_get_total_cost_graph_response(('123', "Waldur Chatbot", "Meh"))
 
 
 def mocked_query_get_total_cost_graph_empty(method, data, endpoint, parameters):
@@ -432,22 +432,51 @@ def mocked_query_get_total_cost_graph_response(*names):
         } for uuid, name, customer in names
     ]
 
+
 class TestGetTotalCostGraphRequest(RequestTestCase):
     def setUp(self):
         self.get_graph = GetTotalCostGraphRequest()
         self.get_graph.set_token("asd")
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_total_cost_graph_empty)
-    def test_get_organisations_0(self, mock):
+    def test_get_total_cost_of_organisation_0(self, mock):
         self.get_graph.set_original("organisation Waldur Maie")
         response = self.get_graph.process()
         self.assert_correct_response_format(response, "text")
 
     @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_total_cost_graph_org)
-    def test_get_organisations_1(self, mock):
-        self.get_graph.set_original("organisation Waldur Maie")
+    def test_get_total_cost_of_organisation_1(self, mock):
+        self.get_graph.set_original("organisation Waldur Chatbot")
         response = self.get_graph.process()
         self.assert_correct_response_format(response, "graph")
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_total_cost_graph_org)
+    def test_get_total_cost_of_organisation_2(self, mock):
+        self.get_graph.set_original("organisation Maie")
+        response = self.get_graph.process()
+        self.assert_correct_response_format(response, "text")
+        c_response = "Sorry, I wasn't able to find an organisation with the name \"Maie\". " \
+                     "Please check that an organisation with that name exists."
+        self.assertEqual(c_response, response['data'])
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_total_cost_graph_org)
+    def test_get_total_cost_of_organisation_3(self, mock):
+        self.get_graph.set_original("organisation waldur maie")
+        response = self.get_graph.process()
+        self.assert_correct_response_format(response, "text")
+        self.assertNotIn("Waldur", response['data'])
+        self.assertNotIn("Maie", response['data'])
+        self.assertNotIn("maie", response['data'])
+        self.assertNotIn("waldur", response['data'])
+
+    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_total_cost_graph_org)
+    def test_get_total_cost_of_organisation_4(self, mock):
+        self.get_graph.set_original("organisation waldur maie")
+        response = self.get_graph.process()
+        self.assert_correct_response_format(response, "text")
+        c_response = "Sorry, I wasn't able to find an organisation's name in your request! " \
+                     "Please write it out in capital case!"
+        self.assertEqual(c_response, response['data'])
 
 
 def mocked_query_get_org_ids_1_name(method, data, endpoint, parameters):
@@ -504,6 +533,22 @@ def create_get_clouds_by_org_response(*pairs):
     ]
 
 
+def mocked_query_get_clouds_by_org_subresponse_2():
+    return create_get_clouds_by_org_subresponse("Waldur Chatbot", "Random Memes")
+
+
+def mocked_query_get_clouds_by_org_subresponse_1():
+    return create_get_clouds_by_org_subresponse("Waldur Chatbot")
+
+
+def create_get_clouds_by_org_subresponse(*names):
+    return [
+
+            {'name': name}
+        for name in names
+    ]
+
+
 class TestGetPrivateCloudsByOrganisationRequests(RequestTestCase):
     def setUp(self):
         self.get_cloud_by_org = GetPrivateCloudsByOrganisationRequest()
@@ -539,14 +584,18 @@ class TestGetPrivateCloudsByOrganisationRequests(RequestTestCase):
                      "Please write it out in capital case!"
         self.assertEqual(c_response, response['data'])
 
-    # Bad test
-    @mock.patch('common.request.WaldurConnection.query', side_effect=mocked_query_get_clouds_by_org)
-    def test_get_cloud_by_org_4(self, mock):
-        response = self.get_cloud_by_org.process()
-        # TODO: Think of a good solution on how to test 2 processes at once. Maybe adding subprocess method?
-        self.assertIn("You have 1 private cloud in Waldur Maie.", response['data'])
-        c_response = "You have 1 private cloud in Waldur Maie.\nIt's name is Waldur Maie."
-        self.assertEqual(c_response, response['data'])
+    def test_get_cloud_by_org_4(self):
+        response = self.get_cloud_by_org.subprocess(mocked_query_get_clouds_by_org_subresponse_1(), "Waldur Maie")
+        self.assertIn("You have 1 private cloud in Waldur Maie.", response)
+        c_response = "You have 1 private cloud in Waldur Maie.\nIts name is Waldur Chatbot."
+        self.assertEqual(c_response, response)
+
+    def test_get_cloud_by_org_5(self):
+        response = self.get_cloud_by_org.subprocess(mocked_query_get_clouds_by_org_subresponse_2(), "Waldur Maie")
+        self.assertIn("You have 2 private clouds in Waldur Maie.", response)
+        c_response = "You have 2 private clouds in Waldur Maie.\nThey are:\n    Waldur Chatbot\n    Random Memes"
+        c_response2 = "You have 2 private clouds in Waldur Maie.\nThey are:\n    Random Memes\n    Waldur Chatbot"
+        self.assertTrue(c_response == response or c_response2 == response)
 
 
 class QATests(TestCase):

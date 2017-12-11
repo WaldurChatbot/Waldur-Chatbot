@@ -884,6 +884,7 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
         }
 
     def subprocess(self, response, most_similar):
+        print(response)
         clouds = [cloud["name"] for cloud in response]
 
         if len(clouds) > 1:
@@ -898,7 +899,7 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
         elif len(clouds) == 1:
             response_statement = \
                 "You have 1 private cloud in {similar}.\n" \
-                "It's name is {cloud}." \
+                "Its name is {cloud}." \
                     .format(
                     similar=most_similar,
                     cloud=clouds[0]
@@ -981,7 +982,7 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
                     elif len(clouds) == 1:
                         response_statement = \
                             "You have 1 private cloud in project {similar_project} of organisation " \
-                            "{similar_organisation}.\nIt's name is {cloud}." \
+                            "{similar_organisation}.\nIts name is {cloud}." \
                             .format(
                                 similar_project=most_similar_project,
                                 similar_organisation=most_similar_organisation,
