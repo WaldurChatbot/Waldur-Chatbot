@@ -196,9 +196,11 @@ conversations:
 # get_totalcosts
 - - get_graph
   - REQUEST~get_totalcosts
-- - Please tell me the total annual cost in my organisation
+- - get_totalcosts
   - REQUEST~get_totalcosts
-- - What's the total cost of my organisation
+- - Please tell me the monthly costs in my organisation
+  - REQUEST~get_totalcosts
+- - What are the monthly costs of my organisation
   - REQUEST~get_totalcosts
 
 # get_help
