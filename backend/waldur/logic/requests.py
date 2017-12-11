@@ -341,6 +341,7 @@ class InputRequest(Request):
 class GetOrganisationsRequest(SingleRequest):
     ID = 4
     NAME = 'get_organisations'
+    HELP = 'Please tell me what organisations am I part of.'
 
     def __init__(self):
         super(GetOrganisationsRequest, self).__init__(
@@ -383,6 +384,7 @@ class GetOrganisationsRequest(SingleRequest):
 class GetProjectsRequest(SingleRequest):
     ID = 2
     NAME = 'get_projects'
+    HELP = 'Please show me my current projects.'
 
     def __init__(self):
         super(GetProjectsRequest, self).__init__(
@@ -422,6 +424,7 @@ class GetProjectsRequest(SingleRequest):
 class GetServicesRequest(SingleRequest):
     ID = 1
     NAME = 'get_services'
+    HELP = 'What service providers do I have access to?'
 
     def __init__(self):
         super(GetServicesRequest, self).__init__(
@@ -464,6 +467,7 @@ class GetServicesRequest(SingleRequest):
 class GetServicesByOrganisationRequest(SingleRequest):
     ID = 6
     NAME = 'get_services_by_organisation'
+    HELP = 'Please give me my service providers in organisation <org_name>.'
 
     def __init__(self):
         super(GetServicesByOrganisationRequest, self).__init__(
@@ -528,6 +532,7 @@ class GetServicesByOrganisationRequest(SingleRequest):
 class GetServicesByProjectAndOrganisationRequest(SingleRequest):
     ID = 14
     NAME = 'get_services_by_project_and_organisation'
+    HELP = 'Please give me my service providers in project <p_name> of organisation <org_name>.'
 
     def __init__(self):
         super(GetServicesByProjectAndOrganisationRequest, self).__init__(
@@ -617,6 +622,7 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
 class GetVmsRequest(SingleRequest):
     ID = 3
     NAME = 'get_vms'
+    HELP = 'What virtual machines do I have?'
 
     def __init__(self):
         super(GetVmsRequest, self).__init__(
@@ -660,6 +666,7 @@ class GetVmsRequest(SingleRequest):
 class GetVmsByOrganisationRequest(SingleRequest):
     ID = 8
     NAME = 'get_vms_by_organisation'
+    HELP = 'Can you show me which virtual machines is my organisation <org_name> using?'
 
     def __init__(self):
         super(GetVmsByOrganisationRequest, self).__init__(
@@ -719,6 +726,7 @@ class GetVmsByOrganisationRequest(SingleRequest):
 class GetVmsByProjectAndOrganisationRequest(SingleRequest):
     ID = 15
     NAME = 'get_vms_by_project_and_organisation'
+    HELP = 'What virtual machines do I have in project <p_name> of organisation <org_name>?'
 
     def __init__(self):
         super(GetVmsByProjectAndOrganisationRequest, self).__init__(
@@ -800,6 +808,7 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
 class GetPrivateCloudsRequest(SingleRequest):
     ID = 9
     NAME = 'get_private_clouds'
+    HELP = 'Please give me my private clouds.'
 
     def __init__(self):
         super(GetPrivateCloudsRequest, self).__init__(
@@ -844,6 +853,7 @@ class GetPrivateCloudsRequest(SingleRequest):
 class GetPrivateCloudsByOrganisationRequest(SingleRequest):
     ID = 11
     NAME = 'get_private_clouds_by_organisation'
+    HELP = 'What private clouds do I have in organisation <org_name>?'
 
     def __init__(self):
         super(GetPrivateCloudsByOrganisationRequest, self).__init__(
@@ -913,6 +923,7 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
 class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
     ID = 16
     NAME = 'get_private_clouds_by_project_and_organisation'
+    HELP = 'Could you list all my private clouds in project <p_name> of organisation <org_name>?'
 
     def __init__(self):
         super(GetPrivateCloudsByProjectAndOrganisationRequest, self).__init__(
@@ -1001,6 +1012,7 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
 class GetAuditLogByOrganisationRequest(SingleRequest):
     ID = 12
     NAME = 'get_audit_log_by_organisation'
+    HELP = 'What happened in my organisation <org_name>?'
 
     def __init__(self):
         super(GetAuditLogByOrganisationRequest, self).__init__(
@@ -1063,6 +1075,7 @@ class GetAuditLogByOrganisationRequest(SingleRequest):
 class GetAuditLogByProjectRequest(SingleRequest):
     ID = 12
     NAME = 'get_audit_log_by_project'
+    HELP = 'What happened in my project <p_name>?'
 
     def __init__(self):
         super(GetAuditLogByProjectRequest, self).__init__(
@@ -1125,6 +1138,7 @@ class GetAuditLogByProjectRequest(SingleRequest):
 class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
     ID = 13
     NAME = 'get_audit_log_by_project_and_organisation'
+    HELP = 'What happened in project <p_name> of organisation <org_name>?'
 
     def __init__(self):
         super(GetAuditLogByProjectAndOrganisationRequest, self).__init__(
@@ -1211,6 +1225,7 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
 class GetTeamOfOrganisationRequest(SingleRequest):
     ID = 10
     NAME = 'get_team_of_organisation'
+    HELP = 'Who is working in my organisation <org_name>?'
 
     def __init__(self):
         super(GetTeamOfOrganisationRequest, self).__init__(
@@ -1245,27 +1260,27 @@ class GetTeamOfOrganisationRequest(SingleRequest):
                 self.endpoint += "/" + organisations_with_uuid[most_similar] + "/users/"
                 response = self.send()
 
-                print(response)
-                owners = [owner['full_name'] for owner in response if owner["role"] == "owner" and
+
+                owners = [owner['full_name'] + ": " + (owner["email"] if owner["email"] != None else "-") for owner in response if owner["role"] == "owner" and
                           owner['full_name'] != ""]
-                supportusers = [supportuser['full_name'] for supportuser in response if
+                supportusers = [supportuser['full_name'] + ": " + (supportuser["email"] if supportuser["email"] != None else "-") for supportuser in response if
                                 supportuser["role"] == "support_user" and supportuser['full_name'] != ""]
-                others = [other['full_name'] for other in response if other["role"] is None and
+                others = [other['full_name'] + ": " + (other["email"] if other["email"] != None else "-") for other in response if other["role"] is None and
                           other['full_name'] != ""]
 
                 response_statement = "The following people are team members of " + most_similar + ": "
                 if len(owners) > 1:
-                    response_statement += "\nOwners: " + (", ".join(owners)) + "."
+                    response_statement += "\nOwners:\n    " + ("\n    ".join(owners))
                 elif len(owners) == 1:
-                    response_statement += "\nThe owner: " + str(owners[0]) + "."
+                    response_statement += "\nThe owner:\n    " + str(owners[0])
                 if len(supportusers) > 1:
-                    response_statement = "\nSupport: " + (", ".join(owners)) + ". "
+                    response_statement = "\nSupport:\n    " + ("\n    ".join(owners))
                 elif len(supportusers) == 1:
-                    response_statement += "\nThe support: " + str(supportusers[0]) + ". "
+                    response_statement += "\nThe support:\n    " + str(supportusers[0])
                 elif len(others) > 1:
-                    response_statement += "\nOthers: " + (", ".join(owners)) + "."
+                    response_statement += "\nOthers:\n    " + ("\n    ".join(owners))
                 elif len(others) == 1:
-                    response_statement += "\nOther: " + str(others[0]) + "."
+                    response_statement += "\nOther:\n    " + str(others[0])
                 if len(owners) + len(supportusers) == 0:
                     response_statement = "The organisation " + most_similar + " doesn't have any team members. "
 
@@ -1278,10 +1293,7 @@ class GetTeamOfOrganisationRequest(SingleRequest):
 class GetTotalCostGraphRequest(SingleRequest):
     ID = 5
     NAME = 'get_totalcosts'
-    HELP = ("---\n"
-            "GET TOTAL COST GRAPH REQUEST\n"
-            "I AM A WELL DEFINED HELP MESSAGE\n"
-            "---")
+    HELP = 'Please tell me the total annual cost in my organisation <organisation name>.'
 
     def __init__(self):
         super(GetTotalCostGraphRequest, self).__init__(
@@ -1366,6 +1378,7 @@ class GetTotalCostGraphRequest(SingleRequest):
 class CreateVMRequest(InputRequest):
     ID = 7
     NAME = 'create_vm'
+    HELP = 'Create a vm.'
 
     def __init__(self):
         super(CreateVMRequest, self).__init__(
@@ -1536,14 +1549,19 @@ class GetHelpRequest(SingleRequest):
 
         subclasses = all_subclasses()
 
-        response_statement = ""
+        response_statement = "This is the help for Waldur Chatbot.\n\n"
+        response_statement += "Some guidelines for giving names as input:\n"
+        response_statement += "Write names in capital letter and numeric values as words (ex 2nd -> Second).\n"
+        response_statement += "Project name should always be written before organisation's name.\n\n"
+        response_statement += "Here are the supported requests and an example query:\n"
 
         for request in subclasses:
             if request.ID is not None:
                 helpmsg = request.HELP
                 if request.HELP is None:
-                    helpmsg = request.NAME + " does not have HELP defined"
-                response_statement += helpmsg + "\n"
+                    response_statement += request.NAME + " does not have HELP defined"
+                else:
+                    response_statement += request.NAME + ": \"" + helpmsg + "\"\n"
 
         return {
             'data': response_statement,

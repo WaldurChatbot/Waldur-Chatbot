@@ -194,7 +194,11 @@ conversations:
   - REQUEST~get_team_of_organisation
 
 # get_totalcosts
-- - Graphtest
+- - get_graph
+  - REQUEST~get_totalcosts
+- - Please tell me the total annual cost in my organisation
+  - REQUEST~get_totalcosts
+- - What's the total cost of my organisation
   - REQUEST~get_totalcosts
 
 # get_help
@@ -208,18 +212,7 @@ conversations:
   - REQUEST~create_vm
 - - Create a vm
   - REQUEST~create_vm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- - Start creating a vm
+  - REQUEST~create_vm
+- - Start creating a virtual machine
+  - REQUEST~create_vm
