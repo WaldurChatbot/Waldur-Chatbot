@@ -35,8 +35,8 @@ if __name__ == '__main__':
         port = config['backend']['port']
         log.info("Launching WaldurChatbot API on port {}".format(port))
         app.run(port=port)
-    except:
+    except Exception as e:
         log.critical("Unresumable exception occurred")
-        for line in traceback.format_exc().split("\n"): log.critical(line)
+        log.exception(e)
     finally:
         log.info("Shutting down")

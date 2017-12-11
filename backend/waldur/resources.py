@@ -1,13 +1,13 @@
-from logging import getLogger
+import logging
 
 from chatterbot.conversation import Statement
 from flask_restful import Resource
 
 from .parsers import query_parser, teach_parser
-from .logic.requests import Request, text, InputRequest
+from .logic.requests import Request, text, InputRequest, InvalidTokenError
 from common.utils import obscure
 
-log = getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class WaldurResource(Resource):
@@ -20,6 +20,7 @@ class WaldurResource(Resource):
         """
         self.chatbot = chatbot
         self.response = None
+        self.code = 200
 
 
 class Query(WaldurResource):
@@ -38,7 +39,11 @@ class Query(WaldurResource):
         self.query = args.query
         self.token = args.token
 
-        log.info("Query initialized with {{query: '{}', token: '{}'}}".format(self.query, obscure(self.token)))
+        log.info(f"Query initialized with {{query: '{self.query}', token: '{obscure(self.token)}'}}")
+
+        if log.isEnabledFor(logging.DEBUG):
+            obscured_tokens = {obscure(x): self.tokens_for_input[x] for x in self.tokens_for_input}
+            log.debug(f"Tokens waiting for input: {obscured_tokens}")
 
     def post(self):
         """
@@ -48,17 +53,21 @@ class Query(WaldurResource):
         :param: token - Waldur API token
         :return: response, code
         """
+        try:
+            if self.token is not None and self.token in self.tokens_for_input:
+                self._handle_input()
+            else:
+                self._handle_query()
+        except InvalidTokenError:
+            self.response = dict(message='Invalid Waldur API token')
+            self.code = 401
 
-        if self.token is not None and self.token in self.tokens_for_input:
-            self._handle_input()
-        else:
-            self._handle_query()
-
-        log.info("Query response: {}".format(self.response))
-        return self.response, 200
+        log.info(f"Query response: {self.response} code: {self.code}")
+        return self.response, self.code
 
     def _handle_query(self):
         bot_response = str(self.chatbot.get_response(self.query))
+        log.debug(f"Bot response: '{bot_response}'")
 
         if bot_response.startswith("REQUEST"):
             req = Request\
@@ -96,12 +105,12 @@ class Teach(WaldurResource):
         self.statement = args.statement
         self.previous_statement = args.previous_statement
 
-        log.info("Teach initialized with {{statement: '{}', previous_statement: '{}'}}"
-                 .format(self.statement, self.previous_statement))
+        log.info(f"Teach initialized with {{statement: '{self.statement}', "
+                 f"previous_statement: '{self.previous_statement}'}}")
 
     def post(self):
         """
-        Entry point for POST /teach
+        Entry point for POST /teach/
         Teaches the bot that 'statement' is a valid response to 'previous_statement'
         :param: statement
         :param: previous_statement
@@ -109,4 +118,4 @@ class Teach(WaldurResource):
         """
 
         self.chatbot.learn_response(Statement(self.statement), Statement(self.previous_statement))
-        return text("Added '{}' as a response to '{}'".format(self.statement, self.previous_statement)), 200
+        return text(f"Added '{self.statement}' as a response to '{self.previous_statement}'"), 200

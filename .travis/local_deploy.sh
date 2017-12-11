@@ -50,14 +50,14 @@ else
 fi
 
 # install requirements
-sudo pip3 install -r requirements.txt --upgrade
+sudo python3.6 -m pip install -r requirements.txt --upgrade
 
 # kill process if running
 [ -f pid ] && kill `cat pid`
 
 # start process and save pid to file 'pid'
 cd ${PATH_TO_SCRIPT}
-nohup python3.5 ${SCRIPT} > raw.out 2>&1 & echo $! > ../pid
+nohup python3.6 ${SCRIPT} > raw.out 2>&1 & echo $! > ../pid
 echo "Started ${PATH_TO_SCRIPT}/${SCRIPT}"
 
 sleep 5

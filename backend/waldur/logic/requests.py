@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+import itertools
 from common.request import WaldurConnection, InvalidTokenError
 from common.nameparser import extract_names, getSimilarNames
 from logging import getLogger
@@ -86,7 +87,6 @@ class Request(object):
         :return: Dict or tuple of dicts with 2 keys: 'type' and 'data'
                     'type' values:  'text' if data is string
                                     'graph' if data is dict from which a graph can be constructed
-                                    'prompt' if data is a string question for which we expect an answer from client
                  May return more than 1 dict as a tuple, in which case all dicts are processed sequentially by clienta
         """
         raise NotImplementedError("Subclass must override this method")
@@ -371,24 +371,21 @@ class GetVmsRequest(SingleRequest):
     def process(self):
         response = self.send()
 
-        names = {vm['name']: (["None"] if len(vm['external_ips']) == 0 else vm['external_ips']) for vm in response}
+        len_all = 0
+        statement = ""
+        organisations = itertools.groupby(response, lambda vm: vm['customer_name'])
+        for organisation, vms in organisations:
+            names = {vm['name'] + ": " + ("None" if len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in vms}
+            len_all += len(names)
+            if len(names) > 0:
+                statement += "\nOrganisation '" + organisation + "':\n    " + "\n    ".join(names)
 
-        if len(names) > 1:
-            response_statement = \
-                "You have {n} virtual machines. " \
-                "Here are their names and public IPs: {ips}." \
-                .format(
-                    n=len(names),
-                    ips="; ".join([vm + ": " + (", ".join(names[vm])) for vm in names.keys()])
-                )
-        elif len(names) == 1:
-            response_statement = \
-                "You have 1 virtual machine. " \
-                "The virtual machine is {vm} and it's public IP(s): {ip}." \
-                .format(
-                    vm=list(names.keys())[0],
-                    ip=", ".join(list(names.values())[0])
-                )
+        if len_all > 0:
+            if len_all == 1:
+                response_statement = "You have 1 virtual machine in total."
+            else:
+                response_statement = "You have " + str(len_all) + " virtual machines in total."
+            response_statement += statement
         else:
             response_statement = "You don't have any virtual machines."
 
@@ -544,6 +541,7 @@ class GetVmsByOrganisationRequest(SingleRequest):
             'type': 'text'
         }
 
+
 class GetTeamOfOrganisationRequest(SingleRequest):
     ID = 10
     NAME = 'get_team_of_organisation'
@@ -597,6 +595,7 @@ class GetTeamOfOrganisationRequest(SingleRequest):
             'data': response_statement,
             'type': 'text'
         }
+
 
 class GetPrivateCloudsRequest(SingleRequest):
     ID = 9

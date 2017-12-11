@@ -1,4 +1,7 @@
 import json
+import matplotlib
+matplotlib.use('Agg')  # requirement of matplotlib
+
 import matplotlib.pyplot as plt
 import numpy as np
 import io
@@ -10,6 +13,7 @@ log = getLogger(__name__)
 def make_graph(data):
     if data['graphID'] == 1:
         return totalCostsBarGraph(data)
+
 
 def totalCostsBarGraph(data):
 

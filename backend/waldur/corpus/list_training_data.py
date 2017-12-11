@@ -24,6 +24,10 @@ waldur_list_corpus = [
         get_vms
     ],
     [
+        'my vms',
+        get_vms
+    ],
+    [
         'my organisations',
         get_organisations
     ],
@@ -40,11 +44,31 @@ waldur_list_corpus = [
         get_services_by_organisation
     ],
     [
+        'my services in',
+        get_services_by_organisation
+    ],
+    [
         'my virtual machines of organisation',
         get_vms_by_organisation
     ],
     [
+        'my virtual machines in',
+        get_vms_by_organisation
+    ],
+    [
+        'my vms of organisation',
+        get_vms_by_organisation
+    ],
+    [
+        'my vms in',
+        get_vms_by_organisation
+    ],
+    [
         'my team members of organisation',
+        get_team_of_organisation
+    ],
+    [
+        'my team members in',
         get_team_of_organisation
     ],
     [
