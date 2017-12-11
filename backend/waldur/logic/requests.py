@@ -894,7 +894,6 @@ class GetPrivateCloudsByOrganisationRequest(SingleRequest):
         }
 
     def subprocess(self, response, most_similar):
-        print(response)
         clouds = [cloud["name"] for cloud in response]
 
         if len(clouds) > 1:
