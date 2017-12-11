@@ -416,7 +416,7 @@ class TestGetOrganisationsRequests(RequestTestCase):
 
 
 def mocked_query_get_total_cost_graph_org(method, data, endpoint, parameters):
-    return mocked_query_get_total_cost_graph_response(('123', "Waldur Chatbot", "Meh"))
+    return mocked_query_get_total_cost_graph_response(('123', "Waldur Chatbot", 1, 1996, 1000000, "Meh"))
 
 
 def mocked_query_get_total_cost_graph_empty(method, data, endpoint, parameters):
@@ -428,8 +428,11 @@ def mocked_query_get_total_cost_graph_response(*names):
         {
             'uuid': uuid,
             'name': name,
+            'month': month,
+            'year': year,
+            'total': total,
             'customer': customer
-        } for uuid, name, customer in names
+        } for uuid, name, month, year, total, customer in names
     ]
 
 
