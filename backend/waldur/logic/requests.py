@@ -1311,9 +1311,6 @@ class GetTotalCostGraphRequest(SingleRequest):
                                      + extracted_organisations[0] + "\". Please check that an " \
                                                                     "organisation with that name exists."
             else:
-                response = self.send()
-                data = response
-
                 graphdata = {}
 
                 num_to_month = {
@@ -1335,14 +1332,12 @@ class GetTotalCostGraphRequest(SingleRequest):
                 ploty = []
 
                 uuid = organisations_with_uuid[most_similar]
-                customer = 'https://api.etais.ee/api/customers/' + uuid + '/'
 
-                newList = []
-                for i in range((len(data) - 1), -1, -1):
-                    if data[i]['customer'] == customer:
-                        newList.append(data[i])
+                self.parameters["customer"] = "https://api.etais.ee/api/customers/" + uuid + "/"
 
-                data = newList
+                response = self.send()
+                data = response
+
                 lastmonths = 6
 
                 if len(data) >= lastmonths:
@@ -1350,13 +1345,14 @@ class GetTotalCostGraphRequest(SingleRequest):
                 else:
                     maxrange = len(data)
 
-                for i in range(len(data)):
+                for i in range((maxrange - 1), -1, -1):
                     plotx.append(num_to_month[data[i]['month']] + " " + str(data[i]['year']))
                     ploty.append(float(data[i]['total']))
 
                 graphdata['x'] = plotx
                 graphdata['y'] = ploty
                 graphdata['graphID'] = 1
+                graphdata['org_name'] = most_similar
 
                 response_statement = graphdata
                 response_type = 'graph'

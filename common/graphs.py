@@ -1,8 +1,10 @@
 import json
 import matplotlib
+
 matplotlib.use('Agg')  # requirement of matplotlib
 
 import matplotlib.pyplot as plt
+from textwrap import wrap
 import numpy as np
 import io
 from logging import getLogger
@@ -16,7 +18,6 @@ def make_graph(data):
 
 
 def totalCostsBarGraph(data):
-
     plotx = data['x']
     ploty = data['y']
 
@@ -32,15 +33,30 @@ def totalCostsBarGraph(data):
     plt.style.use('ggplot')
     fig, ax = plt.subplots()
 
-    rects1 = ax.bar(ind, ploty, width, color='#2388d6')
+    rects1 = ax.bar(ind, ploty, width, color='#75ad58')  # 2388d6
 
     ax.set_xlabel('Months')
     ax.set_ylabel('Total costs')
     ax.set_xticks(ind + width / 2)
     ax.set_xticklabels(plotx)
-    ax.set_title('Last ' + str(N) + ' months total costs')
+    title = ax.set_title("\n".join(wrap('Last ' + str(N) + ' months total costs for \n' + data['org_name'], 60)))
 
     autolabel(rects1, ax)
+
+    counter = 0
+    for child in ax.get_children():
+        counter += 1
+        if counter == N:
+            child.set_color('#2388d6')
+            break
+
+    real_invoice = matplotlib.patches.Patch(color='#75ad58', label='Invoice')
+    estimate_invoice = matplotlib.patches.Patch(color='#2388d6', label='Estimation')
+    plt.legend(handles=[real_invoice, estimate_invoice])
+
+    fig.tight_layout()
+    title.set_y(1.05)
+    fig.subplots_adjust(top=0.8)
 
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
