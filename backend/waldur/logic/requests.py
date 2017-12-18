@@ -1550,7 +1550,8 @@ class GetHelpRequest(SingleRequest):
 
         response_statement = "This is the help for Waldur Chatbot.\n\n"
         response_statement += "Some guidelines for giving names as input:\n"
-        response_statement += "Write names in capital letter and numeric values as words (ex 2nd -> Second).\n"
+        response_statement += "Write names in capital letter.\n"
+        response_statement += "Writing numbers out may improve name recognition (2nd -> Second)"
         response_statement += "Project name should always be written before organisation's name.\n\n"
         response_statement += "Here are the supported requests and an example query:\n"
 

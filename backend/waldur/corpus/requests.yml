@@ -148,7 +148,7 @@ conversations:
   - REQUEST~get_private_clouds_by_project_and_organisation
 - - What clouds do I have in project of organisation
   - REQUEST~get_private_clouds_by_project_and_organisation
-- - List private clouds in project in organization XYZ
+- - List private clouds in project in organization
   - REQUEST~get_private_clouds_by_project_and_organisation
 
 # get_audit_log_by_organisation
