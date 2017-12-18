@@ -42,8 +42,8 @@ def extract_names(sentences):
     try:
         log.info("Extracting names from \"" + str(sentences) + "\".")
         names = []
-        sentences = preprocess(sentences)
-        for tagged_sentence in sentences:
+        preprocessed_sentences = preprocess(sentences)
+        for tagged_sentence in preprocessed_sentences:
             # NNP - proper noun, CC - coordinating conjunction
             chunkGram = r"""Chunk: {<NNP>+<CC>?<NNP>*}"""
             chunkParser = nltk.RegexpParser(chunkGram)
