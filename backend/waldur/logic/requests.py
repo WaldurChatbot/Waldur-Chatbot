@@ -1401,7 +1401,7 @@ class CreateVMRequest(InputRequest):
                     QA('For which project?',
                        possible_answers=possible_projects,
                        check_answer=(lambda x, y: y[x] if x in y else None),
-                       formatter=(lambda x: str(list(x)))
+                       formatter=(lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z)+1) + ". " + z, x)))
                        )
                 ),
                 (
@@ -1409,7 +1409,7 @@ class CreateVMRequest(InputRequest):
                     QA('Which flavor to use?',
                        possible_answers=possible_flavors,
                        check_answer=(lambda x, y: y[x] if x in y else None),
-                       formatter=(lambda x: str(list(x)))
+                       formatter=(lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z)+1) + ". " + z, x)))
                        )
                 ),
                 (
@@ -1417,7 +1417,7 @@ class CreateVMRequest(InputRequest):
                     QA('Which image to use?',
                        possible_answers=possible_image,
                        check_answer=(lambda x, y: y[x] if x in y else None),
-                       formatter=(lambda x: str(list(x)))
+                       formatter=(lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z)+1) + ". " + z, x)))
                        )
                 ),
                 (
@@ -1441,7 +1441,7 @@ class CreateVMRequest(InputRequest):
                     QA('Which network to use?',
                        possible_answers=possible_networks,
                        check_answer=(lambda x, y: y[x] if x in y else None),
-                       formatter=(lambda x: str(list(x)))
+                       formatter=(lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z)+1) + ". " + z, x)))
                        )
                 ),
                 (
@@ -1456,14 +1456,15 @@ class CreateVMRequest(InputRequest):
                     QA('Which security groups to use (comma separated)?',
                        possible_answers=possible_security_groups,
                        check_answer=(lambda x, y: [y[g.strip()] for g in x.strip(",").split(",") if g.strip() in y]),
-                       formatter=(lambda x: str(list(x))))
+                       formatter=(lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z)+1) + ". " + z, x)))
+                       )
                 ),
                 (
                     'ssh_public_key',
                     QA('Which key to use?',
                        possible_answers=possible_keys,
                        check_answer=(lambda x, y: y[x] if x in y else None),
-                       formatter=(lambda x: str(list(x)))
+                       formatter=(lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z)+1) + ". " + z, x)))
                        )
                 )
             ],
