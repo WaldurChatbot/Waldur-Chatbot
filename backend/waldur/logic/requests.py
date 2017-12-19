@@ -361,7 +361,7 @@ class GetOrganisationsRequest(SingleRequest):
             response_statement = \
                 "You are part of {n} organisations. " \
                 "They are:\n    {organisations}" \
-                .format(
+                    .format(
                     n=len(organisations),
                     organisations="\n    ".join(organisations)
                 )
@@ -369,7 +369,7 @@ class GetOrganisationsRequest(SingleRequest):
             response_statement = \
                 "You are part of 1 organisation. " \
                 "The organisation is {organisation}" \
-                .format(
+                    .format(
                     organisation=organisations[0]
                 )
         else:
@@ -444,7 +444,7 @@ class GetServicesRequest(SingleRequest):
             response_statement = \
                 "You have access to {n} service providers. " \
                 "They are:\n    {services}" \
-                .format(
+                    .format(
                     n=len(services),
                     services="\n    ".join(services)
                 )
@@ -452,7 +452,7 @@ class GetServicesRequest(SingleRequest):
             response_statement = \
                 "You have access to 1 service provider. " \
                 "This service is {service}." \
-                .format(
+                    .format(
                     service=services[0]
                 )
         else:
@@ -508,7 +508,7 @@ class GetServicesByOrganisationRequest(SingleRequest):
                     response_statement = \
                         "You have access to {n} service providers in {similar}.\n" \
                         "They are:\n    {services}" \
-                        .format(
+                            .format(
                             n=len(service_names),
                             similar=most_similar,
                             services="\n    ".join(service_names)
@@ -517,7 +517,7 @@ class GetServicesByOrganisationRequest(SingleRequest):
                     response_statement = \
                         "You have access to 1 service provider in {similar}.\n" \
                         "This service is {service}." \
-                        .format(
+                            .format(
                             similar=most_similar,
                             service=service_names[0]
                         )
@@ -594,7 +594,7 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
                         response_statement = \
                             "You have access to {n} service providers in project {similar_project} of organisation " \
                             "{similar_organisation}.\nThey are:\n    {services}" \
-                            .format(
+                                .format(
                                 n=len(service_names),
                                 similar_project=most_similar_project,
                                 similar_organisation=most_similar_organisation,
@@ -604,7 +604,7 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
                         response_statement = \
                             "You have access to 1 service provider in project {similar_project} of organisation " \
                             "{similar_organisation}.\nThis service is {service}." \
-                            .format(
+                                .format(
                                 similar_project=most_similar_project,
                                 similar_organisation=most_similar_organisation,
                                 service=service_names[0]
@@ -613,6 +613,62 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
                         response_statement = "You don't have access to any service providers in project " + \
                                              most_similar_project + " of organisation " + most_similar_organisation \
                                              + ". "
+        return {
+            'data': response_statement,
+            'type': 'text'
+        }
+
+
+class GetVmInfoRequest(SingleRequest):
+    ID = 17
+    NAME = 'get_vm_info'
+    HELP = 'Whats up with vm <vm_name>?'
+
+    def __init__(self):
+        super(GetVmInfoRequest, self).__init__(
+            method='GET',
+            endpoint='openstacktenant-instances'
+        )
+
+    def process(self):
+
+        firstreq = GetVmsAndIdsRequest()
+        firstreq.token = self.token
+
+        vms_with_uuid = firstreq.process()
+        vms = [x for x in vms_with_uuid]
+
+        extracted_vms = extract_names(self.original)
+
+        if len(extracted_vms) == 0:
+            response_statement = "Sorry, I wasn't able to find a virtual machine's name in your request! " \
+                                 "Please write it out in capital case!"
+        else:
+            most_similar = getSimilarNames(extracted_vms, vms)
+            if most_similar == "":
+                response_statement = "Sorry, I wasn't able to find a virtual machine with the name \"" \
+                                     + extracted_vms[0] + "\". Please check that a " \
+                                                          "virtual machine with that name exists."
+            else:
+
+                self.endpoint += "/" + vms_with_uuid[most_similar]
+                response = self.send()
+
+                response_statement = "Current information about virtual machine {x}:".format(x=most_similar)
+                response_statement += "\n    Organisation: {n}".format(n=response["customer_name"])
+                response_statement += "\n    Project: {n}".format(n=response["project_name"])
+                response_statement += "\n    Provider: {n}".format(n=response["service_name"])
+                response_statement += "\n    Internal IP(s): {ip}".format(
+                    ip="-" if response['internal_ips'] == None or len(response['internal_ips']) == 0 or
+                              response['internal_ips'][0] == None else ", ".join(
+                        response['internal_ips']))
+                response_statement += "\n    External IP(s): {ip}".format(
+                    ip="-" if response['external_ips'] == None or len(response['external_ips']) == 0 else ", ".join(
+                        response['external_ips']))
+                response_statement += "\n    Security groups: {l}".format(
+                    l=", ".join(group["name"] for group in response["security_groups"]))
+                response_statement += "\n    Status: {s}".format(s=response["state"])
+
         return {
             'data': response_statement,
             'type': 'text'
@@ -643,7 +699,8 @@ class GetVmsRequest(SingleRequest):
         for organisation, vms in organisations:
             names = {
                 vm['name'] + ": " + ("-" if len(vm['internal_ips']) == 0 else ", ".join(vm['internal_ips'])) + " / " +
-                ("-" if vm['external_ips'] == None or len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in vms}
+                ("-" if vm['external_ips'] == None or len(vm['external_ips']) == 0 else ", ".join(vm['external_ips']))
+                for vm in vms}
             len_all += len(names)
             if len(names) > 0:
                 statement += "\nOrganisation '" + organisation + "':\n    " + "\n    ".join(names)
@@ -704,7 +761,8 @@ class GetVmsByOrganisationRequest(SingleRequest):
                 vm_names = {
                     vm['name'] + ": " + (
                         "-" if len(vm['internal_ips']) == 0 else ", ".join(vm['internal_ips'])) + " / " +
-                    ("-" if vm['external_ips'] == None or  len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in response}
+                    ("-" if vm['external_ips'] == None or len(vm['external_ips']) == 0 else ", ".join(
+                        vm['external_ips'])) for vm in response}
 
                 if len(vm_names) > 1:
                     response_statement = "You have " + str(len(vm_names)) + \
@@ -784,7 +842,8 @@ class GetVmsByProjectAndOrganisationRequest(SingleRequest):
                     vm_names = {
                         vm['name'] + ": " + (
                             "-" if len(vm['internal_ips']) == 0 else ", ".join(vm['internal_ips'])) + " / " +
-                        ("-" if vm['external_ips'] == None or  len(vm['external_ips']) == 0 else ", ".join(vm['external_ips'])) for vm in response}
+                        ("-" if vm['external_ips'] == None or len(vm['external_ips']) == 0 else ", ".join(
+                            vm['external_ips'])) for vm in response}
 
                     if len(vm_names) > 1:
                         response_statement = "You have " + str(
@@ -983,7 +1042,7 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
                         response_statement = \
                             "You have {n} private clouds in project {similar_project} of organisation " \
                             "{similar_organisation}.\nThey are:\n    {clouds}" \
-                            .format(
+                                .format(
                                 n=len(clouds),
                                 similar_project=most_similar_project,
                                 similar_organisation=most_similar_organisation,
@@ -993,7 +1052,7 @@ class GetPrivateCloudsByProjectAndOrganisationRequest(SingleRequest):
                         response_statement = \
                             "You have 1 private cloud in project {similar_project} of organisation " \
                             "{similar_organisation}.\nIts name is {cloud}." \
-                            .format(
+                                .format(
                                 similar_project=most_similar_project,
                                 similar_organisation=most_similar_organisation,
                                 cloud=clouds[0]
@@ -1018,7 +1077,7 @@ class GetAuditLogByOrganisationRequest(SingleRequest):
             method='GET',
             endpoint='events',
             parameters={
-                "page_size": 10 # This param represents the last n events that will be displayed
+                "page_size": 10  # This param represents the last n events that will be displayed
             }
         )
 
@@ -1081,7 +1140,7 @@ class GetAuditLogByProjectRequest(SingleRequest):
             method='GET',
             endpoint='events',
             parameters={
-                "page_size": 10 # This param represents the last n events that will be displayed
+                "page_size": 10  # This param represents the last n events that will be displayed
             }
         )
 
@@ -1103,7 +1162,7 @@ class GetAuditLogByProjectRequest(SingleRequest):
             if most_similar == "":
                 response_statement = "Sorry, I wasn't able to find a project with the name \"" \
                                      + extracted_projects[0] + "\". Please check that an " \
-                                                                    "organisation with that name exists."
+                                                               "organisation with that name exists."
             else:
                 self.parameters["scope"] = "https://api.etais.ee/api/projects/" + str(
                     projects_with_uuid[most_similar]) + "/"
@@ -1144,7 +1203,7 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
             method='GET',
             endpoint='events',
             parameters={
-                "page_size": 10 # This param represents the last n events that will be displayed
+                "page_size": 10  # This param represents the last n events that will be displayed
             }
         )
 
@@ -1204,8 +1263,8 @@ class GetAuditLogByProjectAndOrganisationRequest(SingleRequest):
 
                     if len(log_entries) > 1:
                         response_statement = "Here are the last " + str(len(log_entries)) \
-                                            + " audit log entries in project " + most_similar_project + \
-                                            " of organisation " + most_similar_organisation + ": "
+                                             + " audit log entries in project " + most_similar_project + \
+                                             " of organisation " + most_similar_organisation + ": "
                         response_statement += "\n".join(log_entries)
                     elif len(log_entries) == 1:
                         response_statement = "You have 1 audit log entry in project " + most_similar_project + \
@@ -1259,12 +1318,15 @@ class GetTeamOfOrganisationRequest(SingleRequest):
                 self.endpoint += "/" + organisations_with_uuid[most_similar] + "/users/"
                 response = self.send()
 
-
-                owners = [owner['full_name'] + ": " + (owner["email"] if owner["email"] != None else "-") for owner in response if owner["role"] == "owner" and
+                owners = [owner['full_name'] + ": " + (owner["email"] if owner["email"] != None else "-") for owner in
+                          response if owner["role"] == "owner" and
                           owner['full_name'] != ""]
-                supportusers = [supportuser['full_name'] + ": " + (supportuser["email"] if supportuser["email"] != None else "-") for supportuser in response if
-                                supportuser["role"] == "support_user" and supportuser['full_name'] != ""]
-                others = [other['full_name'] + ": " + (other["email"] if other["email"] != None else "-") for other in response if other["role"] is None and
+                supportusers = [
+                    supportuser['full_name'] + ": " + (supportuser["email"] if supportuser["email"] != None else "-")
+                    for supportuser in response if
+                    supportuser["role"] == "support_user" and supportuser['full_name'] != ""]
+                others = [other['full_name'] + ": " + (other["email"] if other["email"] != None else "-") for other in
+                          response if other["role"] is None and
                           other['full_name'] != ""]
 
                 response_statement = "The following people are team members of " + most_similar + ": "
@@ -1400,24 +1462,33 @@ class CreateVMRequest(InputRequest):
                     'service_project_link',
                     QA('For which project?',
                        possible_answers=possible_projects,
-                       check_answer=(lambda x, y: y[x] if x in y else None),
-                       formatter=(lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z)+1) + ". " + z, x)))
+                       check_answer=(
+                           lambda x, y: y[x] if x in y else next(iter(y.values())) if x == "ok" else list(y.values())[
+                               int(x) - 1] if x.isdigit() else None),
+                       formatter=(
+                           lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z) + 1) + ". " + z, x)))
                        )
                 ),
                 (
                     'flavor',
                     QA('Which flavor to use?',
                        possible_answers=possible_flavors,
-                       check_answer=(lambda x, y: y[x] if x in y else None),
-                       formatter=(lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z)+1) + ". " + z, x)))
+                       check_answer=(
+                           lambda x, y: y[x] if x in y else next(iter(y.values())) if x == "ok" else list(y.values())[
+                               int(x) - 1] if x.isdigit() else None),
+                       formatter=(
+                           lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z) + 1) + ". " + z, x)))
                        )
                 ),
                 (
                     'image',
                     QA('Which image to use?',
                        possible_answers=possible_image,
-                       check_answer=(lambda x, y: y[x] if x in y else None),
-                       formatter=(lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z)+1) + ". " + z, x)))
+                       check_answer=(
+                           lambda x, y: y[x] if x in y else next(iter(y.values())) if x == "ok" else list(y.values())[
+                               int(x) - 1] if x.isdigit() else None),
+                       formatter=(
+                           lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z) + 1) + ". " + z, x)))
                        )
                 ),
                 (
@@ -1425,23 +1496,27 @@ class CreateVMRequest(InputRequest):
                     QA('System volume size in MB?',
                        possible_answers=possible_system_volume_size,
                        check_answer=(lambda x, y: x if int(x) >= y else None),
-                       formatter=(lambda x: f"Must be more than {x}")
+                       formatter=(lambda x: f"Must be at least {x}")
                        )
                 ),
                 (
+                    # Todo: Make data_volume_size optional in a better way.
                     'data_volume_size',
                     QA('Data volume size in MB?',
-                       possible_answers=10240,
-                       check_answer=(lambda x, y: x if int(x) >= y else None),
-                       formatter=(lambda x: f"Must be more than {x}")
+                       possible_answers=1024,
+                       check_answer=(lambda x, y: x if x.isdigit() and int(x) >= y else 0),
+                       formatter=(lambda x: f"Must be at least {x}, skipped if lower.")
                        )
                 ),
                 (
                     'internal_ips_set',
                     QA('Which network to use?',
                        possible_answers=possible_networks,
-                       check_answer=(lambda x, y: y[x] if x in y else None),
-                       formatter=(lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z)+1) + ". " + z, x)))
+                       check_answer=(
+                           lambda x, y: y[x] if x in y else next(iter(y.values())) if x == "ok" else list(y.values())[
+                               int(x) - 1] if x.isdigit() else None),
+                       formatter=(
+                           lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z) + 1) + ". " + z, x)))
                        )
                 ),
                 (
@@ -1455,16 +1530,23 @@ class CreateVMRequest(InputRequest):
                     'security_groups',
                     QA('Which security groups to use (comma separated)?',
                        possible_answers=possible_security_groups,
-                       check_answer=(lambda x, y: [y[g.strip()] for g in x.strip(",").split(",") if g.strip() in y]),
-                       formatter=(lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z)+1) + ". " + z, x)))
+                       check_answer=(
+                           lambda x, y: [y[g.strip()] for g in x.strip(",").split(",") if g.strip() in y] if len(
+                               y) > 1 else next(iter(y.values())) if x == "ok" else list(y.values())[
+                               int(x) - 1] if x.isdigit() else None),
+                       formatter=(
+                           lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z) + 1) + ". " + z, x)))
                        )
                 ),
                 (
                     'ssh_public_key',
                     QA('Which key to use?',
                        possible_answers=possible_keys,
-                       check_answer=(lambda x, y: y[x] if x in y else None),
-                       formatter=(lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z)+1) + ". " + z, x)))
+                       check_answer=(
+                           lambda x, y: y[x] if x in y else next(iter(y.values())) if x == "ok" else list(y.values())[
+                               int(x) - 1] if x.isdigit() else None),
+                       formatter=(
+                           lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z) + 1) + ". " + z, x)))
                        )
                 )
             ],
@@ -1499,13 +1581,15 @@ class CreateVMRequest(InputRequest):
                     'url': sg['value']
                 } for sg in self.parameters['security_groups']],
                 system_volume_size=int(self.parameters['system_volume_size']),
-                data_volume_size=int(self.parameters['data_volume_size'])
+                # Todo: Make data_volume_size optional in a better way.
+                data_volume_size=int(self.parameters['data_volume_size']) if int(
+                    self.parameters['data_volume_size']) > 1024 else None
             ).set_token(self.token).process()
             log.info(response)
-            return text(response['state'])
+            return response['state'] + " for " + response["name"] + "."
         except Exception as e:
             log.exception(e)
-            return text("Couldn't create vm")
+            return "Couldn't create vm"
 
 
 def possible_projects(token, parameters):
@@ -1700,6 +1784,8 @@ class CreateVM(SingleRequest):
         )
 
     def process(self):
+        # Todo: Make data_volume_size optional in a better way.
+        if self.data["data_volume_size"] == None: del self.data["data_volume_size"]
         response = self.send()
         log.debug(response)
         return response
@@ -1733,6 +1819,21 @@ class GetProjectsAndIdsRequest(SingleRequest):
         response = self.send()
 
         return {project['name']: project["uuid"] for project in response}
+
+
+class GetVmsAndIdsRequest(SingleRequest):
+    NAME = 'util_get_vms'
+
+    def __init__(self):
+        super(GetVmsAndIdsRequest, self).__init__(
+            method='GET',
+            endpoint='openstacktenant-instances'
+        )
+
+    def process(self):
+        response = self.send()
+
+        return {vm['name']: vm["uuid"] for vm in response}
 
 
 class GetProjectsAndIdsByOrganisationRequest(SingleRequest):
