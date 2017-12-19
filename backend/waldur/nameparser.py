@@ -89,7 +89,7 @@ def getSimilarNames(extracted_names, list_of_names):
     # todo: Return all names with similar confidence
     # todo: Find a better algorithm for similarity determination
     try:
-        log.info("Looking for similar names to " + str(extracted_names))
+        log.info("Looking for similar names to " + str(extracted_names) + "in " + str(list_of_names))
         best = ["", 0]
         results = []
         matcher = difflib.SequenceMatcher()

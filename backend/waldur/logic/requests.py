@@ -1812,7 +1812,10 @@ class GetProjectsAndIdsRequest(SingleRequest):
     def __init__(self):
         super(GetProjectsAndIdsRequest, self).__init__(
             method='GET',
-            endpoint='projects'
+            endpoint='projects',
+            parameters={
+                "page_size": 100
+            }
         )
 
     def process(self):
@@ -1827,7 +1830,10 @@ class GetVmsAndIdsRequest(SingleRequest):
     def __init__(self):
         super(GetVmsAndIdsRequest, self).__init__(
             method='GET',
-            endpoint='openstacktenant-instances'
+            endpoint='openstacktenant-instances',
+            parameters={
+                "page_size": 100
+            }
         )
 
     def process(self):
@@ -1843,7 +1849,9 @@ class GetProjectsAndIdsByOrganisationRequest(SingleRequest):
         super(GetProjectsAndIdsByOrganisationRequest, self).__init__(
             method='GET',
             endpoint='projects',
-            parameters={}
+            parameters={
+                "page_size" : 100
+            }
         )
 
     def process(self):
