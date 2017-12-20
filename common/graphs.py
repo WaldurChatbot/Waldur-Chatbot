@@ -26,6 +26,7 @@ def totalCostsBarGraph(data):
     log.debug("y: {}".format(ploty))
 
     N = len(ploty)
+    currency = "€"
 
     ind = np.arange(N)
     width = 0.35
@@ -36,7 +37,7 @@ def totalCostsBarGraph(data):
     rects1 = ax.bar(ind, ploty, width, color='#75ad58')  # 2388d6
 
     ax.set_xlabel('Months')
-    ax.set_ylabel('Total costs')
+    ax.set_ylabel('Total costs (' + currency + ')')
     ax.set_xticks(ind + width / 2)
     ax.set_xticklabels(plotx)
     title = ax.set_title("\n".join(wrap('Last ' + str(N) + ' months total costs for \n' + data['org_name'], 60)))

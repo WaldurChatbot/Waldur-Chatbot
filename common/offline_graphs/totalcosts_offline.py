@@ -494,10 +494,15 @@ fig, ax = plt.subplots()
 
 rects1 = ax.bar(ind, ploty, width, color='#75ad58')
 
+currency = "€"
+
 ax.set_xlabel('Months')
-ax.set_ylabel('Total costs')
+ax.set_ylabel('Total costs (' + currency + ')')
 ax.set_xticks(ind + width / 2)
 ax.set_xticklabels(plotx)
+fmt = currency + '{x:,.0f}'
+tick = matplotlib.ticker.StrMethodFormatter(fmt)
+ax.yaxis.set_major_formatter(tick)
 title = ax.set_title("\n".join(wrap('Last ' + str(N) + 'month total costs but then everytime the title gets longer '
                                                        'omg like wtf when does it stop OMG HELP well okay'
                                                        'let me tell you a story all about how'
@@ -513,8 +518,8 @@ def autolabel(rects, ax):
         height = rect.get_height()
         label_position = height + (y_height * 0.01)
 
-        ax.text(rect.get_x() + rect.get_width()/2., label_position,
-                '%d' % int(height),
+        ax.text(rect.get_x() + rect.get_width()/2, label_position,
+                currency + '%d' % int(height),
                 ha='center', va='bottom')
 
 autolabel(rects1, ax)
