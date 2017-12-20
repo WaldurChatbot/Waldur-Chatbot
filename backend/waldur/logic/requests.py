@@ -622,7 +622,7 @@ class GetServicesByProjectAndOrganisationRequest(SingleRequest):
 class GetVmInfoRequest(SingleRequest):
     ID = 17
     NAME = 'get_vm_info'
-    HELP = 'Whats up with vm <vm_name>?'
+    HELP = 'What\'s the state of virtual machine \<vm_name>?'
 
     def __init__(self):
         super(GetVmInfoRequest, self).__init__(
