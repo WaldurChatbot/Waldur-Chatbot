@@ -1495,7 +1495,7 @@ class CreateVMRequest(InputRequest):
                     'system_volume_size',
                     QA('System volume size in MB?',
                        possible_answers=possible_system_volume_size,
-                       check_answer=(lambda x, y: x if int(x) >= y else None),
+                       check_answer=(lambda x, y: x if x.isdigit() and int(x) >= y else None),
                        formatter=(lambda x: f"Must be at least {x}")
                        )
                 ),
