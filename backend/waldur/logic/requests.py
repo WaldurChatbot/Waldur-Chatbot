@@ -1464,7 +1464,7 @@ class CreateVMRequest(InputRequest):
                        possible_answers=possible_projects,
                        check_answer=(
                            lambda x, y: y[x] if x in y else next(iter(y.values())) if x == "ok" else list(y.values())[
-                               int(x) - 1] if x.isdigit() else None),
+                               int(x) - 1] if x.isdigit() and 1 <= int(x) <= len(y) else None),
                        formatter=(
                            lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z) + 1) + ". " + z, x)))
                        )
@@ -1475,7 +1475,7 @@ class CreateVMRequest(InputRequest):
                        possible_answers=possible_flavors,
                        check_answer=(
                            lambda x, y: y[x] if x in y else next(iter(y.values())) if x == "ok" else list(y.values())[
-                               int(x) - 1] if x.isdigit() else None),
+                               int(x) - 1] if x.isdigit() and 1 <= int(x) <= len(y) else None),
                        formatter=(
                            lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z) + 1) + ". " + z, x)))
                        )
@@ -1486,7 +1486,7 @@ class CreateVMRequest(InputRequest):
                        possible_answers=possible_image,
                        check_answer=(
                            lambda x, y: y[x] if x in y else next(iter(y.values())) if x == "ok" else list(y.values())[
-                               int(x) - 1] if x.isdigit() else None),
+                               int(x) - 1] if x.isdigit() and 1 <= int(x) <= len(y) else None),
                        formatter=(
                            lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z) + 1) + ". " + z, x)))
                        )
@@ -1514,7 +1514,7 @@ class CreateVMRequest(InputRequest):
                        possible_answers=possible_networks,
                        check_answer=(
                            lambda x, y: y[x] if x in y else next(iter(y.values())) if x == "ok" else list(y.values())[
-                               int(x) - 1] if x.isdigit() else None),
+                               int(x) - 1] if x.isdigit() and 1 <= int(x) <= len(y) else None),
                        formatter=(
                            lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z) + 1) + ". " + z, x)))
                        )
@@ -1533,7 +1533,7 @@ class CreateVMRequest(InputRequest):
                        check_answer=(
                            lambda x, y: [y[g.strip()] for g in x.strip(",").split(",") if g.strip() in y] if len(
                                y) > 1 else next(iter(y.values())) if x == "ok" else list(y.values())[
-                               int(x) - 1] if x.isdigit() else None),
+                               int(x) - 1] if x.isdigit() and 1 <= int(x) <= len(y) else None),
                        formatter=(
                            lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z) + 1) + ". " + z, x)))
                        )
@@ -1544,7 +1544,7 @@ class CreateVMRequest(InputRequest):
                        possible_answers=possible_keys,
                        check_answer=(
                            lambda x, y: y[x] if x in y else next(iter(y.values())) if x == "ok" else list(y.values())[
-                               int(x) - 1] if x.isdigit() else None),
+                               int(x) - 1] if x.isdigit() and 1 <= int(x) <= len(y) else None),
                        formatter=(
                            lambda x: "\n    " + "\n    ".join(map(lambda z: str(list(x).index(z) + 1) + ". " + z, x)))
                        )
